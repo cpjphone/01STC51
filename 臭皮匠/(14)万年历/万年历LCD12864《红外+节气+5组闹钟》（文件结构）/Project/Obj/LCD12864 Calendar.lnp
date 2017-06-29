@@ -1,0 +1,12 @@
+".\Obj\Main.obj",
+".\Obj\LCD12864.obj",
+".\Obj\DisplayTime.obj",
+".\Obj\DS1302.obj",
+".\Obj\DS18B20.obj",
+".\Obj\KeyPro.obj",
+".\Obj\Lunar.obj",
+".\Obj\AlarmClock.obj",
+".\Obj\Font.obj",
+".\Obj\IR.obj" 
+TO ".\Obj\LCD12864 Calendar" 
+PRINT(".\List\LCD12864 Calendar.m51") RAMSIZE(256) 

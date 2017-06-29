@@ -1,0 +1,126 @@
+C51 COMPILER V9.01   DS1302_DRIVE                                                          07/19/2013 17:28:34 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DS1302_DRIVE
+OBJECT MODULE PLACED IN DS1302_Drive.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE DS1302_Drive.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /****************************************************************/
+   2          //
+   3          // 
+   4          /****************************************************************/         
+   5          #include<reg52.h>                                                       //头文件定义
+   6          #include<intrins.h>
+   7          
+   8          #include"DS1302_Drive.h"
+   9          
+  10          /*****************************************************************************/
+  11          //定义DS1302时钟接口
+  12          sbit clock_clk = P3 ^ 6;//ds1302_clk（时钟线）
+  13          sbit clock_dat = P3 ^ 4;//ds1302_dat（数据线）
+  14          sbit clock_Rst = P3 ^ 5;//ds1302_Rst（复位线）
+  15          
+  16          /*****************************************************************************/
+  17          //定义累加器A中的各位
+  18          sbit a0   = ACC ^ 0;
+  19          sbit a1   = ACC ^ 1;
+  20          sbit a2   = ACC ^ 2;
+  21          sbit a3   = ACC ^ 3;
+  22          sbit a4   = ACC ^ 4;
+  23          sbit a5   = ACC ^ 5;
+  24          sbit a6   = ACC ^ 6;
+  25          sbit a7   = ACC ^ 7;
+  26          
+  27          
+  28          
+  29          /*****************************************************************************/
+  30          //1302驱动程序（底层协议）
+  31          void write(unsigned char dat){
+  32   1              ACC=dat;
+  33   1              clock_dat=a0; clock_clk=1;clock_clk=0;
+  34   1              clock_dat=a1; clock_clk=1;clock_clk=0;
+  35   1              clock_dat=a2; clock_clk=1;clock_clk=0;
+  36   1              clock_dat=a3; clock_clk=1;clock_clk=0;
+  37   1              clock_dat=a4; clock_clk=1;clock_clk=0;
+  38   1              clock_dat=a5; clock_clk=1;clock_clk=0;
+  39   1              clock_dat=a6; clock_clk=1;clock_clk=0;
+  40   1              clock_dat=a7; clock_clk=1;clock_clk=0;
+  41   1      }
+  42          /*****************************************************************************/
+  43          //DS1302读出字节（底层协议）
+  44          unsigned char read(void){
+  45   1              clock_dat=1;
+  46   1              a0=clock_dat;
+  47   1              clock_clk=1; clock_clk=0;a1=clock_dat;
+  48   1              clock_clk=1; clock_clk=0;a2=clock_dat;
+  49   1              clock_clk=1; clock_clk=0;a3=clock_dat;
+  50   1              clock_clk=1; clock_clk=0;a4=clock_dat;
+  51   1              clock_clk=1; clock_clk=0;a5=clock_dat;
+  52   1              clock_clk=1; clock_clk=0;a6=clock_dat;
+  53   1              clock_clk=1; clock_clk=0;a7=clock_dat;
+  54   1              return(ACC);
+  55   1      }
+C51 COMPILER V9.01   DS1302_DRIVE                                                          07/19/2013 17:28:34 PAGE 2   
+
+  56          /*****************************************************************************/
+  57          //DS1302写数据（底层协议）
+  58          void write_clock(unsigned char adr, unsigned char dat){
+  59   1              clock_clk=0;
+  60   1              clock_Rst=0;
+  61   1              clock_Rst=1;
+  62   1              write(adr);
+  63   1              write(dat);
+  64   1              clock_Rst=0;
+  65   1              clock_clk=1;
+  66   1      }
+  67          /*****************************************************************************/
+  68          //DS1302读数据（底层协议）
+  69          unsigned char read_clock(unsigned char adr){
+  70   1              unsigned char dat=0;
+  71   1              clock_clk=0;
+  72   1              clock_Rst=0;
+  73   1              clock_Rst=1;
+  74   1              write(adr);
+  75   1              dat=read();
+  76   1              clock_Rst=0;
+  77   1              clock_clk=1;
+  78   1              return(dat);
+  79   1      }
+  80          /*****************************************************************************/
+  81          /*****************************************************************************/
+  82          //设置1302的初始时间（自动初始化）
+  83          void Init_1302(void)//-设置1302的初始时间（2011年12月3日12时00分00秒星期六）
+  84          {
+  85   1              if(read_clock(0xc1) != 0xaa)
+  86   1              {
+  87   2                      write_clock(0x8e,0x00);//允许写操作
+  88   2                      write_clock(0x8c,0x11);//年
+  89   2                      write_clock(0x8a,0x06);//星期
+  90   2                      write_clock(0x88,0x12);//月
+  91   2                      write_clock(0x86,0x03);//日
+  92   2                      write_clock(0x84,0x12);//小时
+  93   2                      write_clock(0x82,0x00);//分钟
+  94   2                      write_clock(0x80,0x00);//秒
+  95   2                      write_clock(0x90,0xa5);//充电   
+  96   2                      write_clock(0xc0,0xaa);//写入初始化标志RAM（第00个RAM位置）
+  97   2              }
+  98   1              write_clock(0x8e,0x80);//禁止写操作
+  99   1      }
+ 100          
+ 101          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    249    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

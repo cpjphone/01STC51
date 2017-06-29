@@ -1,0 +1,75 @@
+C51 COMPILER V9.01   LED                                                                   07/27/2013 08:32:33 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LED
+OBJECT MODULE PLACED IN led.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE led.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*******************************************************************************
+   2          *  标题:                  试验74HC595驱动数码管上显示数字（C语言）             *
+   3          *                                                                                                                                                          *
+   4          *   连接方法：JP12用条线冒短接  JP3和JP2 用8PIN排线连接                                        *                                                                                                         
+   5          ********************************************************************************
+   6          * 通过本例程了解 74HC595（串入并出）基本原理和使用                                 *
+   7          *                                                                                                                      *
+   8          * 请学员认真消化本例程，懂74C595在C语言中的操作                                *
+   9          ********************************************************************************/
+  10          
+  11          
+  12          #include <reg51.h> 
+  13          #include <intrins.h>
+  14          
+  15          
+  16          //SPI IO
+  17          
+  18          
+  19          
+  20          void delay(unsigned int i);      //函数声名
+  21          void HC595SendData(unsigned char SendVal);  //函数声名
+  22           
+  23          // 此表为 LED 的字模            // 0    1    2    3    4    5    6   7    8    9    A    b    c    d    E 
+             -   -    L   P    U    Hidden  _ (20)
+  24          unsigned char code LED7Code[] = {~0x3F,~0x06,~0x5B,~0x4F,~0x66,~0x6D,~0x7D,~0x07,~0x7F,~0x6F,~0x77,~0x7C,~
+             -0x39,~0x5E,~0x79,~0x71};
+  25          main()
+  26          {  unsigned char  HC595SendVal;
+  27   1         unsigned int LedNumVal;
+  28   1         
+  29   1        while(1)
+  30   1        {      
+  31   2                      LedNumVal++;
+  32   2                      HC595SendVal = LED7Code[LedNumVal%16];     //LED7;显示0-F  LedNumVal%10 显示0-9
+  33   2                  HC595SendData(HC595SendVal); //调用595驱动函数      
+  34   2                      delay(200);
+  35   2               
+  36   2        }   
+  37   1      }       
+  38          /*******************延时函数************/
+  39          void delay(unsigned int i)
+  40          {
+  41   1          unsigned int j;
+  42   1          for(i; i > 0; i--)   //CPU循环执行i*300次
+  43   1              for(j = 300; j > 0; j--);
+  44   1      }
+  45          
+  46          
+  47          
+  48          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     68    ----
+   CONSTANT SIZE    =     16    ----
+C51 COMPILER V9.01   LED                                                                   07/27/2013 08:32:33 PAGE 2   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,4 @@
+".\keymatrix.obj",
+"main.obj" 
+TO "keymatrix" 
+RAMSIZE(256) 

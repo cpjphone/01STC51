@@ -1,0 +1,3 @@
+"..\Obj\Phone.obj" 
+TO "..\Obj\Phone" 
+PRINT(".\Phone.m51")

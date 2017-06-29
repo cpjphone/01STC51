@@ -1,0 +1,121 @@
+C51 COMPILER V9.01   STC12C_EEPROM                                                         08/02/2013 19:54:28 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE STC12C_EEPROM
+OBJECT MODULE PLACED IN stc12c_eeprom.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE stc12c_eeprom.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "stc12_eeprom.h"
+   2          #include "intrins.h"
+   3          
+   4          /*----------------------------
+   5          Software delay function
+   6          ----------------------------*/
+   7          static void Delay(uchar n)
+   8          {
+   9   1          uint x;
+  10   1      
+  11   1          while (n--)
+  12   1          {
+  13   2              x = 0;
+  14   2              while (++x);
+  15   2          }
+  16   1      }
+  17          
+  18          /*----------------------------
+  19          Disable ISP/IAP/EEPROM function
+  20          Make MCU in a safe state
+  21          ----------------------------*/
+  22          void IapIdle()
+  23          {
+  24   1          IAP_CONTR = 0;                  //Close IAP function
+  25   1          IAP_CMD = 0;                    //Clear command to standby
+  26   1          IAP_TRIG = 0;                   //Clear trigger register
+  27   1          IAP_ADDRH = 0x80;               //Data ptr point to non-EEPROM area
+  28   1          IAP_ADDRL = 0;                  //Clear IAP address to prevent misuse
+  29   1      }
+  30          
+  31          /*----------------------------
+  32          Read one uint8 from ISP/IAP/EEPROM area
+  33          Input: addr (ISP/IAP/EEPROM address)
+  34          Output:Flash data
+  35          ----------------------------*/
+  36          uchar IapReaduint8(uint addr)
+  37          {
+  38   1          uchar dat;                       //Data buffer
+  39   1      
+  40   1          IAP_CONTR = ENABLE_IAP;         //Open IAP function, and set wait time
+  41   1          IAP_CMD = CMD_READ;             //Set ISP/IAP/EEPROM READ command
+  42   1          IAP_ADDRL = addr;               //Set ISP/IAP/EEPROM address low
+  43   1          IAP_ADDRH = addr >> 8;          //Set ISP/IAP/EEPROM address high
+  44   1          IAP_TRIG = 0x5a;                //Send trigger command1 (0x5a)
+  45   1          IAP_TRIG = 0xa5;                //Send trigger command2 (0xa5)
+  46   1          _nop_();                        //MCU will hold here until ISP/IAP/EEPROM operation complete
+  47   1          dat = IAP_DATA;                 //Read ISP/IAP/EEPROM data
+  48   1          IapIdle();                      //Close ISP/IAP/EEPROM function
+  49   1      
+  50   1          return dat;                     //Return Flash data
+  51   1      }
+  52          
+  53          /*----------------------------
+  54          Program one uint8 to ISP/IAP/EEPROM area
+  55          Input: addr (ISP/IAP/EEPROM address)
+C51 COMPILER V9.01   STC12C_EEPROM                                                         08/02/2013 19:54:28 PAGE 2   
+
+  56                 dat (ISP/IAP/EEPROM data)
+  57          Output:-
+  58          ----------------------------*/
+  59          void IapProgramuint8(uint addr, uchar dat)
+  60          {
+  61   1          IAP_CONTR = ENABLE_IAP;         //Open IAP function, and set wait time
+  62   1          IAP_CMD = CMD_PROGRAM;          //Set ISP/IAP/EEPROM PROGRAM command
+  63   1          IAP_ADDRL = addr;               //Set ISP/IAP/EEPROM address low
+  64   1          IAP_ADDRH = addr >> 8;          //Set ISP/IAP/EEPROM address high
+  65   1          IAP_DATA = dat;                 //Write ISP/IAP/EEPROM data
+  66   1          IAP_TRIG = 0x5a;                //Send trigger command1 (0x5a)
+  67   1          IAP_TRIG = 0xa5;                //Send trigger command2 (0xa5)
+  68   1          _nop_();                        //MCU will hold here until ISP/IAP/EEPROM operation complete
+  69   1          IapIdle();
+  70   1      }
+  71          
+  72          /*----------------------------
+  73          Erase one sector area
+  74          Input: addr (ISP/IAP/EEPROM address)
+  75          Output:-
+  76          ----------------------------*/
+  77          bit IapEraseSector(uint addr)
+  78          {
+  79   1      //    uchar i;
+  80   1              IAP_CONTR = ENABLE_IAP;         //Open IAP function, and set wait time
+  81   1          IAP_CMD = CMD_ERASE;            //Set ISP/IAP/EEPROM ERASE command
+  82   1          IAP_ADDRL = addr;               //Set ISP/IAP/EEPROM address low
+  83   1          IAP_ADDRH = addr >> 8;          //Set ISP/IAP/EEPROM address high
+  84   1          IAP_TRIG = 0x5a;                //Send trigger command1 (0x5a)
+  85   1          IAP_TRIG = 0xa5;                //Send trigger command2 (0xa5)
+  86   1          _nop_();                        //MCU will hold here until ISP/IAP/EEPROM operation complete
+  87   1          IapIdle();
+  88   1      
+  89   1      //    for (i=0; i<512; i++)           //Check whether all sector data is FF
+  90   1      //    {
+  91   1      //        if (IapReaduint8(IAP_ADDRESS+i) != 0xff)
+  92   1      //            return 0;
+  93   1      //    }
+  94   1              return 1;
+  95   1      }
+  96          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    100    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,526 @@
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD12864
+OBJECT MODULE PLACED IN LCD12864.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE LCD12864.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /********************************************************************************************
+   2          名称：LCD12864.c
+   3          功能：12864液晶显示屏并口驱动程序
+   4          作者：
+   5          时间：
+   6          *********************************************************************************************/             
+   7          #include "STC_NEW_8051.H"
+   8          #include "LCD12864.h"
+   9          
+  10          
+  11          void delayms(uint com)    //延时1毫秒
+  12          {
+  13   1          uchar i,a,b,c;
+  14   1              for(i=0;i<com;i++)
+  15   1              {
+  16   2              for(c=1;c>0;c--)
+  17   2              for(b=222;b>0;b--)
+  18   2                  for(a=12;a>0;a--);
+  19   2              }
+  20   1      }
+  21          /*==========================12864液晶显示屏并口驱动程序=============================*/
+  22          //===========检查忙位
+  23          void chk_busy()
+  24          {
+  25   1         LCM_RS=0;_nop_(); _nop_();LCM_RW=1;_nop_(); _nop_();LCM_EN=1;_nop_(); _nop_();
+  26   1         Lcd_Bus=0xff;   while((Lcd_Bus&0x80)==0x80);
+  27   1         LCM_EN=0;
+  28   1      }
+  29          //================写指令到LCD=============================
+  30          void write_com(uchar cmdcode)
+  31          {
+  32   1              chk_busy();
+  33   1              LCM_RS=0;_nop_();_nop_(); LCM_RW=0;_nop_();_nop_(); LCM_EN=1;_nop_(); _nop_();
+  34   1              Lcd_Bus=cmdcode;
+  35   1              LCM_EN=0;
+  36   1      }
+  37          //=================写数据到LCD==============================
+  38          void write_data(uchar Dispdata)
+  39          {        
+  40   1              chk_busy();      //检查忙位
+  41   1              LCM_RS=1;_nop_(); LCM_RW=0; _nop_();LCM_EN=1;_nop_();
+  42   1              Lcd_Bus=Dispdata;
+  43   1              LCM_EN=0;
+  44   1      }
+  45          //===================读数据到单片机===========================
+  46          unsigned char read_12864_data( void )
+  47          {
+  48   1          unsigned char ReturnValue ;
+  49   1          chk_busy();
+  50   1          ReturnValue= 0xff ;
+  51   1          LCM_RS=1;_nop_(); LCM_RW=1; _nop_();
+  52   1              LCM_EN=0;_nop_();                         //必须先 有一个下降沿之后 在拉高 才能读出数据。。。
+  53   1              LCM_EN=1;
+  54   1          ReturnValue =Lcd_Bus ; 
+  55   1          LCM_EN=0;
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 2   
+
+  56   1              return ReturnValue ;    
+  57   1      }
+  58          //==========向LCM发送一个字符串,长度64字符之内============
+  59          void lcm_w_word(uchar *s)
+  60          {
+  61   1              while(*s>0) { write_data(*s); s++; }  //应用：lcm_w_word("您好！");
+  62   1      }
+  63          /******************************************************************************/
+  64          void lcm_w_test(bit i,unsigned char word){//写指令或数据（被调用层）
+  65   1              if(i == 0){
+  66   2                      write_com(word);//写指令（0，指令）
+  67   2              }else{
+  68   2                      write_data(word);//写数据（1，数据）
+  69   2              }
+  70   1      }
+  71          //===========清屏函数=====================================
+  72          void lcm_clr(void)
+  73          {
+  74   1              write_com(0x30);        
+  75   1              write_com(0x01);
+  76   1              delayms(5);     
+  77   1      }
+  78          
+  79          //=========================================================
+  80          
+  81          void lcm_clr2(void){//清屏上面3行（用空格填满要清显示的地方，因为液晶屏是静态显示的，所以这办法常用）
+  82   1              lcm_w_test(0,0x80);//第一行
+  83   1              lcm_w_word("                ");
+  84   1                  //标尺("1234567812345678"应该能够显示满一行)
+  85   1              lcm_w_test(0,0x90);//第二行
+  86   1              lcm_w_word("                ");
+  87   1                  //标尺("1234567812345678"应该能够显示满一行)
+  88   1              lcm_w_test(0,0x88);//第三行
+  89   1              lcm_w_word("                ");
+  90   1                  //标尺("1234567812345678"应该能够显示满一行)
+  91   1      }
+  92          //========================================================================
+  93           void lcm_clr3(void){//清屏中间2行（用空格填满要清显示的地方，因为液晶屏是静态显示的，所以这办法常用）
+  94   1              lcm_w_test(0,0x90);//第二行
+  95   1              lcm_w_word("                ");
+  96   1                  //标尺("1234567812345678"应该能够显示满一行)
+  97   1              lcm_w_test(0,0x88);//第三行
+  98   1              lcm_w_word("                ");
+  99   1                  //标尺("1234567812345678"应该能够显示满一行)
+ 100   1              lcm_w_test(0,0x9f);//第一行
+ 101   1              lcm_w_word("  ");
+ 102   1                  //标尺("1234567812345678"应该能够显示满一行)
+ 103   1      }
+ 104          //==================初始化LCD屏===============================
+ 105          void lcm_init()
+ 106          {       
+ 107   1              
+ 108   1              write_com(0x30);  //选择8bit数据流
+ 109   1              write_com(0x0c);  //开显示(无游标、不反白)
+ 110   1              lcm_clr();        //清除显示，并且设定地址指针为00H
+ 111   1              write_com(0x06);  //光标右移,DDRAM位址计数器(AC)加1,不整屏移动
+ 112   1              lcm_clr2();
+ 113   1              
+ 114   1      }
+ 115          /*-------------------使用绘图的方法让一个16*16的汉字符反白---------------------------
+ 116                  形式参数:uchar x,uchar  行参说明:坐标水平位置,坐标垂直位置,反白行数,要反白还是清除(1:反白,0:清除)
+ 117          -----------------------------------------------------------------------------------*/
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 3   
+
+ 118          void write1616GDRAM(uchar x,uchar y,uchar sign,uchar *bmp)      
+ 119          { 
+ 120   1              uchar i,j,basex;
+ 121   1              write_com(0x36);      //扩展指令，绘图模式命令，开显示也可以绘.(关图片显示0x34)
+ 122   1              if(y==1||y==2)    //第一第二行
+ 123   1              {
+ 124   2                      basex=0x80;        //上半屏
+ 125   2                      y=(y-1)*16;       //垂直位址从0X80开始.
+ 126   2              }
+ 127   1              if(y==3||y==4)  //第三第四行
+ 128   1              {
+ 129   2                      basex=0x88;      //下半屏
+ 130   2                      y=(y-3)*16;      //垂直位址都是从0X80开始的，不管上下半屏。
+ 131   2              }
+ 132   1              for(i=0;i<16;i++)       //
+ 133   1              {                                                                                                                       
+ 134   2                      write_com(0x80+y+i);  //写入垂直位址。
+ 135   2                      write_com(basex+x-1); //再写入水平位址(上半屏第一字为0X80，……第七字为0X87)
+ 136   2                                                                 //下半屏第一字为0X88，……第七字为0X8F；
+ 137   2                      for(j=0;j<2;j++)   //再写入两个8位元的数据,AC会自动增一，接着写数据
+ 138   2                      {
+ 139   3                              if(sign==1)  
+ 140   3                                      write_data(~(*bmp++));
+ 141   3                              else  
+ 142   3                                      write_data(*bmp++);
+ 143   3                      }
+ 144   2              }       
+ 145   1              write_com(0x36);  //写完数据，开图片显示     
+ 146   1      }
+ 147          
+ 148          /*=====================================================================================
+ 149                  函数功能:显示16X16图形,适用于st7920型液晶
+ 150                  形式参数:uchar x,uchar y,uchar *bmp
+ 151                  行参说明:横坐标X列，纵坐标Y行，sign=1反白、=0不反，tt是要显示的图形bmp1616中的第几个
+ 152          ======================================================================================*/ 
+ 153          void set1616pic(uchar x,uchar y,uchar sign,uchar tt) 
+ 154          {
+ 155   1              uchar (*pp)[32];         //定义指针
+ 156   1              pp=bmp1616;       //二维数组首地址给指针，故指针指向下一个数组地址应为加64
+ 157   1              write1616GDRAM(x,y,sign,pp[tt]); //写入小时的十位         
+ 158   1      }
+ 159          /*=====================================================================================
+ 160                  函数功能:显示16X32图形,适用于st7920型液晶
+ 161                  形式参数:uchar x,uchar y,uchar *bmp
+ 162                  行参说明:横坐标X列，纵坐标Y行，要显示的图形BMP
+ 163          =====================================================================================*/           
+ 164          void write1632GDRAM(uchar x,uchar y,uchar *bmp) 
+ 165          { 
+ 166   1              uchar i,j,basex,basey;
+ 167   1              switch(y)        //由y纵坐标定是上半屏还是下半屏
+ 168   1              {
+ 169   2                case 1: basex=0x80; break;  //上半屏
+ 170   2                case 2: basex=0x80; break;  //先上半屏，下面再下半屏。
+ 171   2                case 3: basex=0x88; break;  //下半屏
+ 172   2                default:   return;   //别的则返回
+ 173   2              }
+ 174   1              basey=basex+x-1;
+ 175   1      
+ 176   1              write_com(0x36);  
+ 177   1              if(y==1||y==3)  //如为第一第三行，则直接是在同一半屏，直接绘完32行点陈数据。
+ 178   1              {
+ 179   2                        for(i=0;i<32;i++)      //写入32行点阵
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 4   
+
+ 180   2                        {                                                                                                             
+ 181   3                                  write_com(0x80+i);  //先写入垂直位址,选上下32行的哪一行,
+ 182   3                                                                              //不管上下半屏，首行都为0X80
+ 183   3                                  write_com(basey);   //再写入水平位址(选上下半屏)
+ 184   3                                  for(j=0;j<2;j++)           //2个8位元的数据,即16BIT宽度
+ 185   3                                  write_data(*bmp++);   
+ 186   3                        }      
+ 187   2              }
+ 188   1              if(y==2)  //从第二行开始则画图将上下半屏都有，所以先画完上半屏16行，再画下半屏16行。
+ 189   1              {                                       
+ 190   2                        for(i=0;i<16;i++)      //写入上半屏16行点阵
+ 191   2                        {                                                                                                             
+ 192   3                                  write_com(0x90+i);  //先写入垂直位址,选上下32行的哪一行,不管上下半屏，
+ 193   3                                                                              //首行都为0X80，第二行为0X90。
+ 194   3                                  write_com(basey);   //(选上半屏)再写入水平位址
+ 195   3                                  for(j=0;j<2;j++)           //2个8位元的数据,即16BIT宽度
+ 196   3                                      write_data(*bmp++);   
+ 197   3                        }
+ 198   2                        for(i=0;i<16;i++)      //写入下半屏16行点阵
+ 199   2                        {                                                                                                             
+ 200   3                                  write_com(0x80+i);  //先写入垂直位址,选上下32行的哪一行,不管上下半屏，首行都为0X80
+ 201   3                                  write_com(basey+8);   //(选下半屏)再写入水平位址
+ 202   3                                  for(j=0;j<2;j++)           //2个8位元的数据,即16BIT宽度
+ 203   3                                      write_data(*bmp++);   
+ 204   3                        }      
+ 205   2              }
+ 206   1              write_com(0x36);  //写完数据，开图片显示     
+ 207   1      }
+ 208          /*=====================================================================================        
+ 209                  函数名称: init_12864_GDRAM()
+ 210                  功能描述: 在程写GDRAM时序初始化12864 
+ 211          =====================================================================================*/
+ 212          void init_12864_GDRAM()  
+ 213          {
+ 214   1         
+ 215   1              write_com(0x30);     //基本指令操作(扩充指令操作为:0x34)
+ 216   1              write_com(0x0C);     //整体显示ON，游标OFF，游标位置OFF
+ 217   1              write_com(0x06);         //光标右移,DDRAM位址计数器(AC)加1,不整屏移动
+ 218   1              lcm_clr();           //清屏 (清DDRAM)
+ 219   1      }
+ 220          
+ 221          /*======================================================================================
+ 222                  函数名称:Clean_12864_GDRAM(void)                                                
+ 223                  函数功能:清屏函数
+ 224                  使用说明:GDRAM填满0
+ 225          =======================================================================================*/
+ 226          void Clean_12864_GDRAM(void)
+ 227          {
+ 228   1          uchar x,y;
+ 229   1          write_com(0x36);
+ 230   1          init_12864_GDRAM();         //设置扩展指令集，按手册说明，仅设置了绘图位，
+ 231   1          write_com(0x36);    //需要两次，本次设置扩展指令集。
+ 232   1          for (y=0;y<32;y++)
+ 233   1          {
+ 234   2              write_com(0x80+y);  //设置y=1000+00xx，y+1则往下一行
+ 235   2              write_com(0x80);        //设置x=1000 0000
+ 236   2              for (x=0;x<16;x++)
+ 237   2              {
+ 238   3                  write_data(0x00);   //高字节数据
+ 239   3                  write_data(0x00);   //低字节数据
+ 240   3              }
+ 241   2          }
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 5   
+
+ 242   1      }
+ 243          /*------------------显示图片------------------------*/ 
+ 244          /*
+ 245          void Disp_Img(unsigned char code *img) 
+ 246          {  unsigned int j=0; 
+ 247             unsigned char x,y,i; 
+ 248                 for(i=0;i<9;i+=8) 
+ 249                 for(y=0;y<32;y++)//原来 为 y<26 ,上下两个半屏不能正常对接显示，导致显示的图片中间有空隙           
+ 250                   for(x=0;x<8;x++) 
+ 251                   {  write_com(0x36);//功能设置---8BIT控制界面，扩充指令集        
+ 252                      write_com(y+0x80);        //行地址 
+ 253                      write_com(x+0x80+i);     //列地址 
+ 254                      write_com(0x30); 
+ 255                      write_data(img[j++]); //写数据还要回到基本指令集     
+ 256                      write_data(img[j++]); 
+ 257                   }   
+ 258                     
+ 259          } 
+ 260          */
+ 261          
+ 262          /**************************************************************************/
+ 263          //-------------------------------------------
+ 264          //函数功能:显示128x64图形,适用于st7920型液晶
+ 265          //-------------------------------------------
+ 266          /************************************************************************           
+ 267           */
+ 268          void write12864GDRAM(unsigned char code *img)
+ 269          {
+ 270   1         uchar i,j;
+ 271   1         for(j=0;j<32;j++)                    //绘制上半屏
+ 272   1         {
+ 273   2           for(i=0;i<8;i++)
+ 274   2           {
+ 275   3             write_com(0x34);         //0011 0100 扩充功能设定——8位数据 扩充指令操作 绘图开
+ 276   3             write_com(0x80+j);               //1xxx xxxx 设定绘图RAM——先设定垂直(列)地址AC6 AC5…AC0
+ 277   3             write_com(0x80+i);               //1000 0xxx 设定绘图RAM——再设定水平(行)地址AC3AC2AC1AC0
+ 278   3             write_com(0x30);         //0011 0000 扩充功能设定——8位数据 基本指令操作
+ 279   3             write_data(img[j*16+i*2]);
+ 280   3             write_data(img[j*16+i*2+1]);
+ 281   3           }
+ 282   2         }
+ 283   1         for(j=32;j<64;j++)                   //绘制下半屏
+ 284   1         {
+ 285   2           for(i=0;i<8;i++)
+ 286   2           {
+ 287   3             write_com(0x34);         //0011 0100 扩充功能设定——8位数据 扩充指令操作 绘图开
+ 288   3             write_com(0x80+j-32);            //1xxx xxxx 设定绘图RAM——先设定垂直(列)地址AC6 AC5…AC0
+ 289   3             write_com(0x88+i);               //1000 1xxx 设定绘图RAM——再设定水平(行)地址AC3AC2AC1AC0
+ 290   3             write_com(0x30);         //0011 0000 扩充功能设定——8位数据 基本指令操作
+ 291   3             write_data(img[j*16+i*2]);
+ 292   3             write_data(img[j*16+i*2+1]);
+ 293   3           }
+ 294   2         }
+ 295   1         write_com(0x36);
+ 296   1      }
+ 297          /*=======================================================================================*/ 
+ 298          void Lcd12864DrawPoint( unsigned char X, unsigned char Y)
+ 299          {
+ 300   1          unsigned char Row , Tier , Tier_bit    ;
+ 301   1          unsigned char ReadOldH, ReadOldL ;
+ 302   1              write_com(0x34);
+ 303   1          write_com(0x36);
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 6   
+
+ 304   1          Tier = X >> 4  ;    
+ 305   1          Tier_bit = X & 0x0f ;
+ 306   1              Y = 64-Y ;
+ 307   1          if( Y < 32 )
+ 308   1          {
+ 309   2              Row = Y ;
+ 310   2          }
+ 311   1          else
+ 312   1          {
+ 313   2              Row = Y - 32 ;
+ 314   2              Tier += 8 ;
+ 315   2          }
+ 316   1          write_com( Row  + 0x80 ) ;
+ 317   1          write_com( Tier + 0x80 ) ;
+ 318   1              read_12864_data();
+ 319   1          ReadOldH = read_12864_data() ; 
+ 320   1          ReadOldL = read_12864_data() ; 
+ 321   1              write_com( Row + 0x80 ) ;
+ 322   1          write_com( Tier + 0x80 );
+ 323   1          if( Tier_bit < 8 )
+ 324   1          {   
+ 325   2              ReadOldH |= ( 0x01 << ( 7 - Tier_bit )) ;
+ 326   2              write_data( ReadOldH ) ;
+ 327   2              write_data( ReadOldL ) ;
+ 328   2          }
+ 329   1          else
+ 330   1          {
+ 331   2              ReadOldL |= ( 0x01 << ( 15 - Tier_bit ));
+ 332   2              write_data( ReadOldH) ;
+ 333   2              write_data( ReadOldL) ;
+ 334   2          }
+ 335   1          write_com( 0x30 )    ;
+ 336   1      }
+ 337          /***********************************************************************/
+ 338          //函数名称：取直线坐标 
+ 339          /***********************************************************************/
+ 340          void Lcd12864DrawLine( unsigned char StartX, unsigned char StartY, unsigned char EndX, unsigned char EndY 
+             -)
+ 341          {
+ 342   1          int t, distance;      /*根据屏幕大小改变变量类型(如改为int型)*/
+ 343   1          int x = 0 , y = 0 , delta_x, delta_y ;
+ 344   1          char incx, incy ;
+ 345   1              delta_x = EndX - StartX ;
+ 346   1          delta_y = EndY - StartY ;
+ 347   1              if( delta_x > 0 )
+ 348   1          {
+ 349   2              incx = 1;
+ 350   2          }
+ 351   1          else if( delta_x == 0 )
+ 352   1          {
+ 353   2              Lcd12864DrawLineY( StartX, StartY, EndY) ;
+ 354   2              return ;
+ 355   2          }
+ 356   1          else                                                                                                                          
+ 357   1          {
+ 358   2              incx = -1 ;
+ 359   2          }
+ 360   1          if( delta_y > 0 )
+ 361   1          {
+ 362   2              incy = 1 ;
+ 363   2          }
+ 364   1          else if(delta_y == 0 )
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 7   
+
+ 365   1          {
+ 366   2              Lcd12864DrawLineX( StartX, EndX, StartY) ;    
+ 367   2              return ;
+ 368   2          }
+ 369   1          else
+ 370   1          {
+ 371   2              incy = -1 ;
+ 372   2          }
+ 373   1              delta_x = abs( delta_x );    
+ 374   1          delta_y = abs( delta_y );
+ 375   1          if( delta_x > delta_y )
+ 376   1          {
+ 377   2              distance = delta_x ;
+ 378   2          }
+ 379   1          else
+ 380   1          {
+ 381   2              distance = delta_y ; 
+ 382   2          }
+ 383   1          Lcd12864DrawPoint( StartX, StartY ) ;    
+ 384   1          /* Draw Line*/
+ 385   1          for( t = 0 ; t <= distance+1 ; t++ )
+ 386   1          {
+ 387   2              Lcd12864DrawPoint( StartX, StartY ) ;
+ 388   2              x += delta_x ;
+ 389   2              y += delta_y ;
+ 390   2              if( x > distance )
+ 391   2              {
+ 392   3                  x -= distance ;
+ 393   3                  StartX += incx ;
+ 394   3              }
+ 395   2              if( y > distance )
+ 396   2              {
+ 397   3                  y -= distance ;
+ 398   3                  StartY += incy ;
+ 399   3              }
+ 400   2          }
+ 401   1      }
+ 402          
+ 403          
+ 404          void Lcd12864DrawLineX( unsigned char X0, unsigned char X1, unsigned char Y )
+ 405          {    
+ 406   1              unsigned char Temp ;
+ 407   1          if( X0 > X1 )
+ 408   1          {
+ 409   2              Temp = X1 ;
+ 410   2              X1 = X0 ;
+ 411   2              X0 = Temp ;
+ 412   2          }
+ 413   1          for( ; X0 <= X1 ; X0++ )
+ 414   1          Lcd12864DrawPoint( X0, Y ) ;    
+ 415   1      }
+ 416          //画垂直线：
+ 417          void Lcd12864DrawLineY( unsigned char X, unsigned char Y0, unsigned char Y1 )
+ 418          {
+ 419   1          unsigned char Temp ;
+ 420   1          if( Y0 > Y1 )
+ 421   1          {
+ 422   2              Temp = Y1 ;
+ 423   2              Y1 = Y0 ;
+ 424   2              Y0 = Temp ;
+ 425   2          }
+ 426   1          for(; Y0 <= Y1 ; Y0++)
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 8   
+
+ 427   1          Lcd12864DrawPoint( X, Y0);
+ 428   1      }
+ 429          //****************画圆函数*********************************//
+ 430          //x0、y0为圆心坐标，r为圆的半径****************************//
+ 431          //*********************************************************//
+ 432          void draw_circle(unsigned char x0 ,unsigned char y0 , unsigned char r)
+ 433          {
+ 434   1              char a , b;
+ 435   1              char di;
+ 436   1              if(r > 31 || r == 0)                    //圆大于液晶屏或者没半径则返回
+ 437   1                      return;
+ 438   1              a = 0;
+ 439   1              b = r;
+ 440   1              di = 3 - 2 * r;                         //判断下个点位置的标志
+ 441   1              while(a <= b)
+ 442   1              {
+ 443   2                      Lcd12864DrawPoint( x0 - b , y0 - a); //3
+ 444   2                      Lcd12864DrawPoint( x0 + b , y0 - a); //0
+ 445   2                      Lcd12864DrawPoint( x0 - a , y0 + b); //1
+ 446   2                      Lcd12864DrawPoint( x0 - b , y0 - a); //7
+ 447   2                      Lcd12864DrawPoint( x0 - a , y0 - b); //2
+ 448   2                      Lcd12864DrawPoint( x0 + b , y0 + a); //4
+ 449   2                      Lcd12864DrawPoint( x0 + a , y0 - b); //5
+ 450   2                      Lcd12864DrawPoint( x0 + a , y0 + b); //6
+ 451   2                      Lcd12864DrawPoint( x0 - b , y0 + a);
+ 452   2                      a ++;
+ 453   2                      //***使用bresenham算法画圆********/
+ 454   2                      if(di < 0)
+ 455   2                              di += 4 * a + 6;
+ 456   2                      else
+ 457   2                      {
+ 458   3                              di += 10 + 4 * (a - b);
+ 459   3                              b --;
+ 460   3                      }       
+ 461   2                      Lcd12864DrawPoint( x0 + a , y0 + b);
+ 462   2              }
+ 463   1      }
+ 464          void Draw_Fangkuang(uchar x ,uchar y,uchar weith,uchar high,bit AB)
+ 465          {
+ 466   1              uchar i,j;
+ 467   1      
+ 468   1              if(AB == FULL)
+ 469   1              {
+ 470   2                      for(i = x;i<x+weith;i++)
+ 471   2                      {
+ 472   3                              for(j = y;j<y+high;j++)
+ 473   3                              {
+ 474   4                                      Lcd12864DrawPoint(i,j); 
+ 475   4                              }       
+ 476   3                      }
+ 477   2              }
+ 478   1              else
+ 479   1              {
+ 480   2                      Lcd12864DrawLineX( x, x+weith, y )       ;
+ 481   2                      Lcd12864DrawLineX( x, x+weith, y+high );
+ 482   2                      Lcd12864DrawLineY( x, y, y+high ) ;
+ 483   2                      Lcd12864DrawLineY( x+weith, y, y+high );
+ 484   2              }
+ 485   1      
+ 486   1      }       
+
+
+C51 COMPILER V9.01   LCD12864                                                              08/07/2013 18:04:59 PAGE 9   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1677    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      49
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

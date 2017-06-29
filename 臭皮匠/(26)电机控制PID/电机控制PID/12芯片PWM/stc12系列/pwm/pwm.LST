@@ -1,0 +1,234 @@
+C51 COMPILER V8.02   PWM                                                                   07/21/2013 09:16:37 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN pwm.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE pwm.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "pwm.h"
+   2          
+   3          
+   4          
+   5          
+   6          uint16  test;
+   7          
+   8          uint16 value = T10Hz;   //100kHz时的CCAP0L值 
+   9          
+  10          uint16 time  = T5ms;      //5ms时的CCAP0L和CCAP0H值 uint test  = 0;         //测试用,要删除 
+  11          
+  12          sbit LED = P2^0;        //用来观测定时模式和捕获模式的现象 
+  13          
+  14                                  //定时模式时500MS闪烁,捕获模式时捕获一次时取反 
+  15          
+  16          /*****函数声明*****/ 
+  17          
+  18          void HP_init(void); //高速模式初始化 
+  19          
+  20          void PP_init(void); //PWM模式初始化 
+  21          
+  22          void TP_init(void); //定时器模式初始化 
+  23          
+  24          void CD_init(void); //捕获模式初始化 
+  25          
+  26          
+  27          //********************************// 
+  28          
+  29          //        H_model初始化     注意两种不同方式赋初值      // 
+  30          
+  31          //********************************// 
+  32          
+  33          void HP_init(void) 
+  34          
+  35          { 
+  36   1      
+  37   1          CMOD       = SYS_12;     //PCA时钟源为Sysclk 
+  38   1      
+  39   1          CCAPM0     = H_model;   //高速输出模式 
+  40   1      
+  41   1          CCAP0L     = value; 
+  42   1      
+  43   1          CCAP0H     = value>>8; 
+  44   1      
+  45   1         // value     += T10Hz; 
+  46   1      
+  47   1          CR         = 1;         //开启PCA计数器 
+  48   1      
+  49   1          EA         = 1;         //开总中断 
+  50   1      
+  51   1      } 
+  52          
+  53          //********************************// 
+  54          
+  55          //          P_model初始化  pwm频率变化可更改时钟源       // 
+C51 COMPILER V8.02   PWM                                                                   07/21/2013 09:16:37 PAGE 2   
+
+  56          
+  57          //********************************// 
+  58          
+  59          void PP_init(void) 
+  60          
+  61          { 
+  62   1      
+  63   1          CMOD   = SYS_1;   //时钟源为Sysclk 
+  64   1      
+  65   1          CCAPM0 = P_model; //无中断PWM模式 
+  66   1              CCAPM1 = P_model; 
+  67   1      
+  68   1          CCAP0L = DR_10;   //%10占空比 
+  69   1      
+  70   1          CCAP0H = DR_10;   //当CL值大于CCAP0L时输出为高,反之输出为低 
+  71   1      
+  72   1                            //当CL溢出时CCAP0H的值装载到CCAP0L中 
+  73   1              CCAP1L = DR_50;   //%50占空比 
+  74   1      
+  75   1          CCAP1H = DR_50;   //当CL值大于CCAP0L时输出为高,反之输出为低 
+  76   1      
+  77   1                            //当CL溢出时CCAP0H的值装载到CCAP0L中 
+  78   1      
+  79   1          CR     = 1;       //开启PCA计数器 
+  80   1      
+  81   1                            //当不使用定时0溢出为时钟源时,PWM输出的频率=PCA的时钟源/256 
+  82   1      
+  83   1                            //使用定时器溢出的时钟源时,可设定定时器的值对输出频率的改变
+  84   1      
+  85   1       
+  86   1      
+  87   1                            //分频为0-256分频 
+  88   1      
+  89   1      } 
+  90          
+  91          //********************************// 
+  92          
+  93          //        T_model初始化           // 
+  94          
+  95          //********************************// 
+  96          
+  97          void TP_init(void) 
+  98          
+  99          { 
+ 100   1      
+ 101   1          CMOD   = SYS_1;   //时钟源为Sysclk     
+ 102   1              CCAPM0 = T_model; //定时模式 
+ 103   1      
+ 104   1          CCAP0L = time;    // 
+ 105   1      
+ 106   1          CCAP0H = time>>8;     //定时5ms 
+ 107   1      
+ 108   1          time  += T5ms; 
+ 109   1      
+ 110   1          CR     = 1; 
+ 111   1      
+ 112   1          EA     = 1; 
+ 113   1      
+ 114   1      } 
+ 115          
+ 116          //********************************// 
+ 117          
+C51 COMPILER V8.02   PWM                                                                   07/21/2013 09:16:37 PAGE 3   
+
+ 118          //        CD_model初始化          // 
+ 119          
+ 120          //********************************// 
+ 121          
+ 122          void CD_init(void) 
+ 123          
+ 124          { 
+ 125   1      
+ 126   1          CMOD   = SYS_1; 
+ 127   1      
+ 128   1          CCAPM0 = CD_model; 
+ 129   1      
+ 130   1          CR     = 1; 
+ 131   1      
+ 132   1          EA     = 1; 
+ 133   1      
+ 134   1      } 
+ 135          
+ 136          
+ 137          //*******************************// 
+ 138          
+ 139          //           中断服务  根据需要打开中断           // 
+ 140          
+ 141          //*******************************// 
+ 142          
+ 143          /*void CD_Service(void) interrupt 7 
+ 144          
+ 145          { 
+ 146          
+ 147              CCF0 = 0; 
+ 148          
+ 149              LED  = ~LED; 
+ 150          
+ 151          } */
+ 152          
+ 153          /*void TP_Service(void) interrupt 7 
+ 154          
+ 155          { 
+ 156          
+ 157              CCF0   = 0; //清除PCA计数器溢出中断标志 
+ 158          
+ 159              test++; 
+ 160          
+ 161              if( test == 100 )     { 
+ 162          
+ 163                  test = 0; 
+ 164          
+ 165                  LED = ~LED; 
+ 166          
+ 167              } 
+ 168          
+ 169              CCAP0L = time; 
+ 170          
+ 171              CCAP0H = time>>8; 
+ 172          
+ 173              time += T5ms; 
+ 174          
+ 175          }   */ 
+ 176          
+ 177           
+ 178          
+ 179          void HP_Service(void) interrupt 7 
+C51 COMPILER V8.02   PWM                                                                   07/21/2013 09:16:37 PAGE 4   
+
+ 180          
+ 181          { 
+ 182   1      
+ 183   1          CCF0   = 0; //清除PCA计数器溢出中断标志
+ 184   1              CH = 0;
+ 185   1              CL = 0; 
+ 186   1              test ++ ;
+ 187   1              if(test > 100)
+ 188   1              {
+ 189   2              test = 0;
+ 190   2               LED = ~LED;
+ 191   2               } 
+ 192   1      
+ 193   1      
+ 194   1      
+ 195   1        //  CCAP0L = value; 
+ 196   1      
+ 197   1        //  CCAP0H = value>>8; 
+ 198   1      
+ 199   1        //  value += T100KHz; 
+ 200   1      
+ 201   1      }    
+ 202          
+ 203           
+ 204          
+ 205           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    139    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

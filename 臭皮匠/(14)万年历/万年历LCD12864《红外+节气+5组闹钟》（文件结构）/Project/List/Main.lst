@@ -1,0 +1,113 @@
+C51 COMPILER V9.01   MAIN                                                                  07/27/2013 10:39:05 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Obj\Main.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\Main\Main.c BROWSE INCDIR(..\Include;..\Main;..\UserDriver\AlarmCloc
+                    -k;..\UserDriver\DisplayTime;..\UserDriver\DS18B20;..\UserDriver\DS1302;..\UserDriver\Font;..\UserDriver\IR;..\UserDriver
+                    -\KeyPro;..\UserDriver\LCD12864;..\UserDriver\Lunar) DEBUG OBJECTEXTEND PRINT(.\List\Main.lst) OBJECT(.\Obj\Main.obj)
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【名    称】： LCD12864多功能万年历 
+   3          * 【语    言】： C语言
+   4          * 【编译环境】： Keli3 
+   5          * 【晶    振】:  12MHz外部晶振          
+   6          * 【芯    片】:  STC89C516RD+
+   7          * 【时钟芯片】:  DS1302
+   8          * 【温度传感】:  DS18B20 
+   9          * 【液 晶 屏】：LCM-12864-ST7920, LCM12864使用并口连接方式,PSB、RST接高电平               
+  10          * 【程序功能】：显示阳历、农历、时间、温度、按键和红外(HS0038)调整、5组闹钟设置、
+  11          *                               节日生日节气提醒、时间校对 
+  12          * 【日    期】:  2013-06-13
+  13          * 【作    者】:  Mike   
+  14          ******************************************************************************/  
+  15          #include "Main.h"
+  16          
+  17          /*------------------------------主函数---------------------------------------*/
+  18          void main()
+  19          {                            
+  20   1              main_init();                    //主程序初始化
+  21   1              ds1302_init();                  //时钟芯片初始化
+  22   1              lcm_init();                             //液晶初始化
+  23   1              read_nz_data();                 //读取闹钟数据
+  24   1      
+  25   1              welcome1();                             //显示Kiss
+  26   1              delayms(250);
+  27   1              lcm_clr2();                             //清屏
+  28   1              Clean_12864_GDRAM();    //清屏
+  29   1      
+  30   1              welcome2();                             //显示信息
+  31   1              delayms(250);
+  32   1              lcm_clr2();                             //清屏
+  33   1              Clean_12864_GDRAM();    //清屏
+  34   1      
+  35   1              buzzer=0;                               //开蜂鸣器
+  36   1              delayms(30);
+  37   1              buzzer=1;                               //关蜂鸣器
+  38   1              keydone();
+  39   1              
+  40   1      }
+  41          
+  42          /**********************************************************
+  43          主程序初始化
+  44          **********************************************************/
+  45          void main_init(void)
+  46          {       
+  47   1              LCM_PSB=1;      //液晶并口通信
+  48   1              LCM_BACKLIGHT=0; //打开背光灯
+  49   1      
+  50   1              key1 = 1;  //A
+  51   1              key2 = 1;  //B
+  52   1              key3 = 1;  //C
+  53   1              key4 = 1;  //D
+C51 COMPILER V9.01   MAIN                                                                  07/27/2013 10:39:05 PAGE 2   
+
+  54   1              key5 = 1;  //背光
+  55   1      
+  56   1              EA=1;
+  57   1              TMOD=0x11;
+  58   1              IE = 0x81;    //允许总中断中断,使能 INT0 外部中断
+  59   1          TCON = 0x01;  //触发方式为脉冲负边沿触发   
+  60   1          IRIN=1;       //IO口初始化
+  61   1              ET0=1;
+  62   1              TH0=0x3c;
+  63   1              TL0=0xb0;
+  64   1              TR0=0;    
+  65   1      } 
+  66          /**********************************************************
+  67          定时中断0用于倒数10秒自动退出菜单
+  68          **********************************************************/
+  69          void chk_main(void) interrupt 1
+  70          {
+  71   1              TH0=0x3c;
+  72   1              TL0=0xb0;
+  73   1              zdjs++;
+  74   1              if(zdjs==20)
+  75   1              {
+  76   2                      zdjs=0;
+  77   2                      cdds--;//用于倒数10秒自动退出菜单
+  78   2                      if(cdds==255)
+  79   2                      {
+  80   3                              cdds_flag=1;
+  81   3                              cdds=' '; 
+  82   3                      }
+  83   2              }  
+  84   1      }
+  85          
+  86          /*结束----------------------------------------------------------------------*/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    134    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

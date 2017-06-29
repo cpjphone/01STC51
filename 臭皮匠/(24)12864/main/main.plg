@@ -1,0 +1,109 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\51…Ëº∆\Phone\(24)12864\main\main.uvproj
+Project File Date:  07/27/2013
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling LCD12864.c...
+..\LCD12864\LCD12864.c(7): warning C318: can't open file 'STC_NEW_8051.H'
+..\LCD12864\LCD12864.H(4): warning C318: can't open file 'Type_Define.h'
+..\LCD12864\LCD12864.H(5): warning C318: can't open file 'Font.h'
+..\LCD12864\LCD12864.H(6): warning C318: can't open file 'AlarmClock.h'
+..\LCD12864\LCD12864.H(11): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(12): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(13): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(14): error C202: 'P0': undefined identifier
+..\LCD12864\LCD12864.H(15): error C202: 'P2': undefined identifier
+..\LCD12864\LCD12864.H(19): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.H(20): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.H(21): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.H(27): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(28): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(29): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(15): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(16): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(17): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(20): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(24): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(25): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(28): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(32): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(33): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(36): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+compiling main.c...
+..\LCD12864\LCD12864.H(4): warning C318: can't open file 'Type_Define.h'
+..\LCD12864\LCD12864.H(5): warning C318: can't open file 'Font.h'
+..\LCD12864\LCD12864.H(6): warning C318: can't open file 'AlarmClock.h'
+..\LCD12864\LCD12864.H(19): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.H(20): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.H(21): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.H(27): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(28): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(29): error C141: syntax error near 'x', expected ')'
+Target not created
+Build target 'Target 1'
+compiling LCD12864.c...
+..\LCD12864\LCD12864.c(7): warning C318: can't open file 'STC_NEW_8051.H'
+..\LCD12864\LCD12864.H(4): warning C318: can't open file 'Type_Define.h'
+..\LCD12864\LCD12864.H(5): warning C318: can't open file 'Font.h'
+..\LCD12864\LCD12864.H(6): warning C318: can't open file 'AlarmClock.h'
+..\LCD12864\LCD12864.H(11): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(12): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(13): error C202: 'P3': undefined identifier
+..\LCD12864\LCD12864.H(14): error C202: 'P0': undefined identifier
+..\LCD12864\LCD12864.H(15): error C202: 'P2': undefined identifier
+..\LCD12864\LCD12864.H(19): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.H(20): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.H(21): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.H(27): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(28): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(29): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(14): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(15): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(16): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(17): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(20): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(23): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(24): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(25): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(28): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_RS': undefined identifier
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_RW': undefined identifier
+..\LCD12864\LCD12864.C(31): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(32): error C202: 'P1': undefined identifier
+..\LCD12864\LCD12864.C(33): error C202: 'LCM_EN': undefined identifier
+..\LCD12864\LCD12864.C(36): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+..\LCD12864\LCD12864.C(38): error C202: 's': undefined identifier
+compiling main.c...
+..\LCD12864\LCD12864.H(4): warning C318: can't open file 'Type_Define.h'
+..\LCD12864\LCD12864.H(5): warning C318: can't open file 'Font.h'
+..\LCD12864\LCD12864.H(6): warning C318: can't open file 'AlarmClock.h'
+..\LCD12864\LCD12864.H(19): error C141: syntax error near 'cmdcode', expected ')'
+..\LCD12864\LCD12864.H(20): error C141: syntax error near 'Dispdata', expected ')'
+..\LCD12864\LCD12864.H(21): error C141: syntax error near '*', expected ')'
+..\LCD12864\LCD12864.H(27): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(28): error C141: syntax error near 'x', expected ')'
+..\LCD12864\LCD12864.H(29): error C141: syntax error near 'x', expected ')'
+Target not created

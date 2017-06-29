@@ -1,0 +1,78 @@
+C51 COMPILER V8.02   小车縚制                                                              03/02/2012 23:38:43 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE 小车縚制
+OBJECT MODULE PLACED IN 小车控制.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE 小车控制.C BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                  /****************************************************************************
+   2                   硬件连接
+   3                   P1_6 接驱动模块ENA     使能端，输入PWM信号调节速度
+   4               P1_7 接驱动模块ENB 使能端，输入PWM信号调节速度
+   5          
+   6               P3_4 P3_5 接IN1  IN2    当 P3_4=1,P3_5=0; 时左电机正转      驱动蓝色输出端OUT1 OUT2接左电机 
+   7               P3_4 P3_5 接IN1  IN2    当 P3_4=0,P3_5=1; 时左电机反转                
+   8               P3_6 P3_7 接IN3  IN4        当 P3_6=1,P3_7=0; 时右电机正转  驱动蓝色输出端OUT3 OUT4接右电机
+   9               P3_6 P3_7 接IN3  IN4        当 P3_6=0,P3_7=1; 时右电机反转
+  10          
+  11               P1_0接四路寻迹模块接口第一路输出信号即中控板上面标记为OUT1
+  12               P1_1接四路寻迹模块接口第二路输出信号即中控板上面标记为OUT2 
+  13               P1_2接四路寻迹模块接口第三路输出信号即中控板上面标记为OUT3
+  14                   P1_3接四路寻迹模块接口第四路输出信号即中控板上面标记为OUT4
+  15                   四路寻迹传感器有信号(白线）为0  没有信号（黑线）为1
+  16                   四路寻迹传感器电源+5V GND 取自于单片机板靠近液晶调节对比度的电源输出接口
+  17                                                                                                                                                                                                   
+  18                   关于单片机电源：本店驱动模块内带LDO稳压芯片，当电池输入最低的电压6V时候可以输出稳定的5V
+  19                   分别在针脚标+5 与GND 。这个电源可以作为单片机系统的供电电源。
+  20                  ****************************************************************************/
+  21          
+  22                  #include<AT89x51.H>
+  23          
+  24                  #define Left_moto_pwm     P1_6     //接驱动模块ENA      使能端，输入PWM信号调节速度
+  25                  #define Right_moto_pwm    P1_7     //接驱动模块ENB
+  26          
+  27              #define Left_1_led        P1_0         //四路寻迹模块接口第一路
+  28                  #define Left_2_led        P1_1     //四路寻迹模块接口第二路
+  29              #define Right_1_led       P1_2         //四路寻迹模块接口第三路
+  30                  #define Right_2_led       P1_3     //四路寻迹模块接口第四路
+  31          
+  32          
+  33                  #define Left_moto_go      {P3_4=0,P3_5=1;} //P3_4 P3_5 接IN1  IN2    当 P3_4=0,P3_5=1; 时左电机前进
+  34                  #define Left_moto_back    {P3_4=1,P3_5=0;} //P3_4 P3_5 接IN1  IN2    当 P3_4=1,P3_5=0; 时左电机后退      
+             -          
+  35                  #define Right_moto_go     {P3_6=0,P3_7=1;} //P3_6 P3_7 接IN1  IN2        当 P3_6=0,P3_7=1; 时右电机前转
+  36                  #define Right_moto_back   {P3_6=1,P3_7=0;} //P3_6 P3_7 接IN1  IN2        当 P3_6=1,P3_7=0; 时右电机后退
+  37          
+  38             
+  39          
+  40                  void main(void)
+  41          {
+  42   1              
+  43   1              Left_moto_pwm=1;                    //使能端置1全速前进
+  44   1      
+  45   1              while(1)                                                        /*无限循环*/
+  46   1              {       
+  47   2                
+  48   2               Left_moto_go; 
+  49   2      
+  50   2               }
+  51   1      }
+  52                  
+
+
+C51 COMPILER V8.02   小车縚制                                                              03/02/2012 23:38:43 PAGE 2   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      8    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

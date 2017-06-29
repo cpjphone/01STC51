@@ -1,0 +1,106 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        07/29/2013  17:15:15  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE main.obj TO pca
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  main.obj (MAIN)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  pca (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0003H     UNIT         ?DT?MAIN
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0033H     UNIT         ?PR?MAIN?MAIN
+                    0036H     0005H                  *** GAP ***
+            CODE    003BH     0003H     ABSOLUTE     
+            CODE    003EH     001DH     UNIT         ?PR?PCA_ISR?MAIN
+            CODE    005BH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   pca (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  pca (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  C:003EH         PUBLIC        PCA_isr
+  B:00A8H.7       PUBLIC        EA
+  D:00F9H         PUBLIC        CH
+  D:00A2H         PUBLIC        P_SW1
+  D:00E9H         PUBLIC        CL
+  D:00FAH         PUBLIC        CCAP0H
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/29/2013  17:15:15  PAGE 2
+
+
+  D:00EAH         PUBLIC        CCAP0L
+  B:00D8H.6       PUBLIC        CR
+  D:00DAH         PUBLIC        CCAPM0
+  D:0008H         PUBLIC        value
+  D:00D9H         PUBLIC        CMOD
+  D:00D8H         PUBLIC        CCON
+  C:0003H         PUBLIC        main
+  D:000AH         PUBLIC        cnt
+  D:00E0H         PUBLIC        ACC
+  B:00D8H.0       PUBLIC        CCF0
+  -------         PROC          PCA_ISR
+  C:003EH         LINE#         51
+  C:0042H         LINE#         53
+  C:0044H         LINE#         54
+  C:0047H         LINE#         55
+  C:004BH         LINE#         56
+  C:0056H         LINE#         57
+  -------         ENDPROC       PCA_ISR
+  -------         PROC          MAIN
+  C:0003H         LINE#         59
+  C:0003H         LINE#         60
+  C:0003H         LINE#         61
+  C:0005H         LINE#         62
+  C:0007H         LINE#         63
+  C:0009H         LINE#         75
+  C:000CH         LINE#         79
+  C:000EH         LINE#         80
+  C:0010H         LINE#         81
+  C:0013H         LINE#         83
+  C:0018H         LINE#         84
+  C:001BH         LINE#         85
+  C:001FH         LINE#         86
+  C:002AH         LINE#         87
+  C:002DH         LINE#         89
+  C:002FH         LINE#         90
+  C:0031H         LINE#         91
+  C:0034H         LINE#         93
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=12.0 xdata=0 code=98
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

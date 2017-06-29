@@ -1,0 +1,11 @@
+本目录各文件夹说明：
+
+Doc    :    包含本例程的资料文档
+Include：   存放相关公共头文件，例如类型头文件Type_Define.h，用户配置头文件User_Config.h等
+Main   ：   存放程序主函数main（），是程序执行的开始函数
+Project：   存放工程文件。
+	    Project->Obj  编译的目标文件夹，所需的hex文件就在此目录
+	    Project->List 跟编译相关文件夹（用户不需要了解里面的文件）
+UserDriver：存放用户所有的外设驱动文件，并且每一个外设单独使用一个文件夹。如下举例说明:
+	    UserDriver->LED  存放与ＬＥＤ相关的驱动文件
+　　　　　　UserDriver->Key  存放与按键相关的驱动文件

@@ -1,0 +1,82 @@
+C51 COMPILER V9.01   4                                                                     06/10/2013 19:44:36 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 4
+OBJECT MODULE PLACED IN ..\Obj\4.obj
+COMPILER INVOKED BY: D:\keil4\C51\BIN\C51.EXE ..\菜鸟小春\（4）呼吸灯\4.c BROWSE DEBUG OBJECTEXTEND PRINT(.\4.lst) OBJEC
+                    -T(..\Obj\4.obj)
+
+line level    source
+
+   1          #include<reg52.h>                     //定义头文件
+   2          #define uchar unsigned char       //宏定义
+   3          #define uint  unsigned int
+   4          
+   5          sbit led = P0^0;
+   6          /*************************************************/
+   7          //延时函数：功能是带有入口参数的延时函数，单位约1毫秒
+   8          /*************************************************/
+   9          void delayms(int m)
+  10          {
+  11   1              int i,j;
+  12   1              for(i=0;i<m;i++)
+  13   1              {
+  14   2                      for(j=0;j<12;j++)
+  15   2                      {}
+  16   2              }
+  17   1      }
+  18          
+  19          /**************************************************/
+  20          //主函数
+  21          /**************************************************/
+  22          void main()
+  23          {
+  24   1              uchar i,j;
+  25   1              while(1)
+  26   1              {
+  27   2                      i = 0 ;
+  28   2                      while(i<100)
+  29   2                      {
+  30   3                              j=0;
+  31   3                              while( j<1)
+  32   3                              {
+  33   4                                      led = 0;
+  34   4                                      delayms(i);
+  35   4                                      led = 1;
+  36   4                                      delayms(100-i);
+  37   4                                      j++;
+  38   4                              }
+  39   3                               i++;
+  40   3                      }
+  41   2                      i=0;
+  42   2                      while(i<100)
+  43   2                      {
+  44   3                              j=0;
+  45   3                              while(j<1)
+  46   3                              {
+  47   4                                      led = 0;
+  48   4                                      delayms(100-i);
+  49   4                                      led = 1;
+  50   4                                      delayms(i);
+  51   4                                      j++;
+  52   4                              }
+  53   3                              i++;
+  54   3                      }       
+C51 COMPILER V9.01   4                                                                     06/10/2013 19:44:36 PAGE 2   
+
+  55   2              }
+  56   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    126    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

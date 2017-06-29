@@ -1,0 +1,44 @@
+#include <reg52.h>
+#include <intrins.h>
+
+typedef unsigned char uchar;
+typedef unsigned int uint;
+sbit led1=P2^1;
+sbit led2=P2^2;
+uint num1,num2;
+
+void main()
+{
+
+	TMOD=0X03;
+	TH0=6;
+	TL0=6;
+	EA=1;
+	ET0=1;
+	ET1=1;
+	TR0=1;
+	TR1=1;
+	 while(1)
+	{
+		if(num1>=4000)//3686 11.0592 
+		{
+			num1=0;
+			led1=~led1;
+		}
+		if(num2>=2000)//1843 11.0592 
+		{
+			num2=0;
+			led2=~led2;
+		}			
+	}	
+}
+void TLO_time() interrupt 1     //低八位用定时器计数器中断0的中断源
+{
+	TL0=6;
+	num1++;
+}
+void TH0_time() interrupt 3    //高八位用定时器计数器中断1的中断源
+{
+	TH0=6;
+	num2++;
+}	

@@ -1,0 +1,4 @@
+"main.obj",
+".\DS1302_y.obj" 
+TO "main" 
+RAMSIZE(256) 

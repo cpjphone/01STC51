@@ -1,0 +1,4 @@
+"main.obj",
+"keyself.obj" 
+TO "(2)keyboard_self" 
+RAMSIZE(256) 

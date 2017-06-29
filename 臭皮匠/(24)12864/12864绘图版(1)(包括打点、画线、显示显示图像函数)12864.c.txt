@@ -1,0 +1,370 @@
+#include "12864.h"
+
+void delayms(unsigned int n)
+{
+ unsigned char i;
+ for(;n>0;n--)
+ for(i=0;i<100;i++);
+}
+
+void checkBusy(void)
+{
+ rs=0;
+ rw=1;
+ en=1;
+ dataPort=0xff;
+ while(dataPort & 0x80);
+ en=0;
+}
+
+void writeCommand(unsigned char cmd)
+{
+ checkBusy();
+ rs=0;
+ rw=0;
+ en=1;
+ dataPort=cmd;
+ _nop_();
+ en=0;
+}
+
+void writeData(unsigned char adata)
+{
+ checkBusy();
+ rs=1;
+ rw=0;
+ en=1;
+ dataPort=adata;
+ _nop_();
+ en=0;
+} 
+
+unsigned char readData(void)
+{
+ unsigned char RData;
+ dataPort=0xff;
+ checkBusy();
+ rs=1;
+ rw=1;
+ en=0;
+ en=1;
+ RData=dataPort;
+ en=0;
+ return RData;
+}
+
+void ClrGDRAM(void)
+{
+	unsigned char x,y;
+	for(y=0;y<64;y++)
+    	for(x=0;x<16;x++)
+    	{
+			writeCommand(0x34);
+            writeCommand(y+0x80);     //行地址  
+            writeCommand(x+0x80);     //列地址  
+            writeCommand(0x30);
+            writeData(0x00);
+            writeData(0x00);
+        }
+	//writeCommand(0x30);
+} 
+
+void LcmInit(void)
+{ 
+ writeCommand(0x30);
+ delayms(50);
+ writeCommand(0x01);
+ delayms(50);
+ writeCommand(0x06);
+ delayms(50);
+ writeCommand(0x0c);
+ ClrGDRAM();
+ psb=1;
+}
+
+//在坐标（x,y)处显示字符串
+void LcmPrint(unsigned char x,unsigned char y,unsigned char *adata)
+{
+ unsigned char address;
+ unsigned char i=0;
+ switch (y)
+ {
+  case 0:address=0x80+x;break;
+  case 1:address=0x90+x;break;
+  case 2:address=0x88+x;break;
+  case 3:address=0x98+x;break;
+  default:break;
+ }
+ writeCommand(address);
+ while(*(adata+i))
+ {
+ 	writeData(*(adata+i));
+	i++;
+ }
+}
+/***********************************************************
+函数名：  disp_picture
+函数说明： 显示一幅128*64的图画
+传入参数：图形指针*img
+传出参数：无
+返回值：  无
+**********************************************************/
+void disp_picture(unsigned char *img)
+{
+  unsigned char i,j;
+  for(j=0;j<32;j++)
+  {
+    for(i=0;i<8;i++)
+    {
+      writeCommand(0x34);
+      writeCommand(0x80+j);
+      writeCommand(0x80+i);
+      writeCommand(0x30);
+      writeData(img[j*16+i*2]);
+      writeData(img[j*16+i*2+1]);
+    }
+  }
+  for(j=32;j<64;j++)
+  {
+    for(i=0;i<8;i++)
+    {
+      writeCommand(0x34);
+      writeCommand(0x80+j-32);
+      writeCommand(0x80+(i+8));
+      writeCommand(0x30);
+      writeData(img[j*16+i*2]);
+      writeData(img[j*16+i*2+1]);
+    }
+  }
+  writeCommand(0x36);
+}
+
+/***********************************************************
+函数名：  dispU_picture
+函数说明： 上半屏显示一幅128*32的图画
+传入参数：图形指针*img
+传出参数：无
+返回值：  无
+**********************************************************/
+void dispU_picture(unsigned char *img)
+{
+  unsigned char i,j;
+  for(j=0;j<32;j++)
+  {
+    for(i=0;i<8;i++)
+    {
+      writeCommand(0x34);
+      writeCommand(0x80+j);
+      writeCommand(0x80+i);
+      writeCommand(0x30);
+      writeData(img[j*16+i*2]);
+      writeData(img[j*16+i*2+1]);
+    }
+  }
+  writeCommand(0x36);
+}
+
+/***********************************************************
+函数名：  dispD_picture
+函数说明： 下半屏显示一幅128*32的图画
+传入参数：图形指针*img
+传出参数：无
+返回值：  无
+**********************************************************/
+void dispD_picture(unsigned char *img)
+{
+  unsigned char i,j;
+  for(j=0;j<32;j++)
+  {
+    for(i=0;i<8;i++)
+    {
+      writeCommand(0x34);
+      writeCommand(0x80+j);
+      writeCommand(0x80+(i+8));
+      writeCommand(0x30);
+      writeData(img[j*16+i*2]);
+      writeData(img[j*16+i*2+1]);
+    }
+  }
+  writeCommand(0x36);
+}
+
+/***********************************************************
+函数名：  drawPoint
+函数说明：画点
+传入参数：打点位置(x0,y0);color=1,点亮；color=0,擦除
+传出参数：无
+返回值：  无
+**********************************************************/
+void drawPoint(unsigned char x,unsigned char y,unsigned char color)
+{
+ unsigned char row,collum,cbite;
+ unsigned char tempH,tempL;
+ writeCommand(0x34);
+ writeCommand(0x36);
+ collum=x>>4;
+ cbite=x&0x0f;
+ if(y<32)
+ 	row=y;
+ else
+ 	{row=y-32;
+	collum+=8;
+	}
+ writeCommand(0x80+row);
+ writeCommand(0x80+collum);
+ readData();
+ tempH=readData();
+ tempL=readData();
+ writeCommand(0x80+row);
+ writeCommand(0x80+collum);
+ if (color)
+ {
+	 if(cbite<8)
+	 {
+	 tempH|=(1<<(7-cbite));
+	 //tempL=(1<<(7-cbite));
+	 }
+	 else
+	 {
+	 //tempH=(1<<(15-cbite));
+	 tempL|=(1<<(15-cbite));
+	 }
+ }
+ else
+ {
+  	 if(cbite<8)
+	 {
+	 tempH&=~(1<<(7-cbite));
+	 //tempL=(1<<(7-cbite));
+	 }
+	 else
+	 {
+	 //tempH=(1<<(15-cbite));
+	 tempL&=~(1<<(15-cbite));
+	 }
+ }
+ writeData(tempH);
+ writeData(tempL);
+ writeCommand(0x30);
+}
+
+/***********************************************************
+函数名：  drawRowLine
+函数说明：画水平线
+传入参数：(x0,y0),水平线的起点;(x1,y0)水平线的终点
+				color=1,点亮；color=0,擦除
+传出参数：无
+返回值：  无
+**********************************************************/
+void drawRowLine(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char color)
+{
+    unsigned char  temp;
+    if(x0>x1) 				// 对x0、x1大小进行排列，以便画图
+    {
+        temp = x1;
+        x1 = x0;
+        x0 = temp;
+    }   
+    do
+    {
+        drawPoint(x0, y0, color);	// 逐点显示，描出垂直线
+        x0++;
+    }
+    while(x1>=x0);
+}
+
+/***********************************************************
+函数名：  drawCollumLine
+函数说明：画竖直线
+传入参数：(x0,y0),竖直线的起点;(x1,y0)竖直线的终点;
+			color=1,点亮；color=0,擦除
+传出参数：无
+返回值：  无
+************************************************************/
+void drawCollumLine(unsigned char x0,unsigned char y0,unsigned char y1,unsigned char color)
+{
+ unsigned char temp;
+ if(y0>y1)
+ {
+  temp=y0;
+  y0=y1;
+  y1=temp;
+ }
+ while (y0<=y1)
+ {
+ drawPoint(x0,y0,color);
+ y0++;
+ }
+}
+/*************************************************************
+函数名：  drawLine
+函数说明：使用Bresenham法,画任意两点间的直线
+传入参数：(x0,y0),竖直线的起点;(x1,y1)竖直线的终点
+				color=1,点亮；color=0,擦除
+传出参数：无
+返回值：  无
+*************************************************************/
+void drawLine(unsigned char x0,unsigned char y0,unsigned char x1,unsigned char y1,unsigned char color)
+{
+   int   dx;		// 直线x轴差值变量
+   int   dy;        // 直线y轴差值变量
+   char   dx_sym;	// x轴增长方向，为-1时减值方向，为1时增值方向
+   char   dy_sym;	// y轴增长方向，为-1时减值方向，为1时增值方向
+   int   dx_2;		// dx*2值变量，用于加快运算速度
+   int   dy_2;		// dy*2值变量，用于加快运算速度
+   int   di;		// 决策变量
+
+   dx = x1-x0;		// 求取两点之间的差值
+   dy = y1-y0;
+   if (dx<0)		dx_sym=-1;
+   else
+   {
+	   if(dx>0)	dx_sym=1; 
+	   else				
+	   {
+	   		drawCollumLine(x0,y0,y1,color);
+			return;
+		}
+	}
+   if(dy>0)			dy_sym=1;
+   else 
+   {
+	   if(dy<0)	dy_sym=-1;
+	   else				
+	   {
+	   		drawRowLine(x0,y0,x1,color);
+			return;
+		}
+	}
+   dx=dx_sym*dx;
+   dy=dy_sym*dy;
+
+   dx_2=dx*2;
+   dy_2=dy*2;
+
+   if(dx>=dy)
+   {
+	di=dy_2-dx;
+	while(x0!=x1)
+		{
+		 drawPoint(x0,y0,color);
+		 x0+=dx_sym;
+		 if(di<0)	di+=dy_2;
+		 else	{di+=dy_2-dx_2;y0+=dy_sym;}
+		}
+	drawPoint(x0,y0,color);
+	}
+   else
+   {
+   di=dx_2-dy;
+   while(y0!=y1)
+   		{
+		 drawPoint(x0,y0,color);
+		 y0+=dy_sym;
+		 if(di<0)	di+=dx_2;
+		 else		{di+=dx_2-dy_2;x0+=dx_sym;}
+		}
+	drawPoint(x0,y0,color);
+   }
+ 
+}

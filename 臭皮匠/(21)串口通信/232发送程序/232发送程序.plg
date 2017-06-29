@@ -1,0 +1,25 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\51设计\菜鸟小春\(21)串口通信\232发送程序\232发送程序.uvproj
+Project File Date:  07/17/2013
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling 232send.c...
+linking...
+Program Size: data=10.0 xdata=0 code=134
+"232发送程序" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling 232send.c...
+linking...
+Program Size: data=10.0 xdata=0 code=134
+"232发送程序" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling 232send.c...
+linking...
+Program Size: data=10.0 xdata=0 code=134
+creating hex file from "232发送程序"...
+"232发送程序" - 0 Error(s), 0 Warning(s).

@@ -1,0 +1,189 @@
+C51 COMPILER V9.01   DS1302                                                                07/19/2013 13:37:15 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DS1302
+OBJECT MODULE PLACED IN ..\Obj\ds1302.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\菜鸟小春\(22)DS1302\时钟芯片\ds1302.c BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\ds1302.lst) OBJECT(..\Obj\ds1302.obj)
+
+line level    source
+
+   1          /****************************************************************/
+   2          //
+   3          // 
+   4          /****************************************************************/         
+   5          #include<reg52.h>                                                       //头文件定义
+   6          #include<intrins.h>
+   7          #define uchar   unsigned char           // /宏定义
+   8          #define uint    unsigned int
+   9          /*****************************************************************************/
+  10          //定义DS1302时钟接口
+  11          sbit clock_clk = P3 ^ 6;//ds1302_clk（时钟线）
+  12          sbit clock_dat = P3 ^ 4;//ds1302_dat（数据线）
+  13          sbit clock_Rst = P3 ^ 5;//ds1302_Rst（复位线）
+  14          
+  15          /*****************************************************************************/
+  16          //定义累加器A中的各位
+  17          sbit a0   = ACC ^ 0;
+  18          sbit a1   = ACC ^ 1;
+  19          sbit a2   = ACC ^ 2;
+  20          sbit a3   = ACC ^ 3;
+  21          sbit a4   = ACC ^ 4;
+  22          sbit a5   = ACC ^ 5;
+  23          sbit a6   = ACC ^ 6;
+  24          sbit a7   = ACC ^ 7;
+  25          /*****************************************************************************/
+  26          //定义变量  年月日时分秒星期
+  27          char ss,mm,hh,dd,mo,xq,yy;
+  28          uchar disp_buffer[8];
+  29          uchar code lab[11]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x40};
+  30          
+  31          /****************************************************************/
+  32          //      delayms(unsigned int ms);延时程序  带有输入参数 ms
+  33          // 
+  34          /****************************************************************/
+  35          void delayms(unsigned int m)
+  36          {
+  37   1              unsigned int i,j;
+  38   1              for(i=0;i<m;i++)
+  39   1              {
+  40   2                      for(j=0;j<123;j++)
+  41   2                      {}
+  42   2              }
+  43   1      }
+  44          /*****************************************************************************/
+  45          //1302驱动程序（底层协议）
+  46          void write(unsigned char dat){
+  47   1              ACC=dat;
+  48   1              clock_dat=a0; clock_clk=1;clock_clk=0;
+  49   1              clock_dat=a1; clock_clk=1;clock_clk=0;
+  50   1              clock_dat=a2; clock_clk=1;clock_clk=0;
+  51   1              clock_dat=a3; clock_clk=1;clock_clk=0;
+  52   1              clock_dat=a4; clock_clk=1;clock_clk=0;
+  53   1              clock_dat=a5; clock_clk=1;clock_clk=0;
+  54   1              clock_dat=a6; clock_clk=1;clock_clk=0;
+C51 COMPILER V9.01   DS1302                                                                07/19/2013 13:37:15 PAGE 2   
+
+  55   1              clock_dat=a7; clock_clk=1;clock_clk=0;
+  56   1      }
+  57          /*****************************************************************************/
+  58          //DS1302读出字节（底层协议）
+  59          unsigned char read(void){
+  60   1              clock_dat=1;
+  61   1              a0=clock_dat;
+  62   1              clock_clk=1; clock_clk=0;a1=clock_dat;
+  63   1              clock_clk=1; clock_clk=0;a2=clock_dat;
+  64   1              clock_clk=1; clock_clk=0;a3=clock_dat;
+  65   1              clock_clk=1; clock_clk=0;a4=clock_dat;
+  66   1              clock_clk=1; clock_clk=0;a5=clock_dat;
+  67   1              clock_clk=1; clock_clk=0;a6=clock_dat;
+  68   1              clock_clk=1; clock_clk=0;a7=clock_dat;
+  69   1              return(ACC);
+  70   1      }
+  71          /*****************************************************************************/
+  72          //DS1302写数据（底层协议）
+  73          void write_clock(unsigned char adr, unsigned char dat){
+  74   1              clock_clk=0;
+  75   1              clock_Rst=0;
+  76   1              clock_Rst=1;
+  77   1              write(adr);
+  78   1              write(dat);
+  79   1              clock_Rst=0;
+  80   1              clock_clk=1;
+  81   1      }
+  82          /*****************************************************************************/
+  83          //DS1302读数据（底层协议）
+  84          unsigned char read_clock(unsigned char adr){
+  85   1              unsigned char dat=0;
+  86   1              clock_clk=0;
+  87   1              clock_Rst=0;
+  88   1              clock_Rst=1;
+  89   1              write(adr);
+  90   1              dat=read();
+  91   1              clock_Rst=0;
+  92   1              clock_clk=1;
+  93   1              return(dat);
+  94   1      }
+  95          /*****************************************************************************/
+  96          /*****************************************************************************/
+  97          //设置1302的初始时间（自动初始化）
+  98          void Init_1302(void)//-设置1302的初始时间（2011年12月3日12时00分00秒星期六）
+  99          {
+ 100   1              if(read_clock(0xc1) != 0xaa)
+ 101   1              {
+ 102   2                      write_clock(0x8e,0x00);//允许写操作
+ 103   2                      write_clock(0x8c,0x11);//年
+ 104   2                      write_clock(0x8a,0x06);//星期
+ 105   2                      write_clock(0x88,0x12);//月
+ 106   2                      write_clock(0x86,0x03);//日
+ 107   2                      write_clock(0x84,0x12);//小时
+ 108   2                      write_clock(0x82,0x00);//分钟
+ 109   2                      write_clock(0x80,0x00);//秒
+ 110   2                      write_clock(0x90,0xa5);//充电   
+ 111   2                      write_clock(0xc0,0xaa);//写入初始化标志RAM（第00个RAM位置）
+ 112   2              }
+ 113   1              write_clock(0x8e,0x80);//禁止写操作
+ 114   1      }
+ 115          /*****************************************************************************/
+ 116          //DS1302时钟芯片驱动程序
+C51 COMPILER V9.01   DS1302                                                                07/19/2013 13:37:15 PAGE 3   
+
+ 117          /*****************************************************************************/
+ 118          //常用时钟数据读取
+ 119          void read_clockS(void){
+ 120   1              ss = read_clock(0x81);//读取秒数据
+ 121   1              mm = read_clock(0x83);//读取分钟数据
+ 122   1              hh = read_clock(0x85);//小时
+ 123   1              dd = read_clock(0x87);//日
+ 124   1              mo = read_clock(0x89);//月
+ 125   1              xq = read_clock(0x8b);//星期
+ 126   1              yy = read_clock(0x8d);//年
+ 127   1      }
+ 128          void display()
+ 129          {
+ 130   1              uchar i,temp;   
+ 131   1              temp = 0xfe;
+ 132   1              for(i=0;i<8;i++)
+ 133   1              {
+ 134   2                      P0 = temp;
+ 135   2                      P2 = lab[disp_buffer[i]];
+ 136   2                      delayms(2);
+ 137   2                      P2 = 0x00;
+ 138   2                      temp = _crol_(temp,1);
+ 139   2              }                               
+ 140   1      }
+ 141          void main()
+ 142          {
+ 143   1              uchar i;
+ 144   1              Init_1302();
+ 145   1              while(1)
+ 146   1              {
+ 147   2                      read_clockS();
+ 148   2                      disp_buffer[7]  =       ss&0x0f;
+ 149   2                      disp_buffer[6]  =       (ss>>4)&0x07;
+ 150   2                      disp_buffer[5]  =       10;
+ 151   2                      disp_buffer[4]  =       mm&0x0f;
+ 152   2                      disp_buffer[3]  =       (mm>>4)&0x07;
+ 153   2                      disp_buffer[2]  =       10;
+ 154   2                      disp_buffer[1]  =       hh&0x0f;
+ 155   2                      disp_buffer[0]  =       (hh>>4)&0x01;
+ 156   2                      for(i=0;i<25;i++)
+ 157   2                      {
+ 158   3                              display();
+ 159   3                      }               
+ 160   2              }
+ 161   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    464    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

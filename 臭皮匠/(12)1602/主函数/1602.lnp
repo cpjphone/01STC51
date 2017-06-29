@@ -1,0 +1,4 @@
+"shizhong.obj",
+".\LCD1602_Drive.obj" 
+TO "1602" 
+RAMSIZE(256) 

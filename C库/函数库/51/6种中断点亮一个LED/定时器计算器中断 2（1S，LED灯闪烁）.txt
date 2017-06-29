@@ -1,0 +1,31 @@
+#include <reg52.h>
+#include <intrins.h>
+
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
+uint num;
+
+void main()             // 该中断计数循环3686（晶振11.0592MHZ）次是一秒4000次（12MHZ）
+{
+	TMOD=0x02;
+	TH0=6;
+	TL0=6;         //当低八位记满溢出 TF0标指位为 1 反应给	CPU 申请中断 同时TH0 中数组                       //自动装入（复制）TL0中
+	EA=1;
+	ET0=1;
+	TR0=1;
+	while(1)
+	{
+	  if(num==4000)	// 	若为11.0592 num=3686
+	  { P2=~P2;
+	    num=0;
+	  }
+	}
+}
+void T0_time() interrupt 1 using 2
+	{
+		num++;
+	}
+
+
+	

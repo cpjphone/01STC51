@@ -1,0 +1,79 @@
+C51 COMPILER V9.01   DELAY                                                                 07/27/2013 11:51:51 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DELAY
+OBJECT MODULE PLACED IN .\Obj\Delay.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\UserDriver\Delay\Delay.c BROWSE INCDIR(..\Include;..\Main;..\UserDriver\
+                    -NRF24L01;..\UserDriver\Delay;..\UserDriver\Display;..\UserDriver\DS18B20;..\UserDriver\LCD1602) DEBUG OBJECTEXTEND PRINT
+                    -(.\List\Delay.lst) OBJECT(.\Obj\Delay.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          函数名称：      Delay.c
+   3          描述    ：      延时程序
+   4          输入    ：      
+   5          输出    ：      
+   6          返回    ：      无
+   7          注意事项：      无
+   8          *********************************************************************************************/
+   9          #include "STC.h"
+  10          #include "Delay.h"
+  11          
+  12          /********************************************************************************************
+  13          函数名称：      void Delay(uint m)
+  14          描述    ：      长延时
+  15          输入    ：      无
+  16          输出    ：      无
+  17          返回    ：      无
+  18          注意事项：      无
+  19          *********************************************************************************************/
+  20          void Delay(unsigned int m)
+  21          {
+  22   1              unsigned int i;
+  23   1              for(i=0; i<m; i++);
+  24   1                      for(i=0; i<m; i++);
+  25   1      }
+  26          
+  27          /*****************************************************************************
+  28          函数名称：      void inerDelay_us(uchar m)
+  29          描述    ：
+  30          输入    ：      无
+  31          输出    ：      无
+  32          返回    ：      无
+  33          注意事项：      无
+  34          ******************************************************************************/
+  35          void inerDelay_us(uchar m)
+  36          {
+  37   1              for(;m>0;m--)
+  38   1                      _nop_();
+  39   1      }
+  40          
+  41          /********************************************************************************************
+  42          函数名称：void Delayms(uint m)
+  43          函数功能：延时程序，大约1ms
+  44          入口参数：m
+  45          出口参数：无
+  46          *********************************************************************************************/
+  47          void Delayms(uint m)
+  48          {
+  49   1              uint i,j;
+  50   1              for(i = 0;i < m;i++)
+  51   1                      for(j = 0;j < 121;j++);                 
+  52   1      }
+
+C51 COMPILER V9.01   DELAY                                                                 07/27/2013 11:51:51 PAGE 2   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     78    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

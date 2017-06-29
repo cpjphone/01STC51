@@ -1,0 +1,80 @@
+//?米赤3那㊣?車3?那??‘o‘那y
+//pll:????米?㊣??米那y㏒?∩車2?a那?㏒?℅?∩車?米?a16	
+//CHECK OK
+//091209
+void Stm32_Clock_Init(u8 PLL)
+{
+	unsigned char temp=0;   
+	MYRCC_DeInit();		   //?∩??2⊿?????辰芍?㊣赤           kiel 角???辰??-D∩o?米? ?∩??辰?D???∩??¯
+	RCC->CR|=0x00010000;   //赤a2????迄那㊣?車那1?邦HSEON
+	while(!(RCC->CR>>17)); //米豕∩y赤a2?那㊣?車?赤D¯
+	RCC->CFGR= 0X00000400;  //APB1=DIV2;APB2=DIV1;AHB=DIV1;
+	PLL-=2;//米???2??米ㄓ??															//米?米?米?㏒?㏒?㏒?㏒?㏒?㏒?PLL?a∩?o‘那yD?2?㏒?豕?D?2??a 9 ㏒????| 9-2=7㏒?7?a?a0X0111 ??車|PLLMUL 米?9㊣??米那?3?
+	RCC->CFGR|=PLL<<18;    //谷豕??PLL?米 2~16
+	RCC->CFGR|=1<<16;	   //PLLSRC ON   赤a2?那㊣?車℅¯?aPLL那?豕?那㊣?車
+	FLASH->ACR|=0x32;	   //FLASH 2???車那㊣?邦?迆  Da辰??芍
+
+	RCC->CR|=0x01000000;    //PLLON   那1?邦PLL
+	while(!(RCC->CR>>25)); //米豕∩yPLL???“   ?～?y3㏒1∟℅¯ 
+	RCC->CFGR|=0x00000002; //PLL℅¯?a?米赤3那㊣?車	 
+	while(temp!=0x02)      //米豕∩yPLL℅¯?a?米赤3那㊣?車谷豕??3谷1|  ?～?D??CFGR米?2?⊿3???a10 
+	{   
+		temp=RCC->CFGR>>2;
+		temp&=0x03;					 //0010&0011=0010
+	}    
+}
+/////////////////////////////////////////////////////////////////////////////////		    
+ㄗ2ㄘ(VET6)
+
+void SystemInit (void)
+{
+  /* Reset the RCC clock configuration to the default reset state(for debug purpose) */
+  /* Set HSION bit */
+  RCC->CR |= (uint32_t)0x00000001;
+
+  /* Reset SW, HPRE, PPRE1, PPRE2, ADCPRE and MCO bits */
+#ifndef STM32F10X_CL
+  RCC->CFGR &= (uint32_t)0xF8FF0000;
+#else
+  RCC->CFGR &= (uint32_t)0xF0FF0000;
+#endif /* STM32F10X_CL */   
+  
+  /* Reset HSEON, CSSON and PLLON bits */
+  RCC->CR &= (uint32_t)0xFEF6FFFF;
+
+  /* Reset HSEBYP bit */
+  RCC->CR &= (uint32_t)0xFFFBFFFF;
+
+  /* Reset PLLSRC, PLLXTPRE, PLLMUL and USBPRE/OTGFSPRE bits */
+  RCC->CFGR &= (uint32_t)0xFF80FFFF;
+
+#ifdef STM32F10X_CL
+  /* Reset PLL2ON and PLL3ON bits */
+  RCC->CR &= (uint32_t)0xEBFFFFFF;
+
+  /* Disable all interrupts and clear pending bits  */
+  RCC->CIR = 0x00FF0000;
+
+  /* Reset CFGR2 register */
+  RCC->CFGR2 = 0x00000000;
+#elif defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) 
+  /* Disable all interrupts and clear pending bits  */
+  RCC->CIR = 0x009F0000;
+
+  /* Reset CFGR2 register */
+  RCC->CFGR2 = 0x00000000;      
+#else
+  /* Disable all interrupts and clear pending bits  */
+  RCC->CIR = 0x009F0000;
+#endif /* STM32F10X_CL */
+    
+#if defined (STM32F10X_HD) || (defined STM32F10X_XL)
+  #ifdef DATA_IN_ExtSRAM
+    SystemInit_ExtMemCtl(); 
+  #endif /* DATA_IN_ExtSRAM */
+#endif 
+
+  /* Configure the System clock frequency, HCLK, PCLK2 and PCLK1 prescalers */
+  /* Configure the Flash Latency cycles and enable prefetch buffer */
+  SetSysClock();
+}

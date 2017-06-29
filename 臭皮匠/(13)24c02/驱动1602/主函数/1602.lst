@@ -1,0 +1,13 @@
+C51 COMPILER V9.01   1602                                                                  07/08/2013 14:24:34 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 1602
+OBJECT MODULE PLACED IN ..\Obj\1602.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\Çý¶¯\1602.c BROWSE INCDIR(..\Çý¶¯) DEBUG OBJECTEXTEND PRINT(.\1602.l
+                    -st) OBJECT(..\Obj\1602.obj)
+
+line level    source
+
+*** ERROR C141 IN LINE 10 OF ..\Ç¶¯\1602.C: syntax error near 'com', expected ')'
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

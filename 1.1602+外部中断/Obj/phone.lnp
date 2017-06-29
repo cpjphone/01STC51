@@ -1,0 +1,6 @@
+"..\Obj\App.obj",
+"..\Obj\BSP.obj",
+"..\Obj\LCD_1602.obj",
+"..\Obj\exti.obj" 
+TO "..\Obj\phone" 
+PRINT("..\Obj\List\phone.m51") RAMSIZE(256) 

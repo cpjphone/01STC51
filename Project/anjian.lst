@@ -1,0 +1,118 @@
+C51 COMPILER V9.01   ANJIAN                                                                06/11/2013 11:30:46 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE ANJIAN
+OBJECT MODULE PLACED IN ..\Obj\anjian.obj
+COMPILER INVOKED BY: D:\keil4\C51\BIN\C51.EXE ..\菜鸟小春\按键3\anjian.c BROWSE DEBUG OBJECTEXTEND PRINT(.\anjian.lst) O
+                    -BJECT(..\Obj\anjian.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>                                                             //定义头文件
+   3          #define uchar unsigned char                                             //宏定义
+   4          #define uint unsigned int
+   5          #define key1 0x38
+   6          
+   7          bit flag,flag_rl;
+   8          
+   9          uchar code tab[] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
+  10          uchar code dpy[]={0,1,2,3,4,5,6,7,8,9};
+  11          uchar disp_buffer[8]={8,8,8,8,8,8,8,8};
+  12          
+  13          void delayms(int m)     ;  //声明
+  14          
+  15          /***************************************************
+  16          funtion：总按键判断 有按键按下，返回按下位置
+  17          ***************************************************/
+  18          uchar keyscan()
+  19          {
+  20   1              uchar temp,ktemp;
+  21   1              P3 = P3 | 0x3c;
+  22   1              temp = P3;
+  23   1              if((temp | 0xc3) == 0xff)
+  24   1                      return(0);
+  25   1              delayms(5);
+  26   1      
+  27   1              P3 = P3 | 0x3c;
+  28   1              temp = P3;
+  29   1              if((temp | 0xc3) == 0xff)
+  30   1                      return(0);
+  31   1      
+  32   1              {
+  33   2                      delayms(5);
+  34   2                      temp = P3; //最终返回值
+  35   2                      if((temp | 0xc3) != 0xff)
+  36   2                      {
+  37   3                      }
+  38   2                      while(1)
+  39   2                      {
+  40   3                              ktemp = P3;
+  41   3                              if((ktemp | 0xc3) == 0xff)
+  42   3                                      break;
+  43   3                      }               
+  44   2              }
+  45   1              return temp;
+  46   1      }
+  47          
+  48          /***************************************************
+  49          funtion：每个按键处理
+  50          ***************************************************/
+  51          
+  52          void kpro(uchar temp)
+  53          {
+  54   1              if((temp & 0x3c) == key1)
+C51 COMPILER V9.01   ANJIAN                                                                06/11/2013 11:30:46 PAGE 2   
+
+  55   1                       flag = 1;
+  56   1              if((temp & 0x3c) == 0x34)
+  57   1                       flag = 0;
+  58   1              if((temp & 0x3c) == 0x2c)
+  59   1                       flag_rl = 1;
+  60   1              if((temp & 0x3c) == 0x1c)
+  61   1                       flag_rl = 0;
+  62   1      }
+  63          
+  64          /***********************************************************************/
+  65          //
+  66          /***********************************************************************/
+  67          void main()
+  68          {
+  69   1              uchar k,tempcode = 0xfe;
+  70   1              while(1)
+  71   1              {       
+  72   2                      k = keyscan();
+  73   2                      if(k != 0)
+  74   2                              kpro(k);
+  75   2                      if(flag == 1)
+  76   2                      {
+  77   3                              P2 = tempcode;
+  78   3                              P1 = tab[8];
+  79   3                              delayms(200);
+  80   3                              if(flag_rl == 1)
+  81   3                              {
+  82   4                                      tempcode = _crol_(tempcode,1);  //左移          
+  83   4                              }
+  84   3                              else
+  85   3                                      tempcode = _cror_(tempcode,1);  //右移
+  86   3                      }
+  87   2                      else
+  88   2                              P1 = 0x00 ;     
+  89   2      
+  90   2              }
+  91   1      }
+  92          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    151    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

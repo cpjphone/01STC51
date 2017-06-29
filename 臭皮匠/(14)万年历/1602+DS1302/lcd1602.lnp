@@ -1,0 +1,4 @@
+"lcd1602.obj",
+".\18B20Drive.obj" 
+TO "lcd1602" 
+RAMSIZE(256) 

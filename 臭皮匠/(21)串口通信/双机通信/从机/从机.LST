@@ -1,0 +1,128 @@
+C51 COMPILER V9.01   从籣                                                                  08/14/2013 23:40:05 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 从籣
+OBJECT MODULE PLACED IN 从机.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE 从机.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】：Keil4  
+   4          * 【程序功能】：主机发送A,B,C,D分别控制1，2，3，4灯亮，从机通过波特率发生
+   5                                          器发出高频正弦波
+   6          * 【技术支持】：                                
+   7          * 【晶    振】: 12MHz外部晶振           
+   8          * 【芯    片】: stc12c5a60s2  
+   9          * 【日    期】: 
+  10          * 【作    者】: 王云飞  
+  11          ******************************************************************************/
+  12          #include<reg52.h>                     //定义头文件
+  13          
+  14          #define uchar unsigned char       //宏定义
+  15          #define uint  unsigned int
+  16          
+  17          sbit led1 = P1^4;
+  18          sbit led2 = P1^1;
+  19          sbit led3=P1^2;
+  20          sbit led4=P1^3;
+  21          
+  22          sfr WAKE_CLKO =0X8F;
+  23          sfr AUXR =0X8E;
+  24          sfr CLK_DIV     =0X97;
+  25          sfr BRT = 0x9C;
+  26          
+  27          
+  28          #define Port_BRT       
+  29                                   
+  30          #ifdef Port_BRT      
+  31          //*********************************//
+  32          //         CLKOUT2      波特率产生         //   
+  33          //*********************************//
+  34          void CLKOUT2_init(void)
+  35          {
+  36   1          WAKE_CLKO = 0x04;   
+  37   1                              
+  38   1                              
+  39   1          AUXR      = 0x14;  
+  40   1                             
+  41   1          BRT       = 0xff;  
+  42   1      } 
+  43          #endif 
+  44          
+  45          
+  46          void init ()
+  47          {
+  48   1              led1 = 1;
+  49   1              led2 = 1;
+  50   1              led3=1;
+  51   1              led4=1;
+  52   1      
+  53   1              SCON = 0x50;
+  54   1              PCON = 0X80;
+  55   1              TMOD = 0x20;
+C51 COMPILER V9.01   从籣                                                                  08/14/2013 23:40:05 PAGE 2   
+
+  56   1              TH0 = 0xFA;
+  57   1              TL0 = 0xFA;
+  58   1              TR1 = 1;
+  59   1      }
+  60          
+  61          void display ()
+  62          {
+  63   1                      uint temp;
+  64   1                      if(RI == 1)
+  65   1                      {
+  66   2                              RI = 0;
+  67   2                              temp = SBUF;
+  68   2                      }
+  69   1                      switch(temp)
+  70   1                      {
+  71   2                              case 'A': 
+  72   2                                      led1=0;led2=1;led3=1;led4=1;
+  73   2                                      break;
+  74   2                              case 'B':
+  75   2                                      led1=1;led2=0;led3=1;led4=1;
+  76   2                                      break;
+  77   2                              case 'C':
+  78   2                                      led1=1;led2=1;led3=0;led4=1;
+  79   2                                      break;
+  80   2                              case 'D':
+  81   2                                      led1=1;led2=1;led3=1;led4=0;
+  82   2                                      break;
+  83   2      //                      case 'E':
+  84   2      //                              led1 = 1; led2 = 1;
+  85   2      //                              break;
+  86   2                              default: 
+  87   2                                      led1 = 1; led2 = 1;
+  88   2                                      
+  89   2                      }
+  90   1      }
+  91          /**************************************************/
+  92          //主函数
+  93          /**************************************************/
+  94          void main()
+  95          {       
+  96   1              init ();
+  97   1              CLKOUT2_init ();                        //注释后为普通单片机双机通讯程序
+  98   1              while(1)
+  99   1              {
+ 100   2                      //CLKOUT2_init ();
+ 101   2                      display ();             
+ 102   2              }
+ 103   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    114    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

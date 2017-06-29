@@ -1,0 +1,475 @@
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE GSM
+OBJECT MODULE PLACED IN gsm.OBJ
+COMPILER INVOKED BY: D:\(7)KEIL\C51\BIN\C51.EXE gsm.c BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          /**************http://tpytongxin.taobao.com/****************/
+   2          #include <reg52.h>
+   3          #include <intrins.h>
+   4          #include <string.h>
+   5          #include <stdio.h>
+   6          #include "lcd12864.h"
+   7          
+   8          #define uint unsigned int
+   9          #define uchar unsigned char
+  10          
+  11          sbit Send_ENGLISH_key=P3^2;     //发英文TEXT短信按键
+  12          sbit Send_CALLING_key=P3^3;     //打电话按键
+  13          sbit Send_DS18B20_key=P3^4;     //发温度按键
+  14          sbit Send_SMS_PDU_key=P3^5;     //发中文PDU短信按键
+  15          
+  16          sbit LED0=P0^0;
+  17          sbit LED1=P0^1;
+  18          sbit LED2=P0^2;
+  19          sbit LED3=P0^3;
+  20          
+  21          #define MAXCHAR 81
+  22          uchar  aa[MAXCHAR];
+  23          
+  24          code uchar ATE0[]="ATE0\r\n";
+  25          code uchar CREG_CMD[]="AT+CREG?\r\n";
+  26          code uchar SMS_send[]="AT+CMGS=18\r\n";
+  27          code uchar ATCN[]="AT+CNMI=2,1\r\n";
+  28          code uchar CMGF0[]="AT+CMGF=0\r\n";
+  29          code uchar CMGF1[]="AT+CMGF=1\r\n";
+  30          code uchar CMGR[12]="AT+CMGR=1\r\n";
+  31          code uchar CMGD[12]="AT+CMGD=1\r\n";
+  32          
+  33          //#define CALL_YOU_TELNUMBER "ATD18622944083;\r\n"    //填入你手上的手机号码 不是板子的
+  34          //#define SEND_MESSA_TO_YOUR "at+cmgs=\"18622944083\"\r\n"    //填入你手上的手机号码 不是板子的
+  35          //#define SEND_MESSA_CONTENT "tpytongxin.taobao.com"
+  36          //#define CALL_YOU_TELNUMBER "ATD18622944083;\r\n"    //填入你手上的手机号码 不是板子的
+  37          //#define CALL_YOU_TELNUMBER "ATD18622944083;\r\n"    //填入你手上的手机号码 不是板子的
+  38          
+  39          /****************亚飞**********************/
+  40          // #define CALL_YOU_TELNUMBER "ATD15238643714;\r\n"      //填入你手上的手机号码 不是板子的
+  41          // #define SEND_MESSA_TO_YOUR "at+cmgs=\"15238643714\"\r\n"    //填入你手上的手机号码 不是板子的
+  42          // #define SEND_MESSA_CONTENT "tpytongxin.taobao.com"
+  43          // #define CALL_YOU_TELNUMBER "ATD15238643714;\r\n"    //填入你手上的手机号码 不是板子的
+  44          // #define CALL_YOU_TELNUMBER "ATD15238643714;\r\n"    //填入你手上的手机号码 不是板子的
+  45          
+  46          #define CALL_YOU_TELNUMBER "ATD18203658785;\r\n"      //填入你手上的手机号码 不是板子的
+  47          #define SEND_MESSA_TO_YOUR "at+cmgs=\"18203658785\"\r\n"    //填入你手上的手机号码 不是板子的
+  48          #define SEND_MESSA_CONTENT "tpytongxin.taobao.com"
+  49          #define CALL_YOU_TELNUMBER "ATD18203658785;\r\n"    //填入你手上的手机号码 不是板子的
+  50          #define CALL_YOU_TELNUMBER "ATD18203658785;\r\n"    //填入你手上的手机号码 不是板子的
+  51          
+  52          sbit JIDIANQI=P1^0;
+  53          
+  54          
+  55          sbit FENGMINGQI=P1^1;
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 2   
+
+  56          
+  57          
+  58          /*-----------------------------------------------------------------------
+  59          1.如果你的晶振是11.0592M
+  60          只需要修改下面的号码就可以了,给成你手上拿着的手机的号码
+  61          
+  62          
+  63          修改方法   在下面这段字符中找到 5129021411F5
+  64          
+  65           其实5129021411F5 --> 15922041115
+  66          18622044083 8126924480F3
+  67          赵晶：18337154193
+  68          亚飞：15238643714    5132683417F4
+  69          田胜：18203658785    8102638587F4
+  70          
+  71          
+  72           看明白了吗  电话是两位两位颠倒 将您手上的手机号码替换即可
+  73          -----------------------------------------------------------------------*/
+  74          //uchar  code Sms2_Pdu[]="0891683108200205F011000B818126924480F30008A704521B601D";
+  75          //uchar  code Sms2_Pdu[]="0891683108200205F011000B815132683417F40008A704521B601D";   //亚飞
+  76          uchar  code Sms2_Pdu[]="0891683108200205F011000B818102638587F40008A704521B601D";    //田胜
+  77          /*-----------------------------------------------------------------------
+  78          1.如果你的晶振不是11.0592M
+  79          
+  80          则修改 Ini_UART 函数 波特率 9600
+  81          
+  82          
+  83          其他都不用动
+  84          
+  85          -----------------------------------------------------------------------*/
+  86          
+  87          uchar a,j=0,flag=0;
+  88          int g_timeout=0;
+  89          
+  90          void delay(uint ms)// 延时子程序
+  91          {
+  92   1          uchar i;
+  93   1          while(ms--)
+  94   1          {
+  95   2              for(i=0;i<120;i++);
+  96   2          }
+  97   1      }
+  98          
+  99          
+ 100          /***********************************************************
+ 101          函数名称：Print_Char
+ 102          函数功能：发送单个字符
+ 103                    入口参数:ch      出口参数：无
+ 104          ***********************************************************/
+ 105          Print_Char(uchar ch)//发送单个字符
+ 106          {
+ 107   1          SBUF=ch; //送入缓冲区
+ 108   1          while(TI!=1); //等待发送完毕
+ 109   1          TI=0; //软件清零
+ 110   1      }
+ 111          
+ 112          /***********************************************************
+ 113          函数名称：Print_Str
+ 114          函数功能：发送字符串
+ 115                    入口参数:*str    出口参数：无
+ 116          ***********************************************************/
+ 117          Print_Str(uchar *str)//发送字符串
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 3   
+
+ 118          {
+ 119   1      
+ 120   1          while(*str!='\0')
+ 121   1          {
+ 122   2              Print_Char(*str);
+ 123   2              delay(2);
+ 124   2              str++;
+ 125   2          }
+ 126   1      
+ 127   1      }
+ 128          
+ 129          /***********************************************************
+ 130          函数名称：Ini_UART
+ 131          函数功能：串口初始化、定时器初始化
+ 132                    入口参数:无     出口参数：无
+ 133          ***********************************************************/
+ 134          Ini_UART(void)//串口初始化、定时器初始化
+ 135          {
+ 136   1          SCON = 0x50 ;  //SCON: serail mode 1, 8-bit UART, enable ucvr
+ 137   1          //UART为模式1，8位数据，允许接收
+ 138   1          TMOD |= 0x20 ; //TMOD: timer 1, mode 2, 8-bit reload
+ 139   1          //定时器1为模式2,8位自动重装
+ 140   1          PCON |= 0x80 ; //SMOD=1;
+ 141   1          TH1 = 0xFA ;   //Baud:19200 fosc="11".0592MHz
+ 142   1          TL1=0xFA;
+ 143   1          IE |= 0x90 ;     //Enable Serial Interrupt
+ 144   1          TR1 = 1 ;       // timer 1 run
+ 145   1          TI=1;
+ 146   1          ES=1;
+ 147   1      }
+ 148          
+ 149          void clearBuff(void)
+ 150          {
+ 151   1          for(j=0;j<MAXCHAR;j++)
+ 152   1          {
+ 153   2              aa[j]=0x00;
+ 154   2          }
+ 155   1          j=0;
+ 156   1      }
+ 157          
+ 158          void led(int i)
+ 159          {
+ 160   1          P2 |= i;
+ 161   1          delay(20);
+ 162   1          P2 &= ~i;
+ 163   1          delay(20);
+ 164   1          P2 |= i;
+ 165   1          delay(20);
+ 166   1          P2 &= ~i;
+ 167   1      }
+ 168          
+ 169          int Hand()
+ 170          {
+ 171   1          delay(10);
+ 172   1          if(strstr(aa,"OK")!=NULL)             //检测单片机和模块的连接
+ 173   1          {
+ 174   2              g_timeout=0;
+ 175   2              return 1;
+ 176   2          }
+ 177   1          if(g_timeout>50)
+ 178   1          {
+ 179   2              g_timeout=0;
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 4   
+
+ 180   2              return -1;
+ 181   2          }
+ 182   1          g_timeout++;
+ 183   1          return 0;
+ 184   1      }
+ 185          
+ 186          
+ 187          
+ 188          void AT(void)
+ 189          {
+ 190   1      
+ 191   1      
+ 192   1          clearBuff();
+ 193   1          Print_Str(ATE0);
+ 194   1          delay(50);
+ 195   1      /*strstr(*str1, *str2)实现从字符串str1中查找是否有字符串str2，如果有，从str1中的str2位置起，返回str1中str2
+             -起始位置的指针，如果没有，返回null。*/
+ 196   1      
+ 197   1          while(strstr(aa,"OK")==NULL)
+ 198   1          {
+ 199   2              delay(50);
+ 200   2              led(0x01);
+ 201   2              v_Lcd12864PutString_f( 1,1, "模块连接【..】") ;
+ 202   2              clearBuff();
+ 203   2              Print_Str(ATE0);
+ 204   2          }
+ 205   1          led(0x02);
+ 206   1      
+ 207   1          v_Lcd12864PutString_f( 1,1, "模块连接【OK】") ;
+ 208   1      
+ 209   1          Print_Str(ATCN);
+ 210   1          delay(50);
+ 211   1      
+ 212   1      
+ 213   1          while(1)
+ 214   1          {
+ 215   2              clearBuff();
+ 216   2              Print_Str(CREG_CMD);
+ 217   2              delay(50);
+ 218   2              if(((aa[9]=='0')&&(aa[11]=='1'))||((aa[9]=='0')&&(aa[11]=='5')))
+ 219   2              {
+ 220   3                  clearBuff();
+ 221   3                  v_Lcd12864PutString_f( 1,1, "模块注册【OK】") ;
+ 222   3                  led(0x08);
+ 223   3                  break;
+ 224   3              }
+ 225   2              else
+ 226   2              {
+ 227   3                  clearBuff();
+ 228   3                  v_Lcd12864PutString_f( 1,1, "模块注册【..】") ;
+ 229   3                  led(0x04);
+ 230   3                  delay(50);
+ 231   3              }
+ 232   2          }
+ 233   1      }
+ 234          
+ 235          void send_english()
+ 236          {
+ 237   1          P2=0XFF;
+ 238   1          clearBuff();
+ 239   1      
+ 240   1          Print_Str(CMGF1);
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 5   
+
+ 241   1          delay(100);
+ 242   1          led(0x01);
+ 243   1      
+ 244   1      
+ 245   1          Print_Str(SEND_MESSA_TO_YOUR);
+ 246   1      
+ 247   1          delay(300);
+ 248   1          led(0x02);
+ 249   1      
+ 250   1          Print_Str(SEND_MESSA_CONTENT);  //发短信内容
+ 251   1          delay(10);
+ 252   1          Print_Char(0x1A);      //发送结束符号
+ 253   1      
+ 254   1          delay(10);
+ 255   1          led(0x04);
+ 256   1          clearBuff();
+ 257   1      }
+ 258          
+ 259          
+ 260          
+ 261          void send_call()
+ 262          {
+ 263   1          clearBuff();
+ 264   1          delay(100);
+ 265   1          Print_Str(CALL_YOU_TELNUMBER); //打电话
+ 266   1          clearBuff();
+ 267   1          delay(300);
+ 268   1      }
+ 269          
+ 270          void send_18B20()
+ 271          {
+ 272   1      
+ 273   1      }
+ 274          
+ 275          void send_pdu()
+ 276          {
+ 277   1          clearBuff();
+ 278   1          Print_Str(CMGF0);
+ 279   1          delay(100);
+ 280   1          led(0x01);
+ 281   1      
+ 282   1          Print_Str(SMS_send);  //发送中文短信
+ 283   1      
+ 284   1          delay(500);
+ 285   1          led(0x02);
+ 286   1      
+ 287   1          Print_Str(Sms2_Pdu);  //发短信内容
+ 288   1          Print_Char(0x1A);      //发送结束符号
+ 289   1      
+ 290   1          delay(500);
+ 291   1          led(0x04);
+ 292   1          clearBuff();
+ 293   1      }
+ 294          
+ 295          
+ 296          void main()
+ 297          {
+ 298   1      
+ 299   1          v_Lcd12864Init_f() ;
+ 300   1          v_Lcd12864PutString_f( 2,0, "") ;
+ 301   1          v_Lcd12864PutString_f( 2,1, "创思通信") ;
+ 302   1          v_Lcd12864PutString_f( 1,2, "") ;
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 6   
+
+ 303   1          v_Lcd12864PutString_f( 1,3, "www.csgsm.com") ;
+ 304   1      
+ 305   1          delay(500);
+ 306   1          Ini_UART();             //初始化串口
+ 307   1          v_Lcd12864PutString_f( 1,1, "串口启动【OK】") ;
+ 308   1      
+ 309   1          AT();      //初始化模块
+ 310   1          delay(10);
+ 311   1      
+ 312   1      
+ 313   1          Send_ENGLISH_key=1;     //发英文TEXT短信按键
+ 314   1          Send_CALLING_key=1;     //打电话按键
+ 315   1          Send_DS18B20_key=1;     //发温度按键
+ 316   1          Send_SMS_PDU_key=1;     //发中文PDU短信按键
+ 317   1      
+ 318   1          clearBuff();
+ 319   1          Print_Str(CMGD);
+ 320   1          delay(50);
+ 321   1          while(Hand()==0);
+ 322   1          clearBuff();
+ 323   1      
+ 324   1              Print_Str(CMGF1);
+ 325   1              delay(30);
+ 326   1      
+ 327   1              Print_Str(ATCN);
+ 328   1              delay(30);
+ 329   1      
+ 330   1      
+ 331   1      
+ 332   1      //    v_Lcd12864PutString_f( 1,1, "给你电话【..】") ;
+ 333   1      //    send_call();
+ 334   1      //    v_Lcd12864PutString_f( 1,1, "给你电话【OK】") ;
+ 335   1      
+ 336   1          while(1)
+ 337   1          {
+ 338   2              ////////////////////////////////////////////////////////////////////////
+ 339   2              if(Send_ENGLISH_key==0)     //发英文TEXT短信按键
+ 340   2              {   
+ 341   3            delay(30);
+ 342   3            if(Send_ENGLISH_key==0)  
+ 343   3            {
+ 344   4                    v_Lcd12864PutString_f( 1,1, "英文短信【..】") ;
+ 345   4                    send_english();
+ 346   4                    v_Lcd12864PutString_f( 1,1, "英文短信【OK】") ;
+ 347   4            }
+ 348   3      
+ 349   3              }
+ 350   2              else if(Send_CALLING_key==0)     //打电话按键
+ 351   2              { 
+ 352   3            delay(30);
+ 353   3            if(Send_CALLING_key==0)
+ 354   3            {
+ 355   4                    v_Lcd12864PutString_f( 1,1, "给你电话【..】") ;
+ 356   4                    send_call();
+ 357   4                    v_Lcd12864PutString_f( 1,1, "给你电话【OK】") ;
+ 358   4            }
+ 359   3      
+ 360   3              }
+ 361   2              else if(Send_SMS_PDU_key==0)
+ 362   2              {
+ 363   3      
+ 364   3              }
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 7   
+
+ 365   2      
+ 366   2              ////////////////////////////////////////////////////////////////////////
+ 367   2      
+ 368   2              //        +CMTI: "SM",1
+ 369   2      
+ 370   2      
+ 371   2              if(strstr(aa,"RING")!=NULL)
+ 372   2              {
+ 373   3                  FENGMINGQI=0;
+ 374   3                  delay(2);
+ 375   3                  v_Lcd12864PutString_f( 1,1, "电话来了【亲】") ;
+ 376   3                  clearBuff();
+ 377   3              }
+ 378   2              else
+ 379   2              {
+ 380   3                  FENGMINGQI=1;
+ 381   3              }
+ 382   2      
+ 383   2      
+ 384   2      
+ 385   2              if(strstr(aa,"+CMTI")!=NULL)    //缓存中有+CMTI字符
+ 386   2              {
+ 387   3                  clearBuff();
+ 388   3                  Print_Str(CMGF1);
+ 389   3                  delay(50);
+ 390   3                  while(Hand()==0);
+ 391   3                  clearBuff();
+ 392   3      
+ 393   3                  Print_Str(CMGR);            //读取1号位置的短信
+ 394   3                  delay(100);
+ 395   3      
+ 396   3      
+ 397   3                  if(strstr(aa,"k1")!=NULL)
+ 398   3                  {
+ 399   4                      v_Lcd12864PutString_f( 1,1, "开继电器【OK】") ;
+ 400   4                      //JIDIANQI=0;
+ 401   4                  }
+ 402   3                  else if(strstr(aa,"k0")!=NULL)
+ 403   3                  {
+ 404   4                      v_Lcd12864PutString_f( 1,1, "关继电器【OK】") ;
+ 405   4                      //JIDIANQI=1;
+ 406   4                  }
+ 407   3                  else
+ 408   3                  {
+ 409   4                      v_Lcd12864PutString_f( 0,3, strstr(aa,",,")) ;
+ 410   4                  }
+ 411   3      
+ 412   3                  clearBuff();
+ 413   3      
+ 414   3                  Print_Str(CMGD);
+ 415   3                  delay(50);
+ 416   3                  while(Hand()==0);
+ 417   3                  clearBuff();
+ 418   3              }
+ 419   2              ////////////////////////////////////////////////////////////////////////
+ 420   2          }
+ 421   1      }
+ 422          
+ 423          void ser() interrupt 4
+ 424          {
+ 425   1        JIDIANQI = 0; 
+ 426   1          if(RI==1)
+C51 COMPILER V9.52.0.0   GSM                                                               03/26/2014 00:47:31 PAGE 8   
+
+ 427   1          { 
+ 428   2            aa[j]=SBUF;//命令存到命令数组
+ 429   2      
+ 430   2              RI=0; //软件清除接收中断
+ 431   2              j++;
+ 432   2          }
+ 433   1      }
+ 434          
+*** WARNING C290 IN LINE 110 OF gsm.c: missing return value
+*** WARNING C290 IN LINE 127 OF gsm.c: missing return value
+*** WARNING C290 IN LINE 147 OF gsm.c: missing return value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1109    ----
+   CONSTANT SIZE    =    439    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     86       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

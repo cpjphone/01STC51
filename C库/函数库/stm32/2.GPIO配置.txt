@@ -1,0 +1,43 @@
+函数: void GPIO_Configuration(void）
+功能: GPIO配置
+参数: 无
+返回: 无
+**************************************************/
+void GPIO_Configuration(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;   //typedef struct { u16 GPIO_Pin; GPIOSpeed_TypeDef GPIO_Speed; GPIOMode_TypeDef GPIO_Mode; } GPIO_InitTypeDef;  GPIO_InitTypeDef可取其中三个的任意一值，但不可取其他的，其中三值又可进行赋值运算；
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOA, ENABLE); //使能
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;	  //PA5口配置成上拉输入，固件库125页，Table 185. GPIO_Mode值；
+	//GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	 Table 184. GPIO_Speed值
+	GPIO_Init(GPIOA, &GPIO_InitStructure);	/* PC6 */
+
+	//1.GPIO_Mode_AIN 模拟输入
+	//2.GPIO_Mode_IN_FLOATING 浮空输入
+	//3.GPIO_Mode_IPD 下拉输入 
+	//4.GPIO_Mode_IPU 上拉输入
+	//5.GPIO_Mode_Out_OD 开漏输出
+	//6.GPIO_Mode_Out_PP 推挽输出 
+	//7.GPIO_Mode_AF_OD 复用开漏输出
+	//8.GPIO_Mode_AF_PP 复用推挽输出
+
+	//*************设置PB0口的输出模式
+	GPIO_SetBits(GPIOB,  GPIO_Pin_0 | GPIO_Pin_1);	//PBO和PB1输出高电平，初始为高电平就算刚开始不让LED亮；
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//速率
+	GPIO_Init(GPIOB, &GPIO_InitStructure);				//这四句话是将PB0口配置成了通用的推挽输出
+}
+
+
+
+
+
+
+
+GPIO口低电平
+GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5) == Bit_RESET
+GPIO口高电平
+GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5) == Bit_SET

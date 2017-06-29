@@ -1,0 +1,211 @@
+/********************************************************************************************
+名称：AlarmClock.c
+功能：闹钟相关程序
+作者：
+时间：
+*********************************************************************************************/		   
+#include "STC_NEW_8051.h"
+#include "AlarmClock.h"	
+
+void delayms(uint com)	  //延时1毫秒
+{
+    uchar i,a,b,c;
+	for(i=0;i<com;i++)
+	{
+    	for(c=1;c>0;c--)
+        for(b=222;b>0;b--)
+            for(a=12;a>0;a--);
+	}
+}
+
+/**********************************************************
+检查闹钟
+**********************************************************/
+uchar chk_nz(uchar hour,uchar minute,uchar second,uchar week)
+{
+	uchar hou,min,i,fh=0;;
+	if(nz_op==0xff)
+	{
+		hou=hour/16*10+hour%16;
+		min=minute/16*10+minute%16;
+		for(i=0;i<5;i++)//循环5次,检查5个闹钟
+		{
+			if(nz[i][2]==1)//闹铃模式为1时,为始终开启
+				if(hou==nz[i][0])
+					if(min==nz[i][1])
+						if(second==0)
+							fh=1;
+			if(nz[i][2]==2)//闹铃模式为2时,为响一次后关闭,返回2+闹钟序号,执行完响铃后关闭
+				if(hou==nz[i][0])
+					if(min==nz[i][1])
+						if(second==0)
+						{
+							if(i==0)
+								fh=2;
+							if(i==1)
+								fh=3;
+							if(i==2)
+								fh=4;
+							if(i==3)
+								fh=5;
+							if(i==4)
+								fh=6;
+						}	
+			if(nz[i][2]==3&&week>=1&&week<=5)//闹铃模式为3时,为周一至周五响铃
+			{
+				if(hou==nz[i][0])
+					if(min==nz[i][1])
+						if(second==0)
+							fh=1;
+			}
+			if(nz[i][2]==4&&week>=1&&week<=6)//闹铃模式为4时,为周一至周六响铃
+			{
+				if(hou==nz[i][0])
+					if(min==nz[i][1])
+						if(second==0)
+							fh=1;
+			}
+			if(nz[i][2]==5)//闹铃模式为5时,为仅周六周日响铃
+			{
+				if(week==0)
+					if(hou==nz[i][0])
+						if(min==nz[i][1])
+							if(second==0)
+								fh=1;
+				if(week==6)
+					if(hou==nz[i][0])
+						if(min==nz[i][1])
+							if(second==0)
+								fh=1;
+			}
+		}
+	}
+	return fh;
+}
+/**********************************************************
+读取存在时间芯片里的闹钟数据
+**********************************************************/
+void read_nz_data(void)
+{
+	nz[0][0]=read_time(0xc1);
+	nz[0][1]=read_time(0xc3);
+	nz[0][2]=read_time(0xc5);
+	nz[1][0]=read_time(0xc7);
+	nz[1][1]=read_time(0xc9);
+	nz[1][2]=read_time(0xcb);
+	nz[2][0]=read_time(0xcd);
+	nz[2][1]=read_time(0xcf);
+	nz[2][2]=read_time(0xd1);
+	nz[3][0]=read_time(0xd3);
+	nz[3][1]=read_time(0xd5);
+	nz[3][2]=read_time(0xd7);
+	nz[4][0]=read_time(0xd9);
+	nz[4][1]=read_time(0xdb);
+	nz[4][2]=read_time(0xdd);
+	nz_op=read_time(0xdf);
+}
+/**********************************************************
+保存闹钟数据到时间芯片里面
+**********************************************************/
+void save_nz(void)
+{
+	write_time(0x8e,0x00);
+	write_time(0xc0,nz[0][0]);
+	write_time(0xc2,nz[0][1]);
+	write_time(0xc4,nz[0][2]);
+	write_time(0xc6,nz[1][0]);
+	write_time(0xc8,nz[1][1]);
+	write_time(0xca,nz[1][2]);
+	write_time(0xcc,nz[2][0]);
+	write_time(0xce,nz[2][1]);
+	write_time(0xd0,nz[2][2]);
+	write_time(0xd2,nz[3][0]);
+	write_time(0xd4,nz[3][1]);
+	write_time(0xd6,nz[3][2]);
+	write_time(0xd8,nz[4][0]);
+	write_time(0xda,nz[4][1]);
+	write_time(0xdc,nz[4][2]);
+	write_time(0xde,nz_op);
+	write_time(0x8e,0x80);
+}
+/**********************************************************
+闹铃
+**********************************************************/
+void buzzer_nz(uchar nz_flag)
+{
+	if(nz_flag==1)
+	{
+		nz_beep();
+	}
+	if(nz_flag==2)
+	{
+		nz_beep();
+		nz[0][2]=0;
+	}
+	if(nz_flag==3)
+	{
+		nz_beep();
+		nz[1][2]=0;
+	}
+	if(nz_flag==4)
+	{
+		nz_beep();
+		nz[2][2]=0;
+	}
+	if(nz_flag==5)
+	{
+		nz_beep();
+		nz[3][2]=0;
+	}
+	if(nz_flag==6)
+	{
+		nz_beep();
+		nz[4][2]=0;
+	}
+	save_nz();		
+}
+/**********************************************************
+闹铃
+**********************************************************/
+void nz_beep(void)
+{
+	uint i=68;//用于计时,如闹铃响一分钟仍无人按下,则自动停止闹铃	
+	while(i)
+	{
+		ds1302_read();
+		dis_nz();
+		didi();
+		i--;
+//		if(read_key()!=0){buzzer=1;lcd_led=1;break;}
+		if(read_key()!=0){buzzer=1;break;}
+	}
+	lcm_clr2();            //清屏
+	Clean_12864_GDRAM();   //清屏
+}
+/**********************************************************
+按键音
+**********************************************************/
+void key_beep(void)
+{
+	if(key_beep_op==0xff)
+	{
+		buzzer=0;
+		delayms(15);
+		buzzer=1;
+	}
+}
+
+/**********************************************************
+响铃音
+**********************************************************/
+void didi() //
+{
+	buzzer=0;
+	delayms(30);
+	buzzer=1;
+	delayms(30);
+	buzzer=0;
+	delayms(30);
+	buzzer=1;
+	delayms(30);
+}

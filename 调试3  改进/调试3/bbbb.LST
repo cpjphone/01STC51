@@ -1,0 +1,207 @@
+C51 COMPILER V9.52.0.0   BBBB                                                              09/07/2013 14:46:18 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE BBBB
+OBJECT MODULE PLACED IN bbbb.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE bbbb.c BROWSE INCDIR(..\步进电机) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "reg52.h"
+   2          #include "dianjin.h"
+   3          #include "F8591.h"
+   4          #include "lcd1602.h"
+   5          uint ki,kj,kk;
+   6          uchar change_num; 
+   7          
+   8          
+   9          
+  10          void tmp_1 ();
+  11          void tmp_2();
+  12          
+  13          void num_init()
+  14          {
+  15   1              key3_num=0;
+  16   1              key4_num=0;
+  17   1              key5_num=0;
+  18   1              key6_num=0;
+  19   1      }
+  20          void main()
+  21          {
+  22   1              ki=0;
+  23   1              kj=0;
+  24   1              kk=0;
+  25   1              num_init();
+  26   1              lcd_init();                 //初始化LCD
+  27   1              timer0_init();
+  28   1              while(1)
+  29   1              {
+  30   2                      
+  31   2                      //display_ADC ();
+  32   2                      if((d>100)&&(d<136))
+  33   2                      {
+  34   3                              fang_hou();
+  35   3                              
+  36   3                                      PWM(PWMTime);
+  37   3                      }
+  38   2                      if((d>136)&&(d<175))
+  39   2                      {
+  40   3                              fang_qian();
+  41   3                              
+  42   3                              PWM(PWMTime);
+  43   3                      }
+  44   2              }
+  45   1      }
+  46          void tmp_2()
+  47          {
+  48   1              for(kk=0;kk<1;kk++)
+  49   1              {
+  50   2                      fang_qian();
+  51   2                      for(ki=130;ki>0;ki--)
+  52   2                      for(kj=200;kj>0;kj--)
+  53   2                      {
+  54   3                              PWM(13);
+  55   3                      }
+C51 COMPILER V9.52.0.0   BBBB                                                              09/07/2013 14:46:18 PAGE 2   
+
+  56   2              }
+  57   1              d=0;
+  58   1              while(d<10)
+  59   1              {
+  60   2                      ISendByte(PCF8591,0x41);                //通道1
+  61   2                      d=IRcvByte(PCF8591);
+  62   2                      PWM(0);
+  63   2              }
+  64   1              for(kk=0;kk<1;kk++)
+  65   1              {
+  66   2                      fang_hou();
+  67   2                      for(ki=150;ki>0;ki--)
+  68   2                      for(kj=200;kj>0;kj--)
+  69   2                      {
+  70   3                              PWM(13);
+  71   3                      }
+  72   2              }
+  73   1              d=0;
+  74   1              while(d<200)
+  75   1              {
+  76   2                      ISendByte(PCF8591,0x41);                //通道1
+  77   2                      d=IRcvByte(PCF8591);
+  78   2                      PWM(0);
+  79   2              }
+  80   1      }
+  81          /*void tmp_1()
+  82          {
+  83                  for(kk=0;kk<1;kk++)
+  84                  {
+  85                          fang_qian();
+  86                          for(ki=130;ki>0;ki--)
+  87                          for(kj=200;kj>0;kj--)
+  88                          {
+  89                                  PWM(13);
+  90                          }
+  91                  }
+  92                  kk=0;
+  93                  while(kk<10)
+  94                  {
+  95                          _nop_();
+  96                          _nop_();
+  97                          _nop_();
+  98                          _nop_();
+  99                          _nop_();
+ 100                          kk++;
+ 101                  }
+ 102                  for(kk=0;kk<1;kk++)
+ 103                  {
+ 104                          fang_hou();
+ 105                          for(ki=130;ki>0;ki--)
+ 106                          for(kj=200;kj>0;kj--)
+ 107                          {
+ 108                                  PWM(13);
+ 109                          }
+ 110                  }
+ 111                  kk=0;
+ 112                  while(kk<10)
+ 113                  {
+ 114                          _nop_();
+ 115                          _nop_();
+ 116                          _nop_();
+ 117                          _nop_();
+C51 COMPILER V9.52.0.0   BBBB                                                              09/07/2013 14:46:18 PAGE 3   
+
+ 118                          _nop_();
+ 119                          kk++;
+ 120                  }
+ 121          }*/
+ 122          
+ 123          
+ 124          void tmp_1 ()
+ 125          {
+ 126   1              uint i=0;
+ 127   1              if (i==0)
+ 128   1              {
+ 129   2                      fang_qian();
+ 130   2                      while (1)
+ 131   2                      {
+ 132   3                              if (sec<15)
+ 133   3                                      PWM(12);
+ 134   3                              else
+ 135   3                              {
+ 136   4                                      sec=0;
+ 137   4                                      i=2;
+ 138   4                                      break;
+ 139   4                              }
+ 140   3                      }                       
+ 141   2              }
+ 142   1              if (i==2)
+ 143   1              {
+ 144   2                      stop ();
+ 145   2                      delay (1000);
+ 146   2                      i=1;
+ 147   2              }
+ 148   1              if (i==1)
+ 149   1              {
+ 150   2                      fang_hou();
+ 151   2                      while (1)
+ 152   2                      {
+ 153   3                              if (sec<15)
+ 154   3                                      PWM(12);
+ 155   3                              else
+ 156   3                              {
+ 157   4                                      sec=0;
+ 158   4                                      i=3;
+ 159   4                                      break;
+ 160   4                              }
+ 161   3                      }                       
+ 162   2              }
+ 163   1              if (i==3)
+ 164   1              {
+ 165   2                      stop ();
+ 166   2                      delay (1000);
+ 167   2                      i=0;
+ 168   2              }               
+ 169   1      }
+ 170          
+ 171          
+ 172          
+ 173          
+ 174          
+ 175          
+ 176          
+ 177          
+ 178          
+
+C51 COMPILER V9.52.0.0   BBBB                                                              09/07/2013 14:46:18 PAGE 4   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1311    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     76       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

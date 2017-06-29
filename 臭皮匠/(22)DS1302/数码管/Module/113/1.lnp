@@ -1,0 +1,4 @@
+"main.obj",
+"DS1302_Drive.obj" 
+TO "1" 
+RAMSIZE(256) 

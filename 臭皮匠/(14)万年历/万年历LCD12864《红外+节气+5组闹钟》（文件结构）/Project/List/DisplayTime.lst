@@ -1,0 +1,1047 @@
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DISPLAYTIME
+OBJECT MODULE PLACED IN .\Obj\DisplayTime.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\UserDriver\DisplayTime\DisplayTime.c BROWSE INCDIR(..\Include;..\Mai
+                    -n;..\UserDriver\AlarmClock;..\UserDriver\DisplayTime;..\UserDriver\DS18B20;..\UserDriver\DS1302;..\UserDriver\Font;..\Us
+                    -erDriver\IR;..\UserDriver\KeyPro;..\UserDriver\LCD12864;..\UserDriver\Lunar) DEBUG OBJECTEXTEND PRINT(.\List\DisplayTime
+                    -.lst) OBJECT(.\Obj\DisplayTime.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          √˚≥∆£∫DisplayTime.c
+   3          π¶ƒ‹£∫“∫æßœ‘ æ
+   4          ◊˜’ﬂ£∫
+   5           ±º‰£∫
+   6          *********************************************************************************************/
+   7          #include "STC_NEW_8051.h"
+   8          #include "DisplayTime.h"
+   9          
+  10          uchar idata nz[5][3]={{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},nz_op=1,nz_flag=0;//ƒ÷÷”
+  11          uchar idata zt[1][2]={0,0};
+  12          uchar zdjs=0,cdds=10,cdds_flag=0;
+  13          uchar year_moon,month_moon,day_moon;//≈©¿˙
+  14          uchar dis_flag;//”√”⁄≈–∂œ∆‰À¸…Ë÷√
+  15          uchar dis_other_flag=0;
+  16          uchar key_beep_op=0xff,nongli_op=0xff,jieri_op=0xff;//∏˜∏ˆ…Ë÷√ƒ¨»œŒ™ø™
+  17          uchar jieri_flag=0;//Ω⁄»’±Í÷æŒª,”√”⁄≈–∂œ”–ŒﬁΩ⁄»’
+  18          bit ssok=0;
+  19          
+  20          //uchar sec,min,hour,day,date,month,year,week,day_moon;
+  21          uchar sec,min;
+  22          uchar ts_n0,ts_n1,ts_n2,ts_n3;
+  23          unsigned char sel,dd,mo,yy;
+  24          
+  25          /*œ‘ æƒÍ°¢‘¬°¢»’-------------------------------------------------------*/
+  26          void displaydate(void)
+  27          {
+  28   1              write_com(0x30);
+  29   1              write_com(0x06);
+  30   1      
+  31   1      /*Õ˘“∫æß∆¡ÃÓ–¥ ƒÍ  ˝æ›-------------------------------------------*/
+  32   1              write_com(0x80);
+  33   1              lcm_w_word("20");       
+  34   1              year=read_time(0x8d);//µ˜”√1302 ±÷” ˝æ›÷–µƒƒÍ ˝æ›£¨¥”µÿ÷∑0x8d÷–∂¡»° ƒÍ  ˝æ›
+  35   1              write_data(year/16+0x30);       
+  36   1              write_data(year%16+0x30);
+  37   1              
+  38   1      /*Õ˘“∫æß∆¡ÃÓ–¥ ‘¬  ˝æ›-------------------------------------------*/
+  39   1              month=read_time(0x89);//µ˜”√1302 ±÷” ˝æ›÷–µƒ‘¬ ˝æ›£¨¥”µÿ÷∑0x89÷–∂¡»° ‘¬  ˝æ›
+  40   1              lcm_w_word("-");        
+  41   1      /*      
+  42   1              if(month/10 != 0){write_data((month/10)+0x30);} 
+  43   1                      else{write_data(0x20);}// ÆŒªœ˚“˛
+  44   1      */
+  45   1              write_data(month/16+0x30);
+  46   1              write_data(month%16+0x30);
+  47   1      //      lcm_w_word("‘¬");       
+  48   1      
+  49   1      /*Õ˘“∫æß∆¡ÃÓ–¥ »’  ˝æ›-------------------------------------------*/
+  50   1              day=read_time(0x87);//¥”1302–æ∆¨÷–∂¡»°»’ ˝æ›£¨¥”µÿ÷∑0x87÷–∂¡»° »’  ˝æ›
+  51   1              lcm_w_word("-");                 
+  52   1              write_data(day/16+0x30);
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 2   
+
+  53   1              write_data(day%16+0x30); 
+  54   1      }
+  55          
+  56          /*Õ˘“∫æß∆¡ÃÓ–¥ –«∆⁄  ˝æ›-----------------------------------------*/
+  57          void displayxq(void){
+  58   1      //      unsigned char sel,dd,mo,yy;
+  59   1      
+  60   1              dd = read_time(0x87);//»’
+  61   1              mo = read_time(0x89);//‘¬
+  62   1              yy = read_time(0x8d);//ƒÍ
+  63   1      
+  64   1              Conver_week(0,yy,mo,dd);//µ˜”√π´¿˙ªªÀ„–«∆⁄◊”∫Ø ˝
+  65   1              sel=week;//week «π´¿˙◊™ªª–«∆⁄◊”∫Ø ˝µƒ‘À––Ω·π˚£¨Ω·π˚Œ™0-6£¨0 «–«∆⁄»’
+  66   1      
+  67   1              write_com(0x87);//œ‘ æŒª÷√
+  68   1              if(sel==0)  {lcm_w_word("»’");}    //0=–«∆⁄»’
+  69   1              if(sel==6)  {lcm_w_word("¡˘");}    //
+  70   1              if(sel==5)  {lcm_w_word("ŒÂ");}    //
+  71   1              if(sel==4)  {lcm_w_word("Àƒ");}    //
+  72   1      //      if(sel==3)  {lcm_w_word("»˝");}//æ≠µ˜ ‘∑¢œ÷“∫æß∆¡≤ª»œ’‚“ªæ‰£¨÷ª∫√”√œ¬“ªæ‰œ‘ æ »˝        °£–Ë“™¥Ú≤π∂°≤≈ƒ‹’˝»∑œ‘
+             - æ°£
+  73   1              if(sel==3)  {write_data(0xc8);write_data(0xfd);} //¥À÷∏¡Óµ»”⁄lcm_w_word("»˝"); “ÚŒ™°∞»˝°±µƒƒ⁄¬Î ß–ß°£
+  74   1              if(sel==2)  {lcm_w_word("∂˛");}    //
+  75   1              if(sel==1)  {lcm_w_word("“ª");}    //–«∆⁄“ª
+  76   1      
+  77   1              write_com(0x85);
+  78   1              lcm_w_word("–«∆⁄");//µ˜”√◊÷∑˚œ‘ æ◊”∫Ø ˝£¨œ‘ æ –«∆⁄ ¡Ω∏ˆ◊÷
+  79   1      
+  80   1      }
+  81          /*–Ë“™ªÊÕºœ‘ æµƒ: ±°¢∑÷°¢√Î--------------------------------------------------*/
+  82          void displaytime(void)
+  83          {
+  84   1              write_com(0x30); write_com(0x06); 
+  85   1              lcm_clr3();             //”√”⁄µ˜’˚≤Àµ•◊‘∂ØÕÀ≥ˆ∫Û«Â∆¡£¨√ª”–µƒª∞£¨ª·≥ˆœ÷ª≠√Ê÷ÿµ˛«Èøˆ
+  86   1      /*Õ˘“∫æß∆¡ÃÓ–¥ –° ±  ˝æ›-----------------------------------------*/
+  87   1      //      hour = read_time(0x85);
+  88   1      //      if (hour > 0x07 && hour < 0x22 && w == 0){ //’˚µ„≈–∂œ
+  89   1      //              Beep();//µ˜”√“ª¥Œ’˚µ„±® ±“Ù
+  90   1      //      }
+  91   1              if(hour!=read_time(0x85))//∏¸–¬–° ± ˝æ›,»ª∫Û’˚µ„±® ±
+  92   1              {//“≤ø…∏˘æ›∏ˆ»À–Ë“™…Ë∂®‘⁄ƒ«∏ˆ ±º‰∂ŒΩ¯––±® ±,÷ª–Ëº”Ãıif”Ôæ‰±„ø…
+  93   2              buzzer=0;delayms(30);buzzer=1;   //’˚µ„±® ±        
+  94   2              hour = read_time(0x85);//∂¡»°DS1302µƒ–° ±
+  95   2      
+  96   2              }
+  97   1              if(hour/16 != 0){                                                 // ÆŒªœ˚“˛
+  98   2                      write1632GDRAM(1,2,num1632[hour/16]);
+  99   2                      write1632GDRAM(2,2,num1632[hour%16]);}
+ 100   1              else {
+ 101   2                      write1632GDRAM(1,2,num1632[hour/16]); //∞—hour/16ªª≥…11£¨–° ±µƒ ÆŒª»Áπ˚ «0æÕ≤ªœ‘ æ
+ 102   2                      write1632GDRAM(2,2,num1632[hour%16]);}
+ 103   1              write1632GDRAM(3,2,num1632[10]);        // ±÷”∑÷∏Ù∑˚°∞:°±
+ 104   1      
+ 105   1      /*Õ˘“∫æß∆¡ÃÓ–¥ ∑÷÷”  ˝æ›-----------------------------------------*/
+ 106   1              min = read_time(0x83);                         //∂¡»°DS1302µƒ∑÷                         
+ 107   1              write1632GDRAM(4,2,num1632[min/16]);
+ 108   1              write1632GDRAM(5,2,num1632[min%16]);
+ 109   1              write1632GDRAM(6,2,num1632[10]);        // ±÷”∑÷∏Ù∑˚°∞:°±
+ 110   1      
+ 111   1      /*Õ˘“∫æß∆¡ÃÓ–¥ √Î÷”  ˝æ›-----------------------------------------*/
+ 112   1              sec= read_time(0x81);                         //∂¡»°DS1302µƒ√Î
+ 113   1              write1632GDRAM(7,2,num1632[sec/16]);
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 3   
+
+ 114   1              write1632GDRAM(8,2,num1632[sec%16]);    
+ 115   1      }
+ 116          /*œ‘ æ…˙–§-----------------------------------------------------*/
+ 117          void displaysx(void){
+ 118   1              unsigned char LunarYearD,ReYear,tiangan,dizhi;        //≈©¿˙ƒÍ∑›µƒ ÆΩ¯÷∆ ˝  ∫Õ»°ƒ£∫Ûµƒ”‡ ˝ 
+ 119   1      
+ 120   1              //µ˜”√∫Ø ˝∫Û,‘≠”– ˝æ›≤ª±‰,∂¡c_moon≈©¿˙ ¿ºÕ,year_moon≈©¿˙ƒÍ,month_moon,day_moonµ√≥ˆ“ı¿˙BCD ˝æ›
+ 121   1              write_com(0x30); write_com(0x06); write_com(0x98);
+ 122   1              LunarYearD=(year_moon/16)*10+year_moon%16;        //≈©¿˙ƒÍ◊™ªª≥…10Ω¯÷∆ ˝ 
+ 123   1              ReYear=LunarYearD%12;                             //≈©¿˙ƒÍƒ£12,»°”‡‘ÀÀ„
+ 124   1              tiangan=LunarYearD%10;   //ÃÏ∏…  º◊°¢““.....
+ 125   1              dizhi=LunarYearD%12;     //µÿ÷ß  ◊”°¢≥Û.....
+ 126   1      
+ 127   1              switch(tiangan) //ÃÏ∏…
+ 128   1              {
+ 129   2      //              case 0: write_com(0x98);lcm_w_word("∏˝");break;   //”‡0º¥’˚≥˝ ÃÏ∏…  ∏˝
+ 130   2                      case 0: write_com(0x98);{write_data(0xb8);write_data(0xfd);}break;   //”‡0º¥’˚≥˝ ÃÏ∏…  ∏˝
+ 131   2                      case 1: write_com(0x98);lcm_w_word("–¡");break;   //
+ 132   2                      case 2: write_com(0x98);lcm_w_word("»…");break;
+ 133   2                      case 3: write_com(0x98);lcm_w_word("πÔ");break;
+ 134   2                      case 4: write_com(0x98);lcm_w_word("º◊");break;
+ 135   2                      case 5: write_com(0x98);lcm_w_word("““");break;
+ 136   2                      case 6: write_com(0x98);lcm_w_word("±˚");break;
+ 137   2                      case 7: write_com(0x98);lcm_w_word("∂°");break;
+ 138   2                      case 8: write_com(0x98);lcm_w_word("ŒÏ");break;
+ 139   2                      case 9: write_com(0x98);lcm_w_word("“—");break;
+ 140   2              }
+ 141   1      
+ 142   1              switch(dizhi) //µÿ÷ß
+ 143   1              {
+ 144   2                      case 0: write_com(0x99);lcm_w_word("≥Ω");break;   //”‡0º¥’˚≥˝ µÿ÷ß ≥Ω
+ 145   2                      case 1: write_com(0x99);lcm_w_word("À»");break;   //
+ 146   2                      case 2: write_com(0x99);lcm_w_word("ŒÁ");break;
+ 147   2                      case 3: write_com(0x99);lcm_w_word("Œ¥");break;
+ 148   2                      case 4: write_com(0x99);lcm_w_word("…Í");break;
+ 149   2                      case 5: write_com(0x99);lcm_w_word("”œ");break;
+ 150   2                      case 6: write_com(0x99);lcm_w_word("–Á");break;
+ 151   2                      case 7: write_com(0x99);lcm_w_word("∫•");break;
+ 152   2                      case 8: write_com(0x99);lcm_w_word("◊”");break;
+ 153   2                      case 9: write_com(0x99);lcm_w_word("≥Û");break;
+ 154   2                      case 10:write_com(0x99);lcm_w_word("“˙");break;
+ 155   2                      case 11:write_com(0x99);lcm_w_word("√Æ");break;
+ 156   2              }
+ 157   1      
+ 158   1              switch(ReYear)  //…˙–§
+ 159   1              {
+ 160   2                      case 0: write_com(0x9a);lcm_w_word("¡˙ƒÍ");break;   //”‡0º¥’˚≥˝ ≈©¿˙ ¡˙ƒÍ
+ 161   2                      case 1: write_com(0x9a);lcm_w_word("…ﬂƒÍ");break;   //…ﬂƒÍ
+ 162   2                      case 2: write_com(0x9a);lcm_w_word("¬ÌƒÍ");break;
+ 163   2                      case 3: write_com(0x9a);lcm_w_word("—ÚƒÍ");break;
+ 164   2                      case 4: write_com(0x9a);lcm_w_word("∫ÔƒÍ");break;
+ 165   2                      case 5: write_com(0x9a);lcm_w_word("º¶ƒÍ");break;
+ 166   2                      case 6: write_com(0x9a);lcm_w_word("π∑ƒÍ");break;
+ 167   2                      case 7: write_com(0x9a);lcm_w_word("÷ÌƒÍ");break;
+ 168   2                      case 8: write_com(0x9a);lcm_w_word(" ÛƒÍ");break;
+ 169   2                      case 9: write_com(0x9a);lcm_w_word("≈£ƒÍ");break;
+ 170   2                      case 10:write_com(0x9a);lcm_w_word("ª¢ƒÍ");break;
+ 171   2                      case 11:write_com(0x9a);lcm_w_word("Õ√ƒÍ");break;
+ 172   2              }
+ 173   1      }
+ 174          
+ 175          /*œ‘ æ≈©¿˙»’∆⁄---------------------------------------------------------------*/
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 4   
+
+ 176          void displaynl(void)
+ 177          {
+ 178   1      /* */
+ 179   1              Conversion(century,year,month,day);     //π´¿˙◊™≈©¿˙
+ 180   1              write_com(0x30); write_com(0x06); write_com(0x98);
+ 181   1      
+ 182   1      //***** œ‘ æ≈©¿˙‘¬∑›  *****     
+ 183   1      //      if (month_moon==1) {lcm_w_word("’˝");}  //æ≠µ˜ ‘∑¢œ÷“∫æß∆¡≤ª»œ’‚“ªæ‰£¨÷ª∫√”√œ¬“ªæ‰œ‘ æ »˝°£        
+ 184   1              if (month_moon==1) {write_data(0xd5);write_data(0xfd);} //"’˝"◊÷µƒ¥˙¬Î
+ 185   1              if (month_moon==2) {lcm_w_word("∂˛");}
+ 186   1      //      if (month_moon==3) {lcm_w_word("»˝");}
+ 187   1              if (month_moon==3) {write_data(0xc8);write_data(0xfd);} //"»˝"◊÷µƒ¥˙¬Î
+ 188   1              if (month_moon==4) {lcm_w_word("Àƒ");}
+ 189   1              if (month_moon==5) {lcm_w_word("ŒÂ");}
+ 190   1              if (month_moon==6) {lcm_w_word("¡˘");}
+ 191   1              if (month_moon==7) {lcm_w_word("∆ﬂ");}
+ 192   1              if (month_moon==8) {lcm_w_word("∞À");}
+ 193   1              if (month_moon==9) {lcm_w_word("æ≈");}
+ 194   1              if (month_moon==10){lcm_w_word(" Æ");}
+ 195   1              if (month_moon==11){lcm_w_word("∂¨");}
+ 196   1              if (month_moon==12){lcm_w_word("¿∞");}
+ 197   1                              lcm_w_word("‘¬");
+ 198   1      
+ 199   1      //***** œ‘ æ≈©¿˙»’µƒ ÆŒª  *****
+ 200   1      
+ 201   1              if(day_moon/10==0)  {lcm_w_word("≥ı");}    //
+ 202   1              if(day_moon/10==1)  
+ 203   1                      if(day_moon/10==1       &       day_moon%10==0) {lcm_w_word("≥ı");}
+ 204   1                      else    {lcm_w_word(" Æ");}    //
+ 205   1              if(day_moon/10==2)      
+ 206   1                      if(day_moon/10==2       &       day_moon%10==0)  {lcm_w_word("∂˛");}
+ 207   1                      else  {lcm_w_word("ÿ•");}   //
+ 208   1              if(day_moon/10==3)  {write_data(0xc8);write_data(0xfd);}          //"»˝"◊÷µƒ¥˙¬Î
+ 209   1      
+ 210   1      //***** œ‘ æ≈©¿˙»’µƒ∏ˆŒª  *****
+ 211   1      
+ 212   1              if(day_moon%10==1)  {lcm_w_word("“ª");}    //
+ 213   1              if(day_moon%10==2)  {lcm_w_word("∂˛");}    //
+ 214   1              if(day_moon%10==3)  {write_data(0xc8);write_data(0xfd);}          //"»˝"◊÷µƒ¥˙¬Î
+ 215   1              if(day_moon%10==4)  {lcm_w_word("Àƒ");}    //
+ 216   1              if(day_moon%10==5)  {lcm_w_word("ŒÂ");}    //
+ 217   1              if(day_moon%10==6)  {lcm_w_word("¡˘");}    //
+ 218   1              if(day_moon%10==7)  {lcm_w_word("∆ﬂ");}    //
+ 219   1              if(day_moon%10==8)  {lcm_w_word("∞À");}    //
+ 220   1              if(day_moon%10==9)  {lcm_w_word("æ≈");}    //
+ 221   1              if(day_moon%10==0)  {lcm_w_word(" Æ");}    //
+ 222   1       
+ 223   1       /*      
+ 224   1       Conversion(century,year,month,date);   //π´¿˙◊™≈©¿˙
+ 225   1              write_com(0x30); write_com(0x06); write_com(0x98);
+ 226   1      //      if (month_moon==1) {lcm_w_word("’˝");}             
+ 227   1              if (month_moon==1) {write_data(0xd5);write_data(0xfd);} //"’˝"◊÷µƒ¥˙¬Î
+ 228   1              if (month_moon==2) {lcm_w_word("∂˛");}
+ 229   1      //      if (month_moon==2) {lcm_w_word("»˝");}
+ 230   1              if (month_moon==3) {lcm_w_test(1,0xc8);lcm_w_test(1,0xfd);}
+ 231   1              if (month_moon==4) {lcm_w_word("Àƒ");}
+ 232   1              if (month_moon==5) {lcm_w_word("ŒÂ");}
+ 233   1              if (month_moon==6) {lcm_w_word("¡˘");}
+ 234   1              if (month_moon==7) {lcm_w_word("∆ﬂ");}
+ 235   1              if (month_moon==8) {lcm_w_word("∞À");}
+ 236   1              if (month_moon==9) {lcm_w_word("æ≈");}
+ 237   1              if (month_moon==10){lcm_w_word(" Æ");}
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 5   
+
+ 238   1              if (month_moon==11){lcm_w_word("∂¨");}
+ 239   1              if (month_moon==12){lcm_w_word("¿∞");}
+ 240   1                              lcm_w_word("‘¬");
+ 241   1      
+ 242   1              if (day_moon==1)   {lcm_w_word("≥ı“ª");}
+ 243   1              if (day_moon==2)   {lcm_w_word("≥ı∂˛");}
+ 244   1              if (day_moon==3)   {lcm_w_word("≥ı");lcm_w_test(1,0xc8);lcm_w_test(1,0xfd);} //°∞»˝°±µƒ¥˙¬Î
+ 245   1              if (day_moon==4)   {lcm_w_word("≥ıÀƒ");}
+ 246   1              if (day_moon==5)   {lcm_w_word("≥ıŒÂ");}
+ 247   1              if (day_moon==6)   {lcm_w_word("≥ı¡˘");}
+ 248   1              if (day_moon==7)   {lcm_w_word("≥ı∆ﬂ");}
+ 249   1              if (day_moon==8)   {lcm_w_word("≥ı∞À");}
+ 250   1              if (day_moon==9)   {lcm_w_word("≥ıæ≈");}
+ 251   1              if (day_moon==10)  {lcm_w_word("≥ı Æ");}
+ 252   1              if (day_moon==11)  {lcm_w_word(" Æ“ª");}
+ 253   1              if (day_moon==12)  {lcm_w_word(" Æ∂˛");}
+ 254   1              if (day_moon==13)  {lcm_w_word(" Æ");lcm_w_test(1,0xc8);lcm_w_test(1,0xfd);} // Æ»˝
+ 255   1              if (day_moon==14)  {lcm_w_word(" ÆÀƒ");}
+ 256   1              if (day_moon==15)  {lcm_w_word(" ÆŒÂ");}
+ 257   1              if (day_moon==16)  {lcm_w_word(" Æ¡˘");}
+ 258   1              if (day_moon==17)  {lcm_w_word(" Æ∆ﬂ");}
+ 259   1              if (day_moon==18)  {lcm_w_word(" Æ∞À");}
+ 260   1              if (day_moon==19)  {lcm_w_word(" Ææ≈");}
+ 261   1              if (day_moon==20)  {lcm_w_word("∂˛ Æ");}
+ 262   1              if (day_moon==21)  {lcm_w_word("ÿ•“ª");}
+ 263   1              if (day_moon==22)  {lcm_w_word("ÿ•∂˛");}
+ 264   1              if (day_moon==23)  {lcm_w_word("ÿ•»˝");}//lcm_w_test(1,0xc8);lcm_w_test(1,0xfd);}       //ÿ•»˝
+ 265   1              if (day_moon==24)  {lcm_w_word("ÿ•Àƒ");}
+ 266   1              if (day_moon==25)  {lcm_w_word("ÿ•ŒÂ");}
+ 267   1              if (day_moon==26)  {lcm_w_word("ÿ•¡˘");}
+ 268   1              if (day_moon==27)  {lcm_w_word("ÿ•∆ﬂ");}
+ 269   1              if (day_moon==28)  {lcm_w_word("ÿ•∞À");}
+ 270   1              if (day_moon==29)  {lcm_w_word("ÿ•æ≈");}
+ 271   1              if (day_moon==30)  {lcm_w_word("ÿ¶ Æ");}//»˝ Æ   lcm_w_test(1,0xc8);lcm_w_test(1,0xfd);lcm_w_word(" Æ");
+ 272   1      */
+ 273   1      }
+ 274          
+ 275          /*----------œ‘ æΩ⁄∆¯---------------------------------------------*/
+ 276          
+ 277          void displayjieqi(void)
+ 278          {
+ 279   1              unsigned char dd,mo,yy,j;
+ 280   1      
+ 281   1              dd = read_time(0x87);//»’
+ 282   1              mo = read_time(0x89);//‘¬
+ 283   1              yy = read_time(0x8d);//ƒÍ
+ 284   1              j=jieqi(yy,mo,dd);
+ 285   1              write_com(0x30); write_com(0x06); write_com(0x98);
+ 286   1      
+ 287   1              if (j==1) { lcm_w_word("ΩÒÃÏ–°∫Æ"); }
+ 288   1              if (j==2) { lcm_w_word("ΩÒÃÏ¥Û∫Æ"); }
+ 289   1              if (j==3) { lcm_w_word("ΩÒÃÏ¡¢¥∫"); }
+ 290   1              if (j==4) { lcm_w_word("ΩÒÃÏ”ÍÀÆ"); }
+ 291   1              if (j==5) { lcm_w_word("ΩÒÃÏæ™’›"); }
+ 292   1              if (j==6) { lcm_w_word("ΩÒÃÏ¥∫∑÷"); }
+ 293   1              if (j==7) { lcm_w_word("ΩÒÃÏ«Â√˜"); }
+ 294   1              if (j==8) { lcm_w_word("ΩÒÃÏπ»”Í"); }
+ 295   1              if (j==9) { lcm_w_word("ΩÒÃÏ¡¢œƒ"); }
+ 296   1              if (j==10){ lcm_w_word("ΩÒÃÏ–°¬˙"); }
+ 297   1              if (j==11){ lcm_w_word("ΩÒÃÏ√¢÷÷"); }
+ 298   1              if (j==12){ lcm_w_word("ΩÒÃÏœƒ÷¡"); }
+ 299   1              if (j==13){ lcm_w_word("ΩÒÃÏ–° Ó"); }
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 6   
+
+ 300   1              if (j==14){ lcm_w_word("ΩÒÃÏ¥Û Ó"); }
+ 301   1              if (j==15){ lcm_w_word("ΩÒÃÏ¡¢«Ô"); }
+ 302   1              if (j==16){ lcm_w_word("ΩÒÃÏ¥¶ Ó"); }
+ 303   1              if (j==17){ lcm_w_word("ΩÒÃÏ∞◊¬∂"); }
+ 304   1              if (j==18){ lcm_w_word("ΩÒÃÏ«Ô∑÷"); }
+ 305   1              if (j==19){ lcm_w_word("ΩÒÃÏ∫Æ¬∂"); }
+ 306   1              if (j==20){ lcm_w_word("ΩÒÃÏÀ™Ωµ"); }
+ 307   1              if (j==21){ lcm_w_word("ΩÒÃÏ¡¢∂¨"); }
+ 308   1              if (j==22){ lcm_w_word("ΩÒÃÏ–°—©"); }
+ 309   1              if (j==23){ lcm_w_word("ΩÒÃÏ¥Û—©"); }
+ 310   1              if (j==24){ lcm_w_word("ΩÒÃÏ∂¨÷¡"); }
+ 311   1      
+ 312   1      }
+ 313           //=====================================================================
+ 314          void nongli(void)                                       //≈©¿˙‘¬»’°¢…˙–§∞¥3√Îº‰∏Ù¬÷ªªœ‘ æ
+ 315          {
+ 316   1              unsigned char ss;
+ 317   1              ss = read_time(0x81);  
+ 318   1              if(ss%16==0){displaynl();}              //√ø∏Ù3√Îµ˜”√≈©¿˙‘¬»’œ‘ æ◊”∫Ø ˝
+ 319   1              if(ss%16==3){displayjieqi();}   //√ø∏Ù3√Îµ˜”√Ω⁄∆¯œ‘ æ◊”∫Ø ˝
+ 320   1              if(ss%16==6){displaysx();}              //√ø∏Ù3√Îµ˜”√≈©¿˙…˙–§œ‘ æ◊”∫Ø ˝
+ 321   1      }                               
+ 322          /****************************************************************************/
+ 323          void displayJr(void)  //Ω⁄»’ ˝æ›ø‚
+ 324          {               
+ 325   1              Conversion(century,year,month,day);     //π´¿˙◊™≈©¿˙
+ 326   1           
+ 327   1              write_com(0x30); write_com(0x06);
+ 328   1              write_com(0x80);
+ 329   1      //**********************1‘¬∑›**********************************************
+ 330   1              if ( mo == 0x01 && dd == 0x01 )           { lcm_w_word("Happy New Year!!"); }//1‘¬
+ 331   1              if (month_moon== 1 && day_moon == 1 ) { lcm_w_word("°˘°˘¥∫Ω⁄øÏ¿÷°˘°˘");  }//“ı¿˙»’∆⁄ÃÓ“ı¿˙‘¬∫Õ»’         
+             -                                         
+ 332   1              if (month_moon== 1 && day_moon == 15 ){ lcm_w_word("°˘°˘‘™œ¸øÏ¿÷°˘°˘"); }   
+ 333   1      
+ 334   1      //************************2‘¬∑›*****************************************************                      
+             -                                                                       
+ 335   1         
+ 336   1              if ( mo == 0x02 && dd == 0x13 ){ lcm_w_word("°Ù√˜ÃÏ«È»ÀΩ⁄¡À°Ù"); }              
+ 337   1              if ( mo == 0x02 && dd == 0x14 ){ lcm_w_word("°Ù«È»ÀΩ⁄øÏ¿÷!!°Ù"); }//—Ù¿˙»’∆⁄ÃÓ µº µƒ—Ù¿˙‘¬∫Õ»’
+ 338   1      
+ 339   1      //**************************3‘¬∑›***************************************************                            
+ 340   1              if ( mo == 0x03 && dd == 0x08 ){ lcm_w_word("°Ó»˝°§∞À∏æ≈ÆΩ⁄°Ó"); }
+ 341   1          if ( mo == 0x03 && dd == 0x12 ){ lcm_w_word("©ÔΩÒÃÏ÷≤ ˜Ω⁄!!©Ô"); }                  
+ 342   1              if ( mo == 0x03 && dd == 0x15 ){ lcm_w_word("°—œ˚∑—’ﬂ»®“Ê»’°—"); }                      
+ 343   1              if ( mo == 0x03 && dd == 0x31 ){ lcm_w_word("°˛√˜ÃÏ «”ﬁ»ÀΩ⁄°˛"); }
+ 344   1              if ( mo == 0x04 && dd == 0x01 ){ lcm_w_word("”ﬁ»ÀΩ⁄°—–°–ƒ…œµ±"); }//3   
+ 345   1              
+ 346   1      //****************************4‘¬∑›*************************************************
+ 347   1              if ( mo == 0x04 && dd == 0x08 ){ lcm_w_word("°ÙΩÒÃÏ «∏¥ªÓΩ⁄°Ù"); }              
+ 348   1              if (month_moon== 5 && day_moon == 5 ){ lcm_w_word("°ÙΩÒÃÏ «∂ÀŒÁΩ⁄°Ù"); }  
+ 349   1              
+ 350   1      //*****************************5‘¬∑›************************************************
+ 351   1              if ( mo == 0x04 && dd == 0x30 ){ lcm_w_word("√˜ÃÏ «ŒÂ“ª¿Õ∂ØΩ⁄"); }//5
+ 352   1              if ( mo == 0x05 && dd == 0x01 ){ lcm_w_word("°˜ŒÂ“ª¿Õ∂ØΩ⁄!!°˜"); }//5                           
+ 353   1              if ( mo == 0x05 && dd == 0x04 ){ lcm_w_word("°’ŒÂÀƒ«‡ƒÍΩ⁄!!°’"); }      
+ 354   1              if ( mo == 0x05 && dd == 0x05 ){ lcm_w_word("Ω¸»’◊¢“‚ƒ∏«◊Ω⁄!!"); }              
+ 355   1              if ( mo == 0x05 && dd == 0x10 ){ lcm_w_word("°ÔΩÒÃÏ «ƒ∏«◊Ω⁄°Ô"); }
+ 356   1                      
+ 357   1      //****************************6‘¬∑›*************************************************
+ 358   1              if ( mo == 0x06 && dd == 0x01 ){ lcm_w_word("°˘ΩÒÃÏ «∂˘ÕØΩ⁄°˘"); }//6
+ 359   1              if ( mo == 0x06 && dd == 0x15 ){ lcm_w_word("Ω¸»’◊¢“‚∏∏«◊Ω⁄!!"); }
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 7   
+
+ 360   1              if ( mo == 0x06 && dd == 0x21 ){ lcm_w_word("°˜ΩÒÃÏ «∏∏«◊Ω⁄°˜"); }      
+ 361   1              if (month_moon== 7 && day_moon == 7 ){ lcm_w_word("∆ﬂœ¶--÷–π˙«È»ÀΩ⁄"); }  
+ 362   1                      
+ 363   1      //****************************7‘¬∑›*************************************************                    
+ 364   1              if ( mo == 0x07 && dd == 0x07 ){ lcm_w_word("øπ»’’Ω’˘º«ƒÓ»’°Ó"); }
+ 365   1      
+ 366   1      //****************************8‘¬∑›*************************************************
+ 367   1          if (month_moon== 8 && day_moon == 15 ){ lcm_w_word("°—÷–«ÔΩ⁄øÏ¿÷!!°—"); }  
+ 368   1              if ( mo == 0x08 && dd == 0x01 ){ lcm_w_word("°˛∞À“ªΩ®æ¸Ω⁄°˛=="); }//8
+ 369   1      //              if ( mo == 0x08 && dd == 0x08 ){ lcm_w_word("  ÷–π˙∏∏«◊Ω⁄    "); }
+ 370   1              if ( mo == 0x08 && dd == 0x15 ){ lcm_w_word("øπ’Ω §¿˚º«ƒÓ»’  "); }
+ 371   1              if (month_moon== 9 && day_moon == 9 ){ lcm_w_word("°¯ΩÒ»’÷ÿ—ÙΩ⁄!!°¯"); }  
+ 372   1                                             
+ 373   1      //*******************************9‘¬∑›**********************************************    
+ 374   1              if ( mo == 0x09 && dd == 0x09 ){ lcm_w_word("°Ó√˜ÃÏ «ΩÃ ¶Ω⁄°Ó"); }//9   
+ 375   1              if ( mo == 0x09 && dd == 0x10 ){ lcm_w_word("°ÔΩÒÃÏ «ΩÃ ¶Ω⁄°Ô"); }//9
+ 376   1              if ( mo == 0x09 && dd == 0x18 ){ lcm_w_word("æ≈“ª∞À ¬±‰º«ƒÓ»’"); }
+ 377   1      
+ 378   1      //******************************10‘¬∑›***********************************************
+ 379   1              if ( mo == 0x10 && dd == 0x01 ){ lcm_w_word("°˘π˙«ÏΩ⁄µΩ¡À!!°˘"); }//10
+ 380   1                                            
+ 381   1      
+ 382   1      //*********************************12‘¬∑›********************************************   
+ 383   1          if (month_moon== 12 && day_moon == 8 ) { lcm_w_word("°ÔΩÒÃÏ «¿∞∞ÀΩ⁄°Ô"); }  
+ 384   1              if (month_moon== 12 && day_moon == 15 ){ lcm_w_word("°˘ΩÒÃÏ «–°ƒÍ≈∂°˘"); }  
+ 385   1              if (month_moon== 12 && day_moon == 30 ){ lcm_w_word("¥ÛƒÍÿ¶ Æ(*^O^*)!"); }
+ 386   1              if ( mo == 0x12 && dd == 0x13 ){ lcm_w_word("ƒœæ©¥ÛÕ¿…±ºÕƒÓ»’"); }//12
+ 387   1              if ( mo == 0x12 && dd == 0x24 ){ lcm_w_word("°˘°˘∆Ω∞≤“π!!°˘°˘"); }
+ 388   1              if ( mo == 0x12 && dd == 0x25 ){ lcm_w_word("°Ô°Ô •µÆøÏ¿÷°Ô°Ô"); }
+ 389   1      
+ 390   1      //****************************…˙»’£®“ı¿˙£©*********************************
+ 391   1              if (month_moon== 9  && day_moon == 23 ){ lcm_w_word("°Ó∫ÛÃÏ“Ø“Ø…˙»’°Ó"); }
+ 392   1              if (month_moon== 9  && day_moon == 24 ){ lcm_w_word("°Ó√˜ÃÏ“Ø“Ø…˙»’°Ó"); }
+ 393   1              if (month_moon== 9  && day_moon == 25 ){ lcm_w_word("°ÓΩÒÃÏ“Ø“Ø…˙»’°Ó"); }  //”–ŒÛ
+ 394   1              if (month_moon== 10 && day_moon == 20 ){ lcm_w_word("°Ó∫ÛÃÏƒÃƒÃ…˙»’°Ó"); }
+ 395   1              if (month_moon== 10 && day_moon == 21 ){ lcm_w_word("°Ó√˜ÃÏƒÃƒÃ…˙»’°Ó"); }          
+ 396   1              if (month_moon== 10 && day_moon == 22 ){ lcm_w_word("°ÓΩÒÃÏƒÃƒÃ…˙»’°Ó"); }
+ 397   1      
+ 398   1      
+ 399   1              if (month_moon== 2 && day_moon == 16 ){ lcm_w_word("°Ô∫ÛÃÏ¬Ë¬Ë…˙»’°Ô"); }
+ 400   1              if (month_moon== 2 && day_moon == 17 ){ lcm_w_word("°Ô√˜ÃÏ¬Ë¬Ë…˙»’°Ô"); }
+ 401   1              if (month_moon== 2 && day_moon == 18 ){ lcm_w_word("°ÔΩÒÃÏ¬Ë¬Ë…˙»’°Ô"); }
+ 402   1              if (month_moon== 6 && day_moon == 17 ){ lcm_w_word("°Ô∫ÛÃÏ∞÷∞÷…˙»’°Ô"); }
+ 403   1              if (month_moon== 6 && day_moon == 18 ){ lcm_w_word("°Ô√˜ÃÏ∞÷∞÷…˙»’°Ô"); }       
+ 404   1              if (month_moon== 6 && day_moon == 19 ){ lcm_w_word("°ÔΩÒÃÏ∞÷∞÷…˙»’°Ô"); }//∞÷∞÷…˙»’
+ 405   1              
+ 406   1              if (month_moon== 10 && day_moon == 8 ){ lcm_w_word("°˛√˜ÃÏ±Ìµ‹…˙»’°˛"); }
+ 407   1              if (month_moon== 10 && day_moon == 9 ){ lcm_w_word("°˛ΩÒÃÏ±Ìµ‹…˙»’°˛"); }       
+ 408   1      
+ 409   1              if (month_moon== 5 && day_moon == 10 ){ lcm_w_word("°˘∫ÛÃÏ√√√√…˙»’°˘"); }
+ 410   1              if (month_moon== 5 && day_moon == 11 ){ lcm_w_word("°˘√˜ÃÏ√√√√…˙»’°˘"); }
+ 411   1              if (month_moon== 5 && day_moon == 12 ){ lcm_w_word("°˘ΩÒÃÏ√√√√…˙»’°˘"); }//√√√√…˙»’ 
+ 412   1              if (month_moon== 2 && day_moon == 25 ){ lcm_w_word("°˘√˜ÃÏŒ“µƒ…˙»’°˘"); }//Œ“µƒ…˙»’
+ 413   1              if (month_moon== 2 && day_moon == 26 ){ lcm_w_word("°˘ΩÒÃÏŒ“µƒ…˙»’°˘"); }//Œ“µƒ…˙»’     
+ 414   1              if (month_moon== 3 && day_moon == 3 ) { lcm_w_word("°˘√˜ÃÏ∑“∑“…˙»’°˘"); }
+ 415   1              if (month_moon== 3 && day_moon == 4 ) { lcm_w_word("°˘ΩÒÃÏ∑“∑“…˙»’°˘"); }
+ 416   1                                
+ 417   1      }  
+ 418          //============================================================================
+ 419          void displayday( )
+ 420          {
+ 421   1         unsigned char sec;
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 8   
+
+ 422   1              sec = read_time(0x81);
+ 423   1              if(sec%6==0){displaydate();displayxq();}//√ø∏Ù3√Îœ‘ æ»’∆⁄°¢–«∆⁄
+ 424   1              if(sec%6==3){displayJr();}                       // √ø∏Ù3√Îœ‘ æΩ⁄»’
+ 425   1      }
+ 426          /**********************************************************
+ 427          œ‘ æƒ÷¡Â ±º‰µΩ
+ 428          **********************************************************/
+ 429          void dis_nz(void)
+ 430          {
+ 431   1              lcm_clr2();            //«Â∆¡
+ 432   1              Clean_12864_GDRAM();     //«Â∆¡
+ 433   1              write_com(0x30); write_com(0x06); 
+ 434   1              write_com(0x80);
+ 435   1              lcm_w_word("  ƒ÷¡Â ±º‰µΩ£°  ");
+ 436   1              //±Í≥ﬂ----("00--00--00--00--")
+ 437   1              write_com(0x90);
+ 438   1              lcm_w_word("µ±«∞ ±º‰£∫      ");
+ 439   1              //±Í≥ﬂ----("00--00--00--00--")
+ 440   1      
+ 441   1              write1632GDRAM(3,3,num1632[hour/16]);
+ 442   1              write1632GDRAM(4,3,num1632[hour%16]);
+ 443   1              write1632GDRAM(5,3,num1632[10]);        // ±÷”∑÷∏Ù∑˚°∞:°±
+ 444   1              write1632GDRAM(6,3,num1632[minute/16]);
+ 445   1              write1632GDRAM(7,3,num1632[minute%16]);
+ 446   1      }
+ 447          /**********************************************************
+ 448          œ‘ æΩÁ√Ê
+ 449          com=“™œ‘ æµƒΩÁ√Ê–Ú∫≈
+ 450          0Œ™’˝≥£ΩÁ√Ê,1Œ™…Ë÷√ΩÁ√Ê,2Œ™…Ë÷√ƒÍΩÁ√Ê,3Œ™‘¬ΩÁ√Ê,4Œ™»’ΩÁ√Ê,5Œ™–° ±ΩÁ√Ê,6Œ™∑÷÷”ΩÁ√Ê,7Œ™√Î ˝ΩÁ√Ê,8Œ™Ã· æ±£¥Ê∏
+             -¸∏ƒΩÁ√Ê
+ 451          **********************************************************/
+ 452          void screen(uchar com)
+ 453          {
+ 454   1                      switch(com)
+ 455   1                              {
+ 456   2                                      case 0:if(read_time(0x81)!=second)      //’˝≥£ΩÁ√Ê,≈–∂œ ˝æ› «∑Ò∏√À¢–¬
+ 457   2                                                      {
+ 458   3                                                              ds1302_read();                  //∂¡»° ±º‰ ˝æ›
+ 459   3                                                              screen1();                              //’˝≥£œ‘ æΩÁ√Ê
+ 460   3                                                               
+ 461   3                                                      }
+ 462   2                                                      break;
+ 463   2                                      case 1: screen2();                                      //≤Àµ•ΩÁ√Ê
+ 464   2                                                      break;
+ 465   2                                      case 2: write_com(0x94); 
+ 466   2                                                      lcm_w_word("ƒÍ∑›    ");
+ 467   2                                                      screen3();                                      //µ˜”√…Ë÷√ ±÷”ΩÁ√Ê
+ 468   2                                                      break;
+ 469   2                                      case 3: write_com(0x94); 
+ 470   2                                                      lcm_w_word("‘¬∑›");
+ 471   2                                                      screen3();
+ 472   2                                                      break;
+ 473   2                                      case 4: write_com(0x94);
+ 474   2                                                      lcm_w_word("»’∆⁄");
+ 475   2                                                      screen3();
+ 476   2                                                      break;
+ 477   2                                      case 5: write_com(0x94);
+ 478   2                                                      lcm_w_word("–° ±");
+ 479   2                                                      screen3();
+ 480   2                                                      break;
+ 481   2                                      case 6: write_com(0x94);
+ 482   2                                                      lcm_w_word("∑÷÷”");
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 9   
+
+ 483   2                                                      screen3();
+ 484   2                                                      break;
+ 485   2                                      case 7: write_com(0x94);
+ 486   2                                                      lcm_w_word("√Î÷”");
+ 487   2                                                      screen3();
+ 488   2                                                      break;
+ 489   2                                      case 8: dis_chk_save();
+ 490   2                                                      break;
+ 491   2                                      case 9: screen4();                                      //ƒ÷÷”◊‹ΩÁ√Ê
+ 492   2                                                      break;
+ 493   2                                      case 10:nz_xz_screen(0);                        //ƒ÷÷”“ªΩÁ√Ê
+ 494   2                                                      break;
+ 495   2                                      case 11:nz_xz_screen(1);                        //ƒ÷÷”∂˛ΩÁ√Ê
+ 496   2                                                      break;
+ 497   2                                      case 12:nz_xz_screen(2);                        //ƒ÷÷”»˝ΩÁ√Ê
+ 498   2                                                      break;
+ 499   2                                      case 13:nz_xz_screen(3);                        //ƒ÷÷”ÀƒΩÁ√Ê
+ 500   2                                                      break;
+ 501   2                                      case 14:nz_xz_screen(4);                        //ƒ÷÷”ŒÂΩÁ√Ê
+ 502   2                                                      break;
+ 503   2                                      case 15:nz_sz_screen(0,0);
+ 504   2                                                      break;
+ 505   2                                      case 16:nz_sz_screen(0,1);
+ 506   2                                                      break;
+ 507   2                                      case 17:nz_sz_screen(0,2);
+ 508   2                                                      break;
+ 509   2                                      case 18:nz_sz_screen(1,0);
+ 510   2                                                      break;
+ 511   2                                      case 19:nz_sz_screen(1,1);
+ 512   2                                                      break;
+ 513   2                                      case 20:nz_sz_screen(1,2);
+ 514   2                                                      break;
+ 515   2                                      case 21:nz_sz_screen(2,0);
+ 516   2                                                      break;
+ 517   2                                      case 22:nz_sz_screen(2,1);
+ 518   2                                                      break;
+ 519   2                                      case 23:nz_sz_screen(2,2);
+ 520   2                                                      break;
+ 521   2                                      case 24:nz_sz_screen(3,0);
+ 522   2                                                      break;
+ 523   2                                      case 25:nz_sz_screen(3,1);
+ 524   2                                                      break;
+ 525   2                                      case 26:nz_sz_screen(3,2);
+ 526   2                                                      break;
+ 527   2                                      case 27:nz_sz_screen(4,0);
+ 528   2                                                      break;
+ 529   2                                      case 28:nz_sz_screen(4,1);
+ 530   2                                                      break;
+ 531   2                                      case 29:nz_sz_screen(4,2);
+ 532   2                                                      break;
+ 533   2                                      case 30:dis_other();
+ 534   2                                                      break;
+ 535   2                                      case 31:wc_xz_screen(0);
+ 536   2                                                      break;
+ 537   2                                      default:break;
+ 538   2                      }
+ 539   1      }
+ 540          
+ 541          /**********************************************************
+ 542          ∆‰À˚…Ë÷√ΩÁ√Ê
+ 543          **********************************************************/
+ 544          void dis_other(void)
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 10  
+
+ 545          {
+ 546   1              write_com(0x30); write_com(0x06); 
+ 547   1              write_com(0x80);
+ 548   1              lcm_w_word("[ SET °˝°¸ ESC ]");
+ 549   1              write_com(0x91);
+ 550   1              lcm_w_word("  ∞¥º¸“Ù  ");
+ 551   1              write_com(0x89);
+ 552   1              lcm_w_word("  œ‘ æ≈©¿˙");
+ 553   1              write_com(0x99);
+ 554   1              lcm_w_word("  œ‘ æΩ⁄»’");
+ 555   1              if(dis_other_flag==0)
+ 556   1              {
+ 557   2                      write_com(0x90);
+ 558   2                      lcm_w_word("°ˆ");
+ 559   2                      write_com(0x88);
+ 560   2                      lcm_w_word("°ı");
+ 561   2                      write_com(0x98);
+ 562   2                      lcm_w_word("°ı");
+ 563   2              }
+ 564   1              if(dis_other_flag==1)
+ 565   1              {
+ 566   2                      write_com(0x90);
+ 567   2                      lcm_w_word("°ı");
+ 568   2                      write_com(0x88);
+ 569   2                      lcm_w_word("°ˆ");
+ 570   2                      write_com(0x98);
+ 571   2                      lcm_w_word("°ı");
+ 572   2              }
+ 573   1              if(dis_other_flag==2)
+ 574   1              {
+ 575   2                      write_com(0x90);
+ 576   2                      lcm_w_word("°ı");
+ 577   2                      write_com(0x88);
+ 578   2                      lcm_w_word("°ı");
+ 579   2                      write_com(0x98);
+ 580   2                      lcm_w_word("°ˆ");
+ 581   2              }
+ 582   1              if(key_beep_op==0xff)//∞¥º¸“Ù±Í÷æŒªŒ™“ª ±,œ‘ æON
+ 583   1              {
+ 584   2                      write_com(0x96);
+ 585   2                      lcm_w_word(" ON ");
+ 586   2              }
+ 587   1              else
+ 588   1              {       write_com(0x96);
+ 589   2                      lcm_w_word(" OFF");
+ 590   2              }
+ 591   1              if(nongli_op==0xff)//≈©¿˙œ‘ æ±Í÷æŒªŒ™“ª ±,œ‘ æON
+ 592   1              {
+ 593   2                      write_com(0x8e);
+ 594   2                      lcm_w_word(" ON ");
+ 595   2              }
+ 596   1              else
+ 597   1              {
+ 598   2                      write_com(0x8e);
+ 599   2                      lcm_w_word(" 0FF");
+ 600   2              }
+ 601   1              if(jieri_op==0xff)//Ω⁄»’±Í÷æŒªŒ™“ª ±,œ‘ æON
+ 602   1              {
+ 603   2                      write_com(0x9e);
+ 604   2                      lcm_w_word(" ON ");
+ 605   2              }
+ 606   1              else
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 11  
+
+ 607   1              {
+ 608   2                      write_com(0x9e);
+ 609   2                      lcm_w_word(" 0FF");
+ 610   2              }
+ 611   1      }
+ 612          /**********************************************************
+ 613           ±º‰ŒÛ≤Ó…Ë÷√ΩÁ√Ê
+ 614          com1=µ˜’˚ƒ£ Ω–Ú∫≈
+ 615          **********************************************************/
+ 616          void wc_xz_screen(uchar autotsf)
+ 617          {
+ 618   1              uchar ssov;
+ 619   1              ssov = read_time(0xe5);  //»°÷µ
+ 620   1              autotsf=read_time(0xe3);//»°◊¥Ã¨
+ 621   1              write_com(0x30); write_com(0x06); 
+ 622   1              write_com(0x80);
+ 623   1              lcm_w_word("   ±º‰ŒÛ≤Óµ˜’˚  ");
+ 624   1              //±Í≥ﬂ----("00--00--00--00--")
+ 625   1              write_com(0x90);
+ 626   1              lcm_w_word("                ");
+ 627   1              write_com(0x88);
+ 628   1              lcm_w_word("  ƒ£ Ω  :");
+ 629   1              if(autotsf==0)                                    //∏˘æ›–Ú∫≈,œ‘ æœ‡”¶µ˜’˚œÓƒø
+ 630   1              {
+ 631   2                      write_com(0x8b);
+ 632   2                      write_data(autotsf%16+0x30);
+ 633   2                      write_com(0x8d);
+ 634   2                      lcm_w_word("≤ªµ˜’˚");
+ 635   2                      write_com(0x98);
+ 636   2                      lcm_w_word("                ");
+ 637   2              }
+ 638   1              if(autotsf==1)
+ 639   1              {
+ 640   2                      write_com(0x8b);
+ 641   2                      write_data(autotsf%16+0x30);
+ 642   2                      write_com(0x8d);
+ 643   2                      lcm_w_word("º”");
+ 644   2                      if(ssov/16!=0) write_data(ssov/16+0x30);
+ 645   2                        else {lcm_w_test(1,0x20);}//»Áπ˚ ÆŒª ˝ «0£¨‘Úœ‘ æ∏ˆø’∏Ò£¨≤ªœ‘ æ ˝æ›
+ 646   2                      write_data(ssov%16+0x30);
+ 647   2                      lcm_w_word("√Î");
+ 648   2                      write_com(0x98);
+ 649   2                      lcm_w_word("                ");
+ 650   2              }
+ 651   1              if(autotsf==2)
+ 652   1              {
+ 653   2                      write_com(0x8b);
+ 654   2                      write_data(autotsf%16+0x30);
+ 655   2                      write_com(0x8d);
+ 656   2                      lcm_w_word("ºı");
+ 657   2                      if(ssov/16!=0) write_data(ssov/16+0x30);
+ 658   2                        else {lcm_w_test(1,0x20);}//»Áπ˚ ÆŒª ˝ «0£¨‘Úœ‘ æ∏ˆø’∏Ò£¨≤ªœ‘ æ ˝æ›
+ 659   2                      write_data(ssov%16+0x30);
+ 660   2                      lcm_w_word("√Î");
+ 661   2                      write_com(0x98);
+ 662   2                      lcm_w_word("                ");
+ 663   2              }
+ 664   1      }
+ 665          
+ 666          /**********************************************************
+ 667          ƒ÷÷”—°‘ÒΩÁ√Ê
+ 668          com=ƒ÷÷”–Ú∫≈
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 12  
+
+ 669          **********************************************************/
+ 670          void nz_xz_screen(uchar com)
+ 671          {
+ 672   1              write_com(0x30); write_com(0x06); 
+ 673   1              write_com(0x80);
+ 674   1              lcm_w_word("[SET <<  >> ESC]");
+ 675   1              //±Í≥ﬂ----("00--00--00--00--")
+ 676   1              write_com(0x92);
+ 677   1              lcm_w_word("—°‘Òƒ÷÷”");
+ 678   1              write_com(0x88);
+ 679   1              lcm_w_word("ƒ÷÷” :");
+ 680   1      
+ 681   1              write_com(0x8a);
+ 682   1              if(com==0){lcm_w_word("1");};//∏˘æ›ƒ÷÷”–Ú∫≈,œ‘ æƒ÷÷”–Ú∫≈
+ 683   1              if(com==1){lcm_w_word("2");};
+ 684   1              if(com==2){lcm_w_word("3");};
+ 685   1              if(com==3){lcm_w_word("4");};
+ 686   1              if(com==4){lcm_w_word("5");};
+ 687   1      
+ 688   1              write_com(0x8d);
+ 689   1              ts_n0=nz[com][0]/10;
+ 690   1              if(ts_n0==0)lcm_w_word("0");
+ 691   1              if(ts_n0==1)lcm_w_word("1");
+ 692   1              if(ts_n0==2)lcm_w_word("2");
+ 693   1              if(ts_n0==3)lcm_w_word("3");
+ 694   1              if(ts_n0==4)lcm_w_word("4");
+ 695   1              if(ts_n0==5)lcm_w_word("5");
+ 696   1              if(ts_n0==6)lcm_w_word("6");
+ 697   1              if(ts_n0==7)lcm_w_word("7");
+ 698   1              if(ts_n0==8)lcm_w_word("8");
+ 699   1              if(ts_n0==9)lcm_w_word("9");
+ 700   1              ts_n1=nz[com][0]%10;
+ 701   1              if(ts_n1==0)lcm_w_word("0");
+ 702   1              if(ts_n1==1)lcm_w_word("1");
+ 703   1              if(ts_n1==2)lcm_w_word("2");
+ 704   1              if(ts_n1==3)lcm_w_word("3");
+ 705   1              if(ts_n1==4)lcm_w_word("4");
+ 706   1              if(ts_n1==5)lcm_w_word("5");
+ 707   1              if(ts_n1==6)lcm_w_word("6");
+ 708   1              if(ts_n1==7)lcm_w_word("7");
+ 709   1              if(ts_n1==8)lcm_w_word("8");
+ 710   1              if(ts_n1==9)lcm_w_word("9");
+ 711   1              lcm_w_word(":");
+ 712   1              ts_n2=nz[com][1]/10;
+ 713   1              if(ts_n2==0)lcm_w_word("0");
+ 714   1              if(ts_n2==1)lcm_w_word("1");
+ 715   1              if(ts_n2==2)lcm_w_word("2");
+ 716   1              if(ts_n2==3)lcm_w_word("3");
+ 717   1              if(ts_n2==4)lcm_w_word("5");
+ 718   1              if(ts_n2==5)lcm_w_word("6");
+ 719   1              if(ts_n2==6)lcm_w_word("6");
+ 720   1              if(ts_n2==7)lcm_w_word("7");
+ 721   1              if(ts_n2==8)lcm_w_word("8");
+ 722   1              if(ts_n2==9)lcm_w_word("9");
+ 723   1              ts_n3=nz[com][1]%10;
+ 724   1              if(ts_n3==0)lcm_w_word("0");
+ 725   1              if(ts_n3==1)lcm_w_word("1");
+ 726   1              if(ts_n3==2)lcm_w_word("2");
+ 727   1              if(ts_n3==3)lcm_w_word("3");
+ 728   1              if(ts_n3==4)lcm_w_word("5");
+ 729   1              if(ts_n3==5)lcm_w_word("6");
+ 730   1              if(ts_n3==6)lcm_w_word("6");
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 13  
+
+ 731   1              if(ts_n3==7)lcm_w_word("7");
+ 732   1              if(ts_n3==8)lcm_w_word("8");
+ 733   1              if(ts_n3==9)lcm_w_word("9");   
+ 734   1              dis_nz_mode(com);
+ 735   1      }
+ 736          /********************************************************************
+ 737          ƒ÷÷”ƒ£ Ωœ‘ æ
+ 738          *********************************************************************/
+ 739          void dis_nz_mode(uchar com)
+ 740          {
+ 741   1              write_com(0x30); write_com(0x06); 
+ 742   1              write_com(0x98);
+ 743   1              if(nz[com][2]==0)
+ 744   1              {
+ 745   2                      lcm_w_word("<<ƒ÷÷” º÷’πÿ±’>>");
+ 746   2              }
+ 747   1              if(nz[com][2]==1)
+ 748   1              {
+ 749   2                      lcm_w_word("<<ƒ÷÷” º÷’ø™∆Ù>>");
+ 750   2              }
+ 751   1              if(nz[com][2]==2)
+ 752   1              {
+ 753   2                      lcm_w_word("<<œÏ“ª¥Œ∫Ûπÿ±’>>");
+ 754   2              }
+ 755   1              if(nz[com][2]==3)
+ 756   1              {
+ 757   2                      lcm_w_word("<<÷‹“ª÷¡÷‹ŒÂœÏ>>");
+ 758   2              }
+ 759   1              if(nz[com][2]==4)
+ 760   1              {
+ 761   2                      lcm_w_word("<<÷‹“ª÷¡÷‹¡˘œÏ>>");
+ 762   2              }
+ 763   1              if(nz[com][2]==5)
+ 764   1              {
+ 765   2                      lcm_w_word("<<Ωˆ÷‹¡˘÷‹»’œÏ>>");
+ 766   2              }
+ 767   1      }
+ 768          
+ 769          /**********************************************************
+ 770          ƒ÷÷”…Ë÷√ΩÁ√Ê
+ 771          com”√”⁄¥Ê∑≈ƒ÷÷”–Ú∫≈
+ 772          co”√”⁄ƒ÷÷”÷√”⁄ƒƒ÷÷µ˜’˚œÓƒø,0Œ™µ˜’˚–° ±,1Œ™µ˜’˚∑÷÷”,2Œ™µ˜’˚ƒ÷÷”ƒ£ Ω
+ 773          **********************************************************/
+ 774          void nz_sz_screen(uchar com,uchar co)
+ 775          {
+ 776   1              write_com(0x30); write_com(0x06); 
+ 777   1              write_com(0x80);
+ 778   1              lcm_w_word("[ENTX +1 -1 ESC]");
+ 779   1              //±Í≥ﬂ----("00--00--00--00--")
+ 780   1              write_com(0x92);
+ 781   1              lcm_w_word("µ˜’˚");
+ 782   1              if(co==0)
+ 783   1              {
+ 784   2                      lcm_w_word("–° ±");
+ 785   2              }
+ 786   1              if(co==1)
+ 787   1              {
+ 788   2                      lcm_w_word("∑÷÷”");
+ 789   2              }
+ 790   1              if(co==2)
+ 791   1              {
+ 792   2                      lcm_w_word("ƒ£ Ω");
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 14  
+
+ 793   2              }
+ 794   1              write_com(0x88);
+ 795   1              lcm_w_word("ƒ÷÷”");
+ 796   1              if(com==0)lcm_w_word("1");
+ 797   1              if(com==1)lcm_w_word("2");
+ 798   1              if(com==2)lcm_w_word("3");
+ 799   1              if(com==3)lcm_w_word("4");
+ 800   1              if(com==4)lcm_w_word("5");
+ 801   1              lcm_w_word(":");
+ 802   1              write_com(0x8d);
+ 803   1              ts_n0=nz[com][0]/10;
+ 804   1              if(ts_n0==0)lcm_w_word("0");
+ 805   1              if(ts_n0==1)lcm_w_word("1");
+ 806   1              if(ts_n0==2)lcm_w_word("2");
+ 807   1              if(ts_n0==3)lcm_w_word("3");
+ 808   1              if(ts_n0==4)lcm_w_word("4");
+ 809   1              if(ts_n0==5)lcm_w_word("5");
+ 810   1              if(ts_n0==6)lcm_w_word("6");
+ 811   1              if(ts_n0==7)lcm_w_word("7");
+ 812   1              if(ts_n0==8)lcm_w_word("8");
+ 813   1              if(ts_n0==9)lcm_w_word("9");
+ 814   1              ts_n1=nz[com][0]%10;
+ 815   1              if(ts_n1==0)lcm_w_word("0");
+ 816   1              if(ts_n1==1)lcm_w_word("1");
+ 817   1              if(ts_n1==2)lcm_w_word("2");
+ 818   1              if(ts_n1==3)lcm_w_word("3");
+ 819   1              if(ts_n1==4)lcm_w_word("4");
+ 820   1              if(ts_n1==5)lcm_w_word("5");
+ 821   1              if(ts_n1==6)lcm_w_word("6");
+ 822   1              if(ts_n1==7)lcm_w_word("7");
+ 823   1              if(ts_n1==8)lcm_w_word("8");
+ 824   1              if(ts_n1==9)lcm_w_word("9");
+ 825   1              lcm_w_word(":");
+ 826   1              ts_n2=nz[com][1]/10;
+ 827   1              if(ts_n2==0)lcm_w_word("0");
+ 828   1              if(ts_n2==1)lcm_w_word("1");
+ 829   1              if(ts_n2==2)lcm_w_word("2");
+ 830   1              if(ts_n2==3)lcm_w_word("3");
+ 831   1              if(ts_n2==4)lcm_w_word("4");
+ 832   1              if(ts_n2==5)lcm_w_word("5");
+ 833   1              if(ts_n2==6)lcm_w_word("6");
+ 834   1              if(ts_n2==7)lcm_w_word("7");
+ 835   1              if(ts_n2==8)lcm_w_word("8");
+ 836   1              if(ts_n2==9)lcm_w_word("9");
+ 837   1              ts_n3=nz[com][1]%10;
+ 838   1              if(ts_n3==0)lcm_w_word("0");
+ 839   1              if(ts_n3==1)lcm_w_word("1");
+ 840   1              if(ts_n3==2)lcm_w_word("2");
+ 841   1              if(ts_n3==3)lcm_w_word("3");
+ 842   1              if(ts_n3==4)lcm_w_word("4");
+ 843   1              if(ts_n3==5)lcm_w_word("5");
+ 844   1              if(ts_n3==6)lcm_w_word("6");
+ 845   1              if(ts_n3==7)lcm_w_word("7");
+ 846   1              if(ts_n3==8)lcm_w_word("8");
+ 847   1              if(ts_n3==9)lcm_w_word("9");
+ 848   1      //      lcd_table[2][12]= ':';
+ 849   1              dis_nz_mode(com);
+ 850   1      }
+ 851          /**********************************************************
+ 852          ƒ÷÷”◊‹ΩÁ√Ê
+ 853          **********************************************************/
+ 854          void screen4(void)
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 15  
+
+ 855          {
+ 856   1              write_com(0x30); write_com(0x06); 
+ 857   1              write_com(0x80);
+ 858   1              lcm_w_word("[SET <<  >> ESC]");
+ 859   1              write_com(0x88);
+ 860   1              lcm_w_word("                ");
+ 861   1              write_com(0x90);
+ 862   1              lcm_w_word("    ƒ÷÷”…Ë÷√    ");
+ 863   1              write_com(0x98);
+ 864   1              lcm_w_word("ƒ÷÷”◊‹ø™πÿ<<");
+ 865   1              if(nz_op==0xff)
+ 866   1              {
+ 867   2                      write_com(0x9e);
+ 868   2                      lcm_w_word("ø™>>");//
+ 869   2              }
+ 870   1              else
+ 871   1              {
+ 872   2                      write_com(0x9e);
+ 873   2                      lcm_w_word("πÿ>>");//
+ 874   2              }
+ 875   1      }                                          
+ 876          /**********************************************************
+ 877          Ã· æ±£¥Ê∏¸∏ƒ
+ 878          **********************************************************/
+ 879          void dis_chk_save(void)
+ 880          {
+ 881   1              write_com(0x30); write_com(0x06); 
+ 882   1              write_com(0x80);
+ 883   1              lcm_w_word("[ »∑∂®    »°œ˚ ]");
+ 884   1              //±Í≥ﬂ----("00--00--00--00--")
+ 885   1              write_com(0x90);
+ 886   1              lcm_w_word("◊¢“‚:           ");
+ 887   1              //±Í≥ﬂ----("00--00--00--00--")
+ 888   1              write_com(0x88);
+ 889   1              lcm_w_word("    ±£¥Ê∏¸∏ƒ?   ");
+ 890   1              //±Í≥ﬂ----("00--00--00--00--")
+ 891   1              write_com(0x98);
+ 892   1              lcm_w_word("                ");
+ 893   1      }
+ 894          /**********************************************************
+ 895          ’˝≥£ΩÁ√Ê
+ 896          **********************************************************/
+ 897          void screen1(void)
+ 898          {
+ 899   1              displayday();
+ 900   1              displaytime();
+ 901   1              nongli();
+ 902   1              ds1820disp();     
+ 903   1              read_nz_data();
+ 904   1              autots();    //◊‘∂Øµ˜ ±∫Ø ˝
+ 905   1      
+ 906   1      }
+ 907          /**********************************************************
+ 908          …Ë÷√÷˜ΩÁ√Ê
+ 909          **********************************************************/
+ 910          void screen2(void)
+ 911          {       
+ 912   1              write_com(0x30); write_com(0x06); 
+ 913   1              write_com(0x80);
+ 914   1              lcm_w_word("[  A  B  C  D  ]");
+ 915   1              //±Í≥ﬂ----("00--00--00--00--")
+ 916   1              write_com(0x90);
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 16  
+
+ 917   1              lcm_w_word("    π¶ƒ‹≤Àµ•    ");
+ 918   1              //±Í≥ﬂ----("00--00--00--00--")
+ 919   1              write_com(0x88);
+ 920   1              lcm_w_word("A: ±÷”    B:ƒ÷÷”");
+ 921   1              //±Í≥ﬂ----("00--00--00--00--")
+ 922   1              write_com(0x98);
+ 923   1              lcm_w_word("C:–£ ±    D:ÕÀ≥ˆ");
+ 924   1              //±Í≥ﬂ----("00--00--00--00--")
+ 925   1              write_com(0x96);
+ 926   1              if(cdds%10==0)          //10√Îµπº∆ ± »Áπ˚√ª∞¥º¸ ‘ÚÕÀ≥ˆ…Ë÷√
+ 927   1                      {lcm_w_word("  ");      
+ 928   2                      }
+ 929   1              else
+ 930   1                      {lcm_w_word("  ");write_data(cdds%10+0x30);              
+ 931   2                                   
+ 932   2                       }
+ 933   1      
+ 934   1      }
+ 935          /**********************************************************
+ 936          …Ë÷√ ±÷”
+ 937          **********************************************************/
+ 938          void screen3(void)
+ 939          {
+ 940   1              write_com(0x30); write_com(0x06); 
+ 941   1              write_com(0x80);
+ 942   1              lcm_w_word("[ENTX +1 -1 ESC]");
+ 943   1              //±Í≥ﬂ----("00--00--00--00--")
+ 944   1              write_com(0x90);
+ 945   1              lcm_w_word("    µ˜’˚");
+ 946   1              write_com(0x88);
+ 947   1              lcm_w_word("   20");
+ 948   1              write_data(year/16+0x30);//ƒÍ   
+ 949   1              write_data(year%16+0x30);
+ 950   1              lcm_w_word("-");
+ 951   1              write_data(month/16+0x30);//‘¬
+ 952   1              write_data(month%16+0x30);
+ 953   1              lcm_w_word("-");
+ 954   1              write_data(day/16+0x30); //»’
+ 955   1              write_data(day%16+0x30);
+ 956   1              lcm_w_word("     ");
+ 957   1               
+ 958   1              write_com(0x98);
+ 959   1              lcm_w_word("    ");
+ 960   1              write_data(hour/16+0x30);       // ±
+ 961   1              write_data(hour%16+0x30);
+ 962   1              lcm_w_word(":");
+ 963   1              write_data(minute/16+0x30);     //∑÷
+ 964   1              write_data(minute%16+0x30);
+ 965   1              lcm_w_word(":");
+ 966   1              write_data(second/16+0x30);     //√Î
+ 967   1              write_data(second%16+0x30); 
+ 968   1              lcm_w_word("     ");
+ 969   1      }
+ 970          
+ 971          /*œ‘ æª∂”≠–≈œ¢---------------------------------------------------------------*/
+ 972          void welcome1(void)
+ 973          {                                                                 
+ 974   1          write12864GDRAM(BMP1);       //œ‘ æÕº∆¨ª∂”≠ΩÁ√Ê(Kiss)
+ 975   1      }
+ 976          
+ 977          void welcome2(void)
+ 978          {                                                                 
+C51 COMPILER V9.01   DISPLAYTIME                                                           07/27/2013 10:39:05 PAGE 17  
+
+ 979   1              write_com(0x30); write_com(0x06); 
+ 980   1              write_com(0x80); lcm_w_word("LCD 12864 ÕÚƒÍ¿˙"); 
+ 981   1              write_com(0x90); lcm_w_word("÷£÷›¥Û—ß°ÔŒ˜—«Àπ");        
+ 982   1              write_com(0x88); lcm_w_word("µÁ◊”–≈œ¢π§≥Ã—ß‘∫");        
+ 983   1              write_com(0x98); lcm_w_word("÷∆◊˜’ﬂ#@@#∫Œ–°ÃŒ");        
+ 984   1      }
+ 985          /*---------------------------------------------------------------------------*/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   6755    ----
+   CONSTANT SIZE    =   2005    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     22      13
+   IDATA SIZE       =     19    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

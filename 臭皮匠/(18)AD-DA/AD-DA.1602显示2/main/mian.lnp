@@ -1,0 +1,6 @@
+"main.obj",
+".\I2C.obj",
+".\LCD1602_Drive.obj",
+".\PCF8591Drive.obj" 
+TO "mian" 
+RAMSIZE(256) 

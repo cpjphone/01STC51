@@ -1,0 +1,45 @@
+#include <reg52.h>
+#include <intrins.h>
+
+typedef unsigned char uchar;
+typedef unsigned char uint;
+
+uint num1,num2;
+sbit led1=P2^2;
+
+void system_Ini()
+{
+     TMOD = 0x00; //选择模式0  13位计数 最大计数8192
+  
+   // TH0=0x1C;   //12.000M  预装初值
+    //TL0=0x18;	
+	 TH0 = (8192 - 1000)/32;
+	 TL0 = (8192 - 1000)%32	;
+     IE = 0x8A;   //中断	
+     TR0  = 1;    //开启T0定时器
+
+
+}
+void main()
+{
+	system_Ini();
+	while(1);	
+}
+
+
+void T0zd(void) interrupt 1      //3定时器1的中断号  1定时器0的中断号 0外部中断1 2外部中断2  4串口中断
+{
+	 //TH0 = 0xFc;    //12.000
+	 //TL0 = 0x18;
+
+	TH0 = (8192 - 1000)/32	;
+	TL0 = (8192 - 1000)%32;
+	num1++;
+	if(num1>100)
+	{
+		num1=0;
+		num2++;
+		if(num2>10)
+		{num2=0;P2=~P2;}	
+	}	 
+}

@@ -1,0 +1,46 @@
+#include "reg52.h"
+#include "dianjin.h"
+
+
+void main()
+{
+	uint i=0;
+	timer0_init();
+	while(1)
+	{
+		while(i<800)
+		{
+			dir=0;
+			PWM(30);
+			if(timer0_flag<1);
+			i++;
+		}
+		while(i>799)
+		{
+			dir=1;
+			PWM(30);
+			if(timer0_flag<1);
+			i++;
+			if(i>1799)
+				i=0;
+		}
+		//en=0;
+		//while(1);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

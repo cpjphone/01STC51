@@ -1,0 +1,6 @@
+"Font.obj",
+"LCD12864.obj",
+"main.obj",
+"pwm.obj" 
+TO "12source" 
+RAMSIZE(256) 

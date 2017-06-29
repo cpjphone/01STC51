@@ -1,0 +1,70 @@
+BL51 BANKED LINKER/LOCATER V6.00                                                        03/02/2012  23:39:46  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.00, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE 小车控制.obj TO 小车控制 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  小车控制.obj (小车縚制)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  小车控制 (小车縚制)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     000CH     UNIT         ?C_C51STARTUP
+            CODE    000FH     0008H     UNIT         ?PR?MAIN?小车縚制
+
+
+
+OVERLAY MAP OF MODULE:   小车控制 (小车縚制)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?小车縚制
+
+
+
+SYMBOL TABLE OF MODULE:  小车控制 (小车縚制)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        小车縚制
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  B:0090H.7       PUBLIC        P1_7
+  B:00B0H.6       PUBLIC        P3_6
+  B:00B0H.7       PUBLIC        P3_7
+  C:000FH         PUBLIC        main
+  -------         PROC          MAIN
+  C:000FH         LINE#         40
+  C:000FH         LINE#         41
+  C:000FH         LINE#         43
+  C:0011H         LINE#         45
+  C:0011H         LINE#         46
+  C:0011H         LINE#         48
+BL51 BANKED LINKER/LOCATER V6.00                                                      03/02/2012  23:39:46  PAGE 2
+
+
+  C:0015H         LINE#         50
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        小车縚制
+
+Program Size: data=9.0 xdata=0 code=23
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

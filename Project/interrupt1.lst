@@ -1,0 +1,288 @@
+C51 COMPILER V9.01   INTERRUPT1                                                            06/29/2013 17:19:47 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE INTERRUPT1
+OBJECT MODULE PLACED IN ..\Obj\interrupt1.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\菜鸟小春\（4）clock\interrupt1.c BROWSE DEBUG OBJECTEXTEND PRINT(.\i
+                    -nterrupt1.lst) OBJECT(..\Obj\interrupt1.obj)
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】：Keil4  
+   4          * 【程序功能】：利用定时器做时钟。在P3口接4个按键调整时间，并具备连加的功能
+   5          * 【技术支持】：中断定时器                              
+   6          * 【晶    振】: 12MHz外部晶振           
+   7          * 【芯    片】: STC89C52RC 
+   8          * 【日    期】: 2013/6/12
+   9          * 【作    者】: Phone
+  10          ******************************************************************************/
+  11          #include<reg52.h>                     //定义头文件 
+  12          #include<intrins.h>
+  13          #define uchar unsigned char                                             //宏定义
+  14          #define uint unsigned int
+  15          
+  16          sbit keyadd = P3^3;//连加按键，判断连加时用到
+  17          uchar code tab[] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x00,0x40,0x80};
+  18          uchar disp_buffer[] ={1,2,11,3,4,12,0,0};
+  19          char con=0,sec,min=34,hour=12,conset=0;         //con计时20=1秒，conset：调整闪烁时间
+  20          uchar flag_t=0,setadd=0;//flag_t:调时0、1、2三种状态，0：正常，1：调分2：调时
+  21                                                          //setadd：连加需要按下的时间
+  22          bit shan,flagadd = 0;   //shan:闪烁标志位，flagadd：连加标志，1：连加
+  23          
+  24          uchar keyscan();
+  25          void kpro(uchar keynum);
+  26          /***********************************************************************/
+  27          //延时函数：功能带有入口参数的延时函数，时间单位1毫秒
+  28          /***********************************************************************/
+  29          void delayms(int m)
+  30          {
+  31   1              int i,j;
+  32   1              for(i=0;i<m;i++)
+  33   1              {
+  34   2                      for(j=0;j<123;j++)
+  35   2                      {}
+  36   2              }
+  37   1      }
+  38          
+  39          /*************************************************/
+  40          //数码管显示函数
+  41          /*************************************************/
+  42          void display()    
+  43          {
+  44   1              uchar i,temp;
+  45   1              temp = 0xfe;
+  46   1              for(i=0;i<8;i++)
+  47   1              {       
+  48   2                      P2 = temp;
+  49   2                      P0 = tab[disp_buffer[i]];
+  50   2                      delayms(2);
+  51   2                      P0 = 0x00;
+  52   2                      temp = _crol_(temp,1);  
+  53   2              }
+  54   1      }
+C51 COMPILER V9.01   INTERRUPT1                                                            06/29/2013 17:19:47 PAGE 2   
+
+  55          
+  56          /*************************************************/
+  57          //调整显示函数
+  58          /*************************************************/
+  59          void displayset()       
+  60          {
+  61   1              uchar i,temp;
+  62   1              temp = 0xfe;
+  63   1              for(i=0;i<8;i++)
+  64   1              {
+  65   2                      P2 = temp;
+  66   2                      if(flag_t == 2)          //调时
+  67   2                      {
+  68   3                              if(i == 0 || i == 1)
+  69   3                              {
+  70   4                                      if(shan == 1)
+  71   4                                              P0 = tab[10];
+  72   4                                      else
+  73   4                                              P0 = tab[disp_buffer[i]];       
+  74   4                              }
+  75   3                              else
+  76   3                                      P0 = tab[disp_buffer[i]];
+  77   3                      }
+  78   2                      if(flag_t == 1)            //调分
+  79   2                      {
+  80   3                              if(i == 3 || i == 4)
+  81   3                              {
+  82   4                                      if(shan == 1)
+  83   4                                              P0 = tab[10];
+  84   4                                      else
+  85   4                                              P0 = tab[disp_buffer[i]];       
+  86   4                              }
+  87   3                              else
+  88   3                                      P0 = tab[disp_buffer[i]];
+  89   3                      }
+  90   2                      delayms(2);
+  91   2                      P0 = 0x00;
+  92   2                      temp = _crol_(temp,1);  
+  93   2              }
+  94   1      }
+  95          
+  96          /***********************************************************************/
+  97          //按键扫描程序：带有参数返回的，返回按键值
+  98          /***********************************************************************/
+  99          uchar keyscan()
+ 100          {
+ 101   1              uchar keynum,ktemp,i;
+ 102   1              P3 = P3 | 0x3c;         //0011 1100实现了按键接口的置位，而不改变其他端口
+ 103   1              keynum = P3;            //读取按键的状态
+ 104   1              if((keynum | 0xc3) == 0xff)
+ 105   1                      return(0);
+ 106   1                      delayms(5);
+ 107   1              keynum = P3;            //读取按键的状态
+ 108   1              if((keynum | 0xc3) == 0xff)
+ 109   1                      return(0);
+ 110   1              flagadd = 0;      //连加标志，确保连加
+ 111   1              setadd = 0;               //确保5秒后连加
+ 112   1              while(1)
+ 113   1              {
+ 114   2                      if(flagadd == 1)
+ 115   2                      {
+ 116   3                              if(keyadd == 0)    //判断连加按键为‘ + ‘键
+C51 COMPILER V9.01   INTERRUPT1                                                            06/29/2013 17:19:47 PAGE 3   
+
+ 117   3                              {
+ 118   4                                      if(flag_t == 1)
+ 119   4                                      {
+ 120   5                                              min++;
+ 121   5                                              if(min > 59)
+ 122   5                                                      min = 0;
+ 123   5                                      }
+ 124   4                                      if(flag_t == 2)
+ 125   4                                      {
+ 126   5                                              hour++;
+ 127   5                                              if(hour > 23)
+ 128   5                                                      hour = 0;
+ 129   5                                      }
+ 130   4                              }
+ 131   3                      }
+ 132   2                      disp_buffer[1] = hour%10;
+ 133   2                      disp_buffer[0] = hour/10;
+ 134   2                      disp_buffer[4] = min%10;
+ 135   2                      disp_buffer[3] = min/10;
+ 136   2                      disp_buffer[7] = sec%10;
+ 137   2                      disp_buffer[6] = sec/10;
+ 138   2                      for(i=0;i<10;i++)
+ 139   2                      {
+ 140   3                              display();
+ 141   3                      }
+ 142   2                      ktemp = P3;             //读取按键的状态
+ 143   2                      if((ktemp | 0xc3) == 0xff)
+ 144   2                              break;
+ 145   2              }
+ 146   1              flagadd = 0;
+ 147   1              return(keynum);
+ 148   1      }
+ 149          
+ 150          void kpro(uchar keynum)
+ 151          {
+ 152   1              if((keynum & 0x3c) == 0x1c)              // 7 0001 1100 0
+ 153   1              {;}      //备用
+ 154   1              if((keynum & 0x3c) == 0x2c)              // 7 0010 1100 0  减
+ 155   1              {
+ 156   2                      if(flag_t==1)
+ 157   2                      {
+ 158   3                              min--;
+ 159   3                              if(min < 0)
+ 160   3                                      min = 59;
+ 161   3                      }
+ 162   2                      if(flag_t==2)
+ 163   2                      {
+ 164   3                              hour--;
+ 165   3                              if(hour < 0)
+ 166   3                                      hour = 23;
+ 167   3                      }
+ 168   2              }       
+ 169   1              if((keynum & 0x3c) == 0x34)              // 7 0011 0100 0  加
+ 170   1              {
+ 171   2                      if(flag_t==1)
+ 172   2                      {
+ 173   3                              min++;
+ 174   3                              if(min>59)
+ 175   3                                      min = 0;
+ 176   3                      }
+ 177   2                      if(flag_t==2)
+ 178   2                      {
+C51 COMPILER V9.01   INTERRUPT1                                                            06/29/2013 17:19:47 PAGE 4   
+
+ 179   3                              hour++;
+ 180   3                              if(hour>23)
+ 181   3                                      hour = 0;
+ 182   3                      }
+ 183   2              }       
+ 184   1              if((keynum & 0x3c) == 0x38)              // 7 0011 1000 0 模式调整键
+ 185   1              {
+ 186   2                      flag_t++;
+ 187   2                      if(flag_t > 2)
+ 188   2                              flag_t = 0;
+ 189   2              }       
+ 190   1      }
+ 191          
+ 192          /***********************************************************************/
+ 193          //
+ 194          /***********************************************************************/
+ 195          void main()
+ 196          {
+ 197   1              uchar k;   //键值判断
+ 198   1              EA = 1;         //开总中断
+ 199   1              ET0 = 1;        //开定时器0中断
+ 200   1              TMOD = 0x01;     //T0 ,方式1
+ 201   1              TH0 = 0x3c;              //赋初值        (65536-50000)/256      0000 0000 0000 0000        
+ 202   1              TL0 = 0xb0;              //          (65536-50000)%256
+ 203   1              TR0 = 1;
+ 204   1              while(1)
+ 205   1              {
+ 206   2                      k = keyscan();
+ 207   2                      if(k != 0)
+ 208   2                              kpro(k);
+ 209   2                      disp_buffer[1] = hour%10;
+ 210   2                      disp_buffer[0] = hour/10;
+ 211   2                      disp_buffer[4] = min%10;
+ 212   2                      disp_buffer[3] = min/10;
+ 213   2                      disp_buffer[7] = sec%10;
+ 214   2                      disp_buffer[6] = sec/10;
+ 215   2                      if(flag_t != 0)
+ 216   2                              displayset();
+ 217   2                      else
+ 218   2                              display();      
+ 219   2              }
+ 220   1      }
+ 221          
+ 222          void t0_50ms() interrupt 1
+ 223          {
+ 224   1              TH0 = 0x3c;
+ 225   1              TL0 = 0xb0;
+ 226   1              con++;
+ 227   1              conset++;
+ 228   1              if(conset>5)
+ 229   1              {
+ 230   2                      conset = 0;
+ 231   2                      shan = ~shan;
+ 232   2              }
+ 233   1              if(con>=20)
+ 234   1              {       
+ 235   2                      con = 0;
+ 236   2                      sec++;
+ 237   2                      setadd++;
+ 238   2                      if(setadd > 3)
+ 239   2                      {
+ 240   3                              setadd = 0;
+C51 COMPILER V9.01   INTERRUPT1                                                            06/29/2013 17:19:47 PAGE 5   
+
+ 241   3                              flagadd = 1;
+ 242   3                      }
+ 243   2                      if(sec > 59)
+ 244   2                      {
+ 245   3                              sec = 0;
+ 246   3                              min++;
+ 247   3                              if(min > 59)
+ 248   3                              {
+ 249   4                                      min = 0;
+ 250   4                                      hour++;
+ 251   4                                      if(hour > 23)
+ 252   4                                              hour = 0;
+ 253   4                              }
+ 254   3                      }       
+ 255   2              }               
+ 256   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    694    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

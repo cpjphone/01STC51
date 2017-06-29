@@ -1,0 +1,164 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        07/27/2013  08:32:33  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\(3)KEIL4\C51\BIN\BL51.EXE STARTUP.obj, led.obj, .\Drive595.obj TO led RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  led.obj (LED)
+  .\Drive595.obj (DRIVE595)
+
+
+LINK MAP OF MODULE:  led (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0003H     UNIT         _DATA_GROUP_
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0026H     UNIT         ?PR?MAIN?LED
+            CODE    0029H     0026H     UNIT         ?PR?_HC595SENDDATA?DRIVE595
+            CODE    004FH     001EH     UNIT         ?PR?_DELAY?LED
+            CODE    006DH     0010H     UNIT         ?CO?LED
+            CODE    007DH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   led (?C_STARTUP)
+
+
+SEGMENT                               DATA_GROUP 
+  +--> CALLED SEGMENT               START    LENGTH
+---------------------------------------------------
+?C_C51STARTUP                       -----    -----
+  +--> ?PR?MAIN?LED
+
+?PR?MAIN?LED                        0008H    0003H
+  +--> ?CO?LED
+  +--> ?PR?_HC595SENDDATA?DRIVE595
+  +--> ?PR?_DELAY?LED
+
+
+
+SYMBOL TABLE OF MODULE:  led (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:007DH         SEGMENT       ?C_C51STARTUP
+  I:000BH         SEGMENT       ?STACK
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/27/2013  08:32:33  PAGE 2
+
+
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0080H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0000H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:007DH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         92
+  C:007DH         LINE#         99
+  C:007FH         LINE#         100
+  C:0080H         LINE#         101
+  C:0081H         LINE#         102
+  C:0083H         LINE#         151
+  C:0086H         LINE#         155
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        LED
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:006DH         PUBLIC        LED7Code
+  C:004FH         PUBLIC        _delay
+  C:0003H         PUBLIC        main
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        HC595SendVal
+  D:0009H         SYMBOL        LedNumVal
+  -------         ENDDO         
+  C:0003H         LINE#         25
+  C:0003H         LINE#         26
+  C:0003H         LINE#         29
+  C:0003H         LINE#         30
+  C:0003H         LINE#         31
+  C:000BH         LINE#         32
+  C:001CH         LINE#         33
+  C:0020H         LINE#         34
+  C:0027H         LINE#         36
+  -------         ENDPROC       MAIN
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        i
+  -------         DO            
+  D:0004H         SYMBOL        j
+  -------         ENDDO         
+  C:004FH         LINE#         39
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/27/2013  08:32:33  PAGE 3
+
+
+  C:004FH         LINE#         40
+  C:004FH         LINE#         42
+  C:0058H         LINE#         43
+  C:006CH         LINE#         44
+  -------         ENDPROC       _DELAY
+  -------         ENDMOD        LED
+
+  -------         MODULE        DRIVE595
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00B0H         PUBLIC        P3
+  B:00B0H.4       PUBLIC        MOSIO
+  B:00B0H.5       PUBLIC        R_CLK
+  B:00B0H.6       PUBLIC        S_CLK
+  C:0029H         PUBLIC        _HC595SendData
+  -------         PROC          _HC595SENDDATA
+  D:0007H         SYMBOL        SendVal
+  -------         DO            
+  D:0006H         SYMBOL        i
+  -------         ENDDO         
+  C:0029H         LINE#         14
+  C:0029H         LINE#         15
+  C:0029H         LINE#         19
+  C:002BH         LINE#         20
+  C:002BH         LINE#         21
+  C:003CH         LINE#         22
+  C:003EH         LINE#         24
+  C:0040H         LINE#         25
+  C:0041H         LINE#         26
+  C:0042H         LINE#         27
+  C:0044H         LINE#         29
+  C:0048H         LINE#         32
+  C:004AH         LINE#         33
+  C:004BH         LINE#         34
+  C:004CH         LINE#         35
+  C:004EH         LINE#         38
+  -------         ENDPROC       _HC595SENDDATA
+  -------         ENDMOD        DRIVE595
+
+Program Size: data=12.0 xdata=0 code=137
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

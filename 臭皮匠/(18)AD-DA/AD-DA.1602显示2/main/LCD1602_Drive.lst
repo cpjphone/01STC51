@@ -1,0 +1,85 @@
+C51 COMPILER V9.01   LCD1602_DRIVE                                                         09/07/2013 18:01:53 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD1602_DRIVE
+OBJECT MODULE PLACED IN .\LCD1602_Drive.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\LCD1602_Drive\LCD1602_Drive.c BROWSE INCDIR(..\IIC_Drive;..\LCD1602_
+                    -Drive;..\PCF8591Drive) DEBUG OBJECTEXTEND PRINT(.\LCD1602_Drive.lst) OBJECT(.\LCD1602_Drive.obj)
+
+line level    source
+
+   1          
+   2          #include <reg52.h>                                         //Í·ÎÄ¼þ
+   3          #define uchar unsigned char                        //ºê¶¨Òå
+   4          #define uint unsigned int
+   5          
+   6          sbit lcdrs = P2^6;                                                        
+   7          sbit lcdrw = P2^5;                                                        
+   8          sbit lcden = P2^7;  
+   9          
+  10          void delay(uint x);  //ÉùÃ÷
+  11                  
+  12          /*************************************************************************************
+  13          LCD1602Ð´Ö¸Áî
+  14          *************************************************************************************/
+  15          void LCD1602_write_com(uchar com)
+  16          {
+  17   1              lcdrs=0;                                                          //lcdrsÎªµÍµçÆ½Ê±£¬Ð´ÃüÁî
+  18   1              lcdrw=0;
+  19   1              delay(1);
+  20   1              P0=com;
+  21   1              lcden=1;
+  22   1              delay(1);
+  23   1              lcden=0;
+  24   1      }
+  25          /*************************************************************************************
+  26          LCD1602Ð´Êý¾Ý
+  27          *************************************************************************************/
+  28          void LCD1602_write_data(uchar dat)
+  29          {
+  30   1              lcdrs=1;                                                        //lcdrsÎª¸ßµçÆ½Ê±£¬Ð´Êý¾Ý
+  31   1              lcdrw=0;
+  32   1              delay(1);       
+  33   1              P0=dat;
+  34   1              lcden=1;
+  35   1              delay(1);
+  36   1              lcden=0;
+  37   1      }
+  38          /*************************************************************************************
+  39          LCD1602³õÊ¼»¯
+  40          *************************************************************************************/
+  41          void LCD1602_init()
+  42          {
+  43   1              lcden=0;
+  44   1              LCD1602_write_com(0x38);                                        //ÏÔÊ¾Ä£Ê½Éè¶¨,ÉèÖÃ16*2ÏÔÊ¾5*7µãÕó£¬8Î»Êý¾Ý½Ó¿Ú
+  45   1              LCD1602_write_com(0x0f);                                        //¿ª¹ØÏÔÊ¾¡¢¹â±êÓÐÎÞÉèÖÃ¡¢¹â±êÉÁË¸ÉèÖÃ
+  46   1              LCD1602_write_com(0x06);                                        //Ð´Ò»¸ö×Ö·ûºóÖ¸Õë¼ÓÒ»
+  47   1              LCD1602_write_com(0x01);                                        //ÇåÆÁÖ¸Á
+  48   1      }
+  49          /*************************************************************************************
+  50          Ð´Á¬Ðø×Ö·ûº¯Êý
+  51          *************************************************************************************/
+  52          void LCD1602_write_word(uchar *s)
+  53          {
+  54   1              while(*s>0)
+C51 COMPILER V9.01   LCD1602_DRIVE                                                         09/07/2013 18:01:53 PAGE 2   
+
+  55   1              {
+  56   2                      LCD1602_write_data(*s);
+  57   2                      s++;
+  58   2              }
+  59   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    116    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

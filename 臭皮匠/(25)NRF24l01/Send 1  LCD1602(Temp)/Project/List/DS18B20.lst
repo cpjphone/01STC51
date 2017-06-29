@@ -1,0 +1,124 @@
+C51 COMPILER V9.01   DS18B20                                                               07/27/2013 11:51:51 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Obj\DS18B20.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\UserDriver\DS18B20\DS18B20.c BROWSE INCDIR(..\Include;..\Main;..\UserDri
+                    -ver\NRF24L01;..\UserDriver\Delay;..\UserDriver\Display;..\UserDriver\DS18B20;..\UserDriver\LCD1602) DEBUG OBJECTEXTEND P
+                    -RINT(.\List\DS18B20.lst) OBJECT(.\Obj\DS18B20.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          函数名称：      DS18B20.c
+   3          描述    ：      DS18B20驱动程序
+   4          输入    ：      无
+   5          输出    ：      无
+   6          返回    ：      无
+   7          注意事项：      无
+   8          *********************************************************************************************/
+   9          #include "STC.h"
+  10          #include "DS18B20.h"
+  11          
+  12          uint tvalue;            //温度值
+  13          uchar tflag;
+  14          
+  15          
+  16          /*DS18B20驱动程序------------------------------------------------------------*/
+  17          /********************************************************************************************
+  18          名称：延时程序
+  19          功能：延时1us
+  20          *********************************************************************************************/           
+  21          void DelayDS18B20(unsigned int i)
+  22          {
+  23   1              while(i--);
+  24   1      }
+  25          
+  26          /********************************************************************************************
+  27          名称：DS18B20驱动程序
+  28          功能：驱动DS18B20温度传感器
+  29          *********************************************************************************************/           
+  30          void Init_DS18B20()             //DS18B20复位
+  31          {  
+  32   1              unsigned char x=0;
+  33   1              DQ = 1;          //DQ复位
+  34   1              DelayDS18B20(4);  //延时
+  35   1              DQ = 0;          //DQ拉低
+  36   1              DelayDS18B20(100);//精确延时大于480us
+  37   1              DQ = 1;          //拉高
+  38   1              DelayDS18B20(40);        
+  39   1      }  
+  40            
+  41          uchar DS18B20ReadData()/*读数据*/
+  42          { 
+  43   1              unsigned char i=0;
+  44   1          unsigned char dat = 0;
+  45   1              for (i=8;i>0;i--)
+  46   1              {   
+  47   2                      DQ = 0; //给脉冲信号
+  48   2                      dat>>=1;
+  49   2                      DQ = 1; //给脉冲信号
+  50   2                      if(DQ)
+  51   2                        dat|=0x80;
+  52   2                        DelayDS18B20(10);
+  53   2              }
+C51 COMPILER V9.01   DS18B20                                                               07/27/2013 11:51:51 PAGE 2   
+
+  54   1              return(dat);
+  55   1      }
+  56          
+  57          void DS18B20WrData(uchar Data)/*写数据*/
+  58          {
+  59   1              unsigned char i=0;
+  60   1          for (i=8; i>0; i--)
+  61   1              { 
+  62   2                      DQ = 0;
+  63   2              DQ = Data&0x01;
+  64   2              DelayDS18B20(10);
+  65   2              DQ = 1;
+  66   2              Data>>=1;
+  67   2         }
+  68   1      }
+  69          uint Read_Temp()/*读取温度值并转换*/
+  70          {
+  71   1              uchar a,b;
+  72   1              float m;
+  73   1              Init_DS18B20();    
+  74   1              DS18B20WrData(0xcc);//*跳过读序列号*/
+  75   1              DS18B20WrData(0x44);//*启动温度转换*/
+  76   1              Init_DS18B20();    
+  77   1              DS18B20WrData(0xcc);//*跳过读序列号*/ 
+  78   1              DS18B20WrData(0xbe);//*读取温度*/ 
+  79   1              a = DS18B20ReadData();
+  80   1              b = DS18B20ReadData();
+  81   1              tvalue = b;
+  82   1              tvalue <<= 8;
+  83   1              tvalue=tvalue|a;
+  84   1              if(tvalue<0x0fff)
+  85   1                      tflag=0;
+  86   1              else
+  87   1              {
+  88   2                      tvalue=~tvalue+1;
+  89   2                      tflag=1;
+  90   2              }
+  91   1              m=tvalue*(0.0625);//tvalue <<= 8;温度值扩大10倍，精确到1位小数
+  92   1              tvalue=m*10+0.5;
+  93   1              return(tvalue);
+  94   1      }
+  95          
+  96          
+  97          /*---------------------------------------------------------------------------*/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    244    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

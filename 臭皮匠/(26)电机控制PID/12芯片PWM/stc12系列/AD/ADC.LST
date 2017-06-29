@@ -1,0 +1,111 @@
+C51 COMPILER V9.01   ADC                                                                   07/29/2013 15:00:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE ADC
+OBJECT MODULE PLACED IN ADC.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ADC.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*
+   2                      STC12C5A16S2 ADC 驱动程序
+   3          */
+   4          
+   5          #include "ADC.h"
+   6          uint16 ADCValue;
+   7          //#include ""
+   8          /**************************************************/
+   9          /*
+  10                  功能描述：ADC 初始化
+  11                  输入参数：
+  12                  输出参数：
+  13                  作    者：BeanBean
+  14                  备    注：
+  15                  版本记录：2011-05-06        V1.0
+  16          */
+  17          /**************************************************/
+  18          void ADC_Int(uint8 ADCChannle)
+  19          {
+  20   1         
+  21   1          EADC = 1;
+  22   1          EA |=1;
+  23   1              P1ASF=0X01<< ADCChannle;   
+  24   1              
+  25   1         ADC_CONTR=(ADCPowerOn | ADCChannle | ADCBeginConvert | ADCSpeed);
+  26   1         AUXR1 |= 0X04;
+  27   1          
+  28   1      }
+  29          
+  30          /**************************************************/
+  31          /*
+  32                  功能描述：ADC 读值  非中断
+  33                  输入参数：
+  34                  输出参数：
+  35                  作    者：BeanBean
+  36                  备    注：
+  37                  版本记录：2011-05-06        V1.0
+  38          */
+  39          /**************************************************
+  40          uint16 ADCConvert(uint8  ADCChannle)
+  41          {
+  42            
+  43                  uint16 ADCValue;
+  44                      P1ASF=0X01<< ADCChannle;   
+  45                  
+  46                  ADC_CONTR=(ADCPowerOn | ADCChannle | ADCBeginConvert | ADCSpeed);
+  47                  AUXR1 |= 0X04;
+  48                    
+  49                  while((ADC_CONTR & ADCConvertFin)!= ADCConvertFin);
+  50                  
+  51                      ADC_CONTR &=~ADCConvertFin;
+  52                      
+  53                                  ADCValue=ADC_RES&0x03 ;
+  54                                  ADCValue=(ADCValue <<8) | ADC_RESL ;
+  55                      ADC_RES=0;
+C51 COMPILER V9.01   ADC                                                                   07/29/2013 15:00:52 PAGE 2   
+
+  56                                  ADC_RESL=0;
+  57                          //      ADCValue=0.0;
+  58                      ADC_CONTR |=ADCBeginConvert; 
+  59                                  return ADCValue;           
+  60                  
+  61                  //      return 0;
+  62              
+  63          }
+  64          
+  65          /**************************************************/
+  66          /*
+  67                  功能描述：ADC 读值  中断取值
+  68                  输入参数：
+  69                  输出参数：
+  70                  作    者：BeanBean
+  71                  备    注：
+  72                  版本记录：2011-05-06        V1.0
+  73          */
+  74          /**************************************************/
+  75          void ADC_intp() interrupt 5
+  76          {
+  77   1         ADC_CONTR &=~ADCConvertFin;
+  78   1         ADCValue=ADC_RES&0x03 ;
+  79   1         ADCValue=(ADCValue << 8 ) | ADC_RESL ;
+  80   1         ADC_RES=0;
+  81   1         ADC_RESL=0;
+  82   1         P2_0 = ADC_CONTR&ADCBeginConvert;   //调试用
+  83   1         ADC_CONTR |=ADCBeginConvert;            //再次启动AD
+  84   1      }
+  85          
+  86          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     76    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

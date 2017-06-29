@@ -1,0 +1,81 @@
+C51 COMPILER V9.01   MAIN                                                                  08/26/2013 15:22:28 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE main.c BROWSE INCDIR(..\LCD12864) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【名    称】： LCD12864多功能万年历 
+   3          * 【语    言】： C语言
+   4          * 【编译环境】： Keli3 
+   5          * 【晶    振】:  12MHz外部晶振          
+   6          * 【芯    片】:  STC89C516RD+
+   7          * 【时钟芯片】:  DS1302
+   8          * 【温度传感】:  DS18B20 
+   9          * 【液 晶 屏】：LCM-12864-ST7920, LCM12864使用并口连接方式,PSB、RST接高电平               
+  10          * 【程序功能】：
+  11          * 【日    期】:  
+  12          * 【作    者】:         
+  13          ******************************************************************************/  
+  14          #include <reg51.h> 
+  15          #include "LCD12864.h"
+*** WARNING C318 IN LINE 4 OF ..\LCD12864\LCD12864.H: can't open file 'Type_Define.h'
+*** WARNING C318 IN LINE 5 OF ..\LCD12864\LCD12864.H: can't open file 'Font.h'
+*** WARNING C318 IN LINE 6 OF ..\LCD12864\LCD12864.H: can't open file 'AlarmClock.h'
+*** ERROR C141 IN LINE 19 OF ..\LCD12864\LCD12864.H: syntax error near 'cmdcode', expected ')'
+*** ERROR C141 IN LINE 20 OF ..\LCD12864\LCD12864.H: syntax error near 'Dispdata', expected ')'
+*** ERROR C141 IN LINE 21 OF ..\LCD12864\LCD12864.H: syntax error near '*', expected ')'
+*** ERROR C141 IN LINE 27 OF ..\LCD12864\LCD12864.H: syntax error near 'x', expected ')'
+*** ERROR C141 IN LINE 28 OF ..\LCD12864\LCD12864.H: syntax error near 'x', expected ')'
+*** ERROR C141 IN LINE 29 OF ..\LCD12864\LCD12864.H: syntax error near 'x', expected ')'
+  16          
+  17          
+  18          /*------------------------------主函数---------------------------------------*/
+  19          void main()
+  20          {                            
+  21   1              main_init();                    //主程序初始化
+  22   1      
+  23   1              lcm_init();                             //液晶初始化
+  24   1      
+  25   1              welcome1();                             //显示Kiss
+  26   1              delayms(250);
+  27   1              lcm_clr2();                             //清屏
+  28   1              Clean_12864_GDRAM();    //清屏
+  29   1      
+  30   1              welcome2();                             //显示信息
+  31   1              delayms(250);
+  32   1              lcm_clr2();                             //清屏
+  33   1              Clean_12864_GDRAM();    //清屏
+  34   1      
+  35   1              buzzer=0;                               //开蜂鸣器
+  36   1              delayms(30);
+  37   1              buzzer=1;                               //关蜂鸣器
+  38   1              keydone();
+  39   1              
+  40   1      }
+  41          
+  42          /**********************************************************
+  43          主程序初始化
+  44          **********************************************************/
+  45          void main_init(void)
+  46          {       
+C51 COMPILER V9.01   MAIN                                                                  08/26/2013 15:22:28 PAGE 2   
+
+  47   1              LCM_PSB=1;      //液晶并口通信
+  48   1              LCM_BACKLIGHT=0; //打开背光灯
+  49   1      
+  50   1              key1 = 1;  //A
+  51   1              key2 = 1;  //B
+  52   1              key3 = 1;  //C
+  53   1              key4 = 1;  //D
+  54   1              key5 = 1;  //背光
+  55   1      
+  56   1      
+  57   1      } 
+  58          
+  59          /*结束----------------------------------------------------------------------*/
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  6 ERROR(S)

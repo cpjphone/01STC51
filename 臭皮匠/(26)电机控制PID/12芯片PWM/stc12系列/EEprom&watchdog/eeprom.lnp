@@ -1,0 +1,4 @@
+"LCD2004.obj",
+"stc12c_eeprom.obj",
+"main.obj" 
+TO "eeprom" 

@@ -1,0 +1,71 @@
+C51 COMPILER V8.02   MAIN                                                                  07/21/2013 14:41:20 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "stc12_eeprom.h"
+   2          #include "lcd2004.h"
+   3          sbit key = P1^1;
+   4          void initwd()
+   5          {
+   6   1         WDT_CONTR = 1<<WDT_EN | 0x06;
+   7   1      }
+   8          
+   9          void ClrWd()
+  10          {
+  11   1         WDT_CONTR |= 1<<WDT_CLR;
+  12   1      }
+  13          
+  14           void main()
+  15           {
+  16   1        // HP_init();
+  17   1         uint8 cot;
+  18   1         uint8 test;
+  19   1        // P1 = 0xfe;
+  20   1         LCDConfig();
+  21   1         LCDLogo();
+  22   1         initwd();
+  23   1      
+  24   1         cot = IapReaduint8(0x01);
+  25   1         cot ++;
+  26   1      
+  27   1         LCDPrintChar(0,2,"Watchdog open!");
+  28   1        if(IapEraseSector(IAP_ADDRESS))    //Erase current sector
+  29   1         LCDPrintChar(0,1,"Eraser sector success");
+  30   1        else
+  31   1         LCDPrintChar(0,1,"Eraser sector falure");
+  32   1         LCDPrintChar(0,2,"system normal");
+  33   1      
+  34   1         IapProgramuint8(0x0001, cot);
+  35   1      
+  36   1         LCDDisplayNum(0,3,cot,10);
+  37   1      
+  38   1         while(1)
+  39   1         {
+  40   2          while(!key);
+  41   2          ClrWd();
+  42   2               test ++;
+  43   2        // LCDPrintChar(5,2,"Watchdog test");
+  44   2           LCDDisplayNum(16,3,test,10);
+  45   2         }
+  46   1       }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    139    ----
+   CONSTANT SIZE    =     72    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V8.02   MAIN                                                                  07/21/2013 14:41:20 PAGE 2   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

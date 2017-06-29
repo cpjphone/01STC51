@@ -1,0 +1,252 @@
+/****************************************************************/
+// 1602液晶显示"Welcome To DoWell"
+/****************************************************************/	   
+#include<reg52.h>							//头文件定义
+
+#define uchar unsigned char 				//宏定义
+
+
+sbit RS = P1^0;
+sbit RW = P1^1;
+sbit EN = P1^2;
+#define Data P2
+
+/****************************************************************/
+//	delayms(unsigned int ms);延时程序  带有输入参数 ms
+/****************************************************************/
+void delayms(unsigned int m)
+{
+   	unsigned int i,j;
+	for(i=0;i<m;i++)
+		for(j=0;j<123;j++);
+}
+
+//uchar LCD_1602Read_Data()
+//{
+//	uchar Dat;
+//	RW = 1;			delayms(2);
+//	RS = 0;			delayms(2);
+//	EN = 1;			delayms(2);
+//	Dat = Data;		delayms(2);
+//	EN = 0;			delayms(2);
+//	return Dat;
+//}
+
+void LCD_1602Write_Data(uchar Dat)
+{
+	RW = 0;			delayms(10);
+	RS = 1;			delayms(10);
+	EN = 1;			delayms(10);
+	Data = Dat;		delayms(10);
+	EN = 0;			delayms(10);
+}
+
+void LCD_1602Write_Cmd(uchar Cmd)
+{
+	RW = 0;			delayms(10);
+	RS = 0;			delayms(10);
+	EN = 1;			delayms(10);
+	Data = Cmd;		delayms(10);
+	EN = 0;			delayms(10);
+}
+
+//液晶字符输入的位置
+void GotoXY(uchar x, uchar y)	   //X为显示指针的位置，即为各行的第几个位置，Y选行
+{
+	if(y==0)
+		LCD_1602Write_Cmd(0x80+x);	//x取值范围0x00到0x27
+	if(y==1)
+		LCD_1602Write_Cmd(0x80+0x40+x);
+}
+
+void LCD1602_Init()
+{
+	LCD_1602Write_Cmd(0x38);//1602显示，5*7点阵，8位数据接口
+	LCD_1602Write_Cmd(0x0c);//显示开，无光标
+	LCD_1602Write_Cmd(0x06);//AC加一，显示不移动
+	LCD_1602Write_Cmd(0x01);//显示清零
+	delayms(300);			//稍作延时
+}
+
+void Display_CharString(uchar x,uchar y,uchar *Dat0)
+{
+	uchar i = 0;
+	GotoXY(x,y);
+	while(*(Dat0 + i) != '\0')//*(Dat + i)	
+	{
+		LCD_1602Write_Data(Dat0[i]);	
+		i++;
+	}
+}
+void main()
+{
+	//uchar dat1[] = "DoWell";
+	LCD1602_Init();
+
+	Display_CharString(3,0,"Welcome To");
+	delayms(500);
+
+	Display_CharString(5,1,"DoWell");
+	while(1) 
+	{
+
+	} 	  
+}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                      @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+################################     第二种写法       ###################################
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$		      $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#define LCD1602_DATA P1     //1602液晶数据口
+
+sbit LCD1602_RS=P3^5;   
+sbit LCD1602_RW=P3^4;   
+sbit LCD1602_EN=P3^3; 
+
+/***********************************************************
+忙检测
+************************************************************/
+void LCD1602_check_busy()
+{
+    LCD1602_DATA = 0xff;
+    LCD1602_RS = 0 ;	
+    LCD1602_RW = 1 ;	
+    LCD1602_EN = 1 ;	
+    while(LCD1602_DATA & 0x80) ;	
+    LCD1602_EN = 0 ;			
+}
+
+/**********************************************************
+写指令    
+************************************************************/
+void LCD1602_write_cmd(uchar cmd)
+{
+    LCD1602_check_busy();	
+    LCD1602_RS = 0 ;	
+    LCD1602_RW = 0 ;	
+    LCD1602_DATA = cmd ;	
+    LCD1602_EN = 1 ;
+    _nop_();    
+    LCD1602_EN = 0 ;
+}
+
+/***********************************************************
+写数据
+*************************************************************/
+void LCD1602_write_data(uchar dat)
+{
+    LCD1602_check_busy();	
+    LCD1602_RS = 1 ;	
+    LCD1602_RW = 0 ;	
+    LCD1602_DATA = dat ;	
+    LCD1602_EN = 1 ;
+    _nop_();	
+    LCD1602_EN = 0 ;
+}
+
+/***********************************************************
+1602初始化
+************************************************************/
+void LCD1602_init()
+{
+/****************写入自定义字符***************************/
+    uchar i  ;
+    LCD1602_write_cmd(0x40);//CGRAM起始地址
+    for(i=0;i<48;i++)
+        LCD1602_write_data(self_table[i]);//写入6个自定义字符
+/*********************************************************/
+
+    LCD1602_write_cmd(0x38);  //8位数据，双列显示，5*7字形
+    LCD1602_write_cmd(0x0c);  //开显示，关光标，光标不闪烁
+    LCD1602_write_cmd(0x01);  //清屏
+}
+
+/************************************************************
+设置显示坐标
+************************************************************/
+void LCD1602_set_postion(uchar x , uchar y)
+{
+	if(!y)
+		LCD1602_write_cmd(0x80+x) ;
+	else if(y)
+		LCD1602_write_cmd(0xc0+x) ;
+}
+
+/************************************************************
+指定位置写字符
+*************************************************************/
+void LCD1602_write_char(uchar x , uchar y , uchar chardata)
+{
+    LCD1602_set_postion(x,y) ;
+    LCD1602_write_data(chardata) ;
+}
+
+/************************************************************
+指定位置写字符串
+*************************************************************/
+void LCD1602_write_string(uchar x , uchar y , uchar *string)
+{
+    LCD1602_set_postion(x,y) ;
+    while((*string) != '\0')
+    {	
+        LCD1602_write_data(*string) ;
+        string++ ;
+    }
+}
+
+void Welcome()	  //欢迎信息
+{
+	uchar i;
+	for(i = 0;i < 12;i++)	 //欢迎
+	{
+		LCD1602_write_string(1,0,"LCD1602 Clock");
+		delay(200);
+		LCD1602_write_string(1,1,"Welcome To You");
+		delay(600);
+	}
+	LCD1602_write_cmd(0x0c);   //关光标
+	LCD1602_write_cmd(0x01);  //清屏
+	
+	for(i = 0;i < 12;i++)	//制作信息
+	{
+		LCD1602_write_string(4,0,"Made By");
+		delay(200);
+		LCD1602_write_string(2,1,"He Xiao Tao");
+		delay(600);
+	}
+	LCD1602_write_cmd(0x0c);   //关光标
+	LCD1602_write_cmd(0x01);  //清屏
+
+
+	for(i = 0;i < 12;i++)	//Hello
+	{
+		LCD1602_write_string(5,0,"Hello!");
+		delay(200);
+		LCD1602_write_string(0,1,"Please Wait.....");
+		delay(600);
+	}
+	LCD1602_write_cmd(0x0c);   //关光标
+	LCD1602_write_cmd(0x01);  //清屏
+
+	
+}
+
+/********************************************************************************************
+名称：main()
+功能：主函数
+*********************************************************************************************/	
+void main()
+{
+ 	LCD1602_init();
+
+	Welcome();
+
+	while(1)
+  	{ 
+	
+  	}
+}

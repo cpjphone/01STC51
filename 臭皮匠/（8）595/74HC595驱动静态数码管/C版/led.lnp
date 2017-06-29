@@ -1,0 +1,5 @@
+"STARTUP.obj",
+"led.obj",
+".\Drive595.obj" 
+TO "led" 
+RAMSIZE(256) 

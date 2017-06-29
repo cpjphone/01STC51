@@ -1,0 +1,97 @@
+C51 COMPILER V9.01   PWM                                                                   06/11/2013 10:05:30 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN pwm.OBJ
+COMPILER INVOKED BY: D:\keil4\C51\BIN\C51.EXE pwm.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>                     //定义头文件
+   2          #include<intrins.h>
+   3          #define uchar unsigned char       //宏定义
+   4          #define uint  unsigned int
+   5          
+   6          uchar count=0;
+   7          uchar i;
+   8          uchar code tab[152] = {
+   9          0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,/*"未命名文件",0*/
+  10          0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0xBF,/*"未命名文件",0*/
+  11          0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x9F,0xDF,/*"未命名文件",0*/
+  12          0x0F,0x0F,0x0F,0x0F,0x0F,0x8F,0xCF,0xEF,/*"未命名文件",0*/
+  13          0x07,0x07,0x07,0x07,0x87,0xC7,0xE7,0xF7,/*"未命名文件",0*/
+  14          0x03,0x03,0x03,0x83,0xC3,0xE3,0xF3,0xFB,/*"未命名文件",0*/
+  15          0x01,0x01,0x81,0xC1,0xE1,0xF1,0xF9,0xFD,/*"未命名文件",0*/
+  16          0x00,0x80,0xC0,0xE0,0xF0,0xF8,0xFC,0xFE,/*"未命名文件",0*/
+  17          0x80,0xC0,0xE0,0xF0,0xF8,0xFC,0xFE,0xFF,/*"未命名文件",0*/
+  18          0xC0,0xE0,0xF0,0xF8,0xFC,0xFE,0xFF,0xFF,/*"未命名文件",0*/
+  19          0xE0,0xF0,0xF8,0xFC,0xFE,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  20          0xF0,0xF8,0xFC,0xFE,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  21          0xF8,0xFC,0xFE,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  22          0xFC,0xFE,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  23          0xFE,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  24          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  25          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  26          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,/*"未命名文件",0*/
+  27          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF/*"未命名文件",0*/
+  28          };
+  29          
+  30          /*************************************************/
+  31          //延时函数：功能是带有入口参数的延时函数，单位约1毫秒
+  32          /*************************************************/
+  33          void delayms(int m)
+  34          {
+  35   1              int i,j;
+  36   1              for(i=0;i<m;i++)
+  37   1              {
+  38   2                      for(j=0;j<123;j++)
+  39   2                      {}
+  40   2              }
+  41   1      }
+  42          /**************************************************/
+  43          //主函数
+  44          /**************************************************/
+  45          void main()
+  46          {
+  47   1              EA = 1;
+  48   1              ET0 = 1;
+  49   1              TMOD = 0x01;
+  50   1              TH0 = (65536-50)/256;
+  51   1              TL0 = (65536-50)%256;
+  52   1              TR0 = 1;
+  53   1              while(1)
+  54   1              {
+  55   2              }
+C51 COMPILER V9.01   PWM                                                                   06/11/2013 10:05:30 PAGE 2   
+
+  56   1      }
+  57          
+  58          void timer0_10ms() interrupt 1
+  59          {
+  60   1              TH0 = (65536-50)/256;
+  61   1              TL0 = (65536-50)%256;
+  62   1              count++;
+  63   1              if(count>70)
+  64   1              {
+  65   2                      count = 0;
+  66   2                      P0 = tab[i];            
+  67   2                      i++;
+  68   2                      if(i>151)
+  69   2                              i = 0;
+  70   2              }
+  71   1                              
+  72   1      }                               
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    110    ----
+   CONSTANT SIZE    =    152    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

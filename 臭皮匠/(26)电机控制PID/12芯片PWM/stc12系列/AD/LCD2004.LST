@@ -1,0 +1,436 @@
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD2004
+OBJECT MODULE PLACED IN LCD2004.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE LCD2004.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /****************************************************************************************/
+   2          /*
+   3                              
+   4                              功能描述：
+   5                                          硬件连接：  数据口：P2
+   6                                                      RET:P07;
+   7                                                      E1:P06; 
+   8                                                      E2:P05; 
+   9                                                      RW:P04; 
+  10                                                      A0:P03
+  11                                          实现功能：
+  12          
+  13          */
+  14          /****************************************************************************************/
+  15          #include <STC12C5A60.H>
+  16          
+  17          #define LCD2004_BUS P0
+  18          
+  19          sbit LCD2004_RS = P2^5;    //命令/数据选择
+  20          sbit LCD2004_RW = P2^4;    //读写口
+  21          sbit LCD2004_CE = P2^3;    //锁存控制
+  22          sbit LCD2004_Busyflag = P0^7; //忙闲标志位
+  23          //uint8 LCD2004DigitalData[]={0X30,0X31,0X32,0X33,0X34,0X35,0X36,0X37,0X38,0X39};
+  24          
+  25          
+  26          /**************************************************/
+  27          /*
+  28                  功能描述：系统短延迟
+  29                  输入参数：延迟时间
+  30                  输出参数：
+  31                  作    者：
+  32                  备    注：时间延迟不精确
+  33                  版本记录：2009-08-07        V1.0
+  34          */
+  35          /**************************************************/
+  36          void Delayus(uint16 Delay_Time)
+  37          {
+  38   1          while((Delay_Time)--);
+  39   1      }
+  40          
+  41          
+  42          
+  43          /**************************************************/
+  44          /*
+  45                  功能描述：  检查液晶屏是否准备好
+  46                  输入参数：
+  47                  输出参数：
+  48                  作    者：  
+  49                  备    注：  D7为液晶屏的状态口
+  50                  版本记录：  2010-04-17        V1.0
+  51          */
+  52          /**************************************************/
+  53          
+  54          void LCDRead()
+  55          {
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 2   
+
+  56   1          LCD2004_CE=0;
+  57   1        //  Delayus(5);
+  58   1          LCD2004_BUS=0XFF;
+  59   1          
+  60   1          do
+  61   1          {
+  62   2              LCD2004_RS=0;
+  63   2      //          Delayus(5);
+  64   2              LCD2004_RW=1;
+  65   2              Delayus(10);
+  66   2              LCD2004_CE=1;
+  67   2              Delayus(20);
+  68   2           }
+  69   1          while(LCD2004_Busyflag);
+  70   1          
+  71   1          
+  72   1      }
+  73          
+  74          /**************************************************/
+  75          /*
+  76                  功能描述：  给液晶屏写指令操作符
+  77                  输入参数：  需写入的指令
+  78                  输出参数：
+  79                  作    者：  
+  80                  备    注：
+  81                  版本记录：  2010-04-17        V1.0
+  82          */
+  83          /**************************************************/
+  84          void LCDWriteCMD(unsigned char Data)        
+  85          {
+  86   1      
+  87   1      
+  88   1           LCDRead();
+  89   1      //       Delayus(5);
+  90   1           LCD2004_CE=0;
+  91   1      //       Delayus(5);
+  92   1           LCD2004_RS=0;
+  93   1      //       Delayus(5);
+  94   1           LCD2004_RW=0;
+  95   1              // Delayus(5);
+  96   1           LCD2004_BUS=Data;
+  97   1           Delayus(10);
+  98   1           LCD2004_CE=1;
+  99   1           Delayus(20);
+ 100   1           LCD2004_CE=0;
+ 101   1      
+ 102   1         
+ 103   1      }
+ 104          
+ 105          /**************************************************/
+ 106          /*
+ 107                  功能描述：  给液晶屏写将要显示的字符
+ 108                  输入参数：  将要显示的字符的ASCII
+ 109                  输出参数：
+ 110                  作    者：  
+ 111                  备    注：
+ 112                  版本记录：  2010-04-17        V1.0
+ 113          */
+ 114          /**************************************************/
+ 115          void LCDWriteDATA(unsigned char Data)
+ 116          {
+ 117   1      
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 3   
+
+ 118   1           LCDRead();
+ 119   1           LCD2004_CE=0;
+ 120   1           LCD2004_RS=1;
+ 121   1           LCD2004_RW=0;
+ 122   1           LCD2004_BUS=Data;
+ 123   1           Delayus(10);
+ 124   1           LCD2004_CE=1;
+ 125   1           Delayus(20);
+ 126   1           LCD2004_CE=0; 
+ 127   1      
+ 128   1        
+ 129   1      }
+ 130          /**************************************************/
+ 131          /*
+ 132                  功能描述：  液晶屏参数配置
+ 133                  输入参数：
+ 134                  输出参数：
+ 135                  作    者：  
+ 136                  备    注：
+ 137                  版本记录：  2010-04-17        V1.0
+ 138          */
+ 139          /**************************************************/
+ 140          void LCDConfig()
+ 141          {
+ 142   1       
+ 143   1           LCDWriteCMD(0X38);                 //8bit data;2 line;5*8font;
+ 144   1           LCDWriteCMD(0X06);                 //AC++
+ 145   1           LCDWriteCMD(0X0C);                 //Display on;Curse off;Blink off
+ 146   1           LCDWriteCMD(0X01);                 //LCD Clear
+ 147   1           //Delayus(0XFF);
+ 148   1           //LCDWriteCMD(0X02);                 //DDRAM Address to 0
+ 149   1         //  WriteCGRAMDATA();                  //写入自建的字库
+ 150   1      
+ 151   1       
+ 152   1      }
+ 153          /**************************************************/
+ 154          /*
+ 155                  功能描述：  液晶屏清屏指令
+ 156                  输入参数：
+ 157                  输出参数：
+ 158                  作    者：  
+ 159                  备    注：
+ 160                  版本记录：  2010-04-17        V1.0
+ 161          */
+ 162          /**************************************************/
+ 163          void LCDClear()
+ 164          {
+ 165   1       
+ 166   1          
+ 167   1      
+ 168   1          LCDWriteCMD(0X01);
+ 169   1      
+ 170   1      
+ 171   1      }
+ 172          
+ 173          /**************************************************/
+ 174          /*
+ 175                  功能描述：  液晶屏显示多字节字符(适合显示字符串)
+ 176                  输入参数：  起始坐标X、Y，及显示的缓冲区
+ 177                  输出参数：
+ 178                  作    者：  
+ 179                  备    注：
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 4   
+
+ 180                  版本记录：  2010-04-17        V1.0
+ 181                              2010-10-13        V2.0  用'\0'来判断字符串是否结束
+ 182          */
+ 183          /**************************************************/
+ 184          void LCDPrintChar(uint8 X,uint8 Y,uint8 *Data)
+ 185          {
+ 186   1          LCDRead();
+ 187   1          switch(Y)
+ 188   1          {
+ 189   2              case 0:LCDWriteCMD(0X80+X);break;
+ 190   2              case 1:LCDWriteCMD(0X80+0X40+X);break;
+ 191   2      
+ 192   2             
+ 193   2              case 2:LCDWriteCMD(0X80+0X14+X);break;              //适合LCDXX04屏
+ 194   2              case 3:LCDWriteCMD(0X80+0X54+X);break;              //适合LCDXX04屏
+ 195   2              default:LCDClear();return;break;
+ 196   2            
+ 197   2      
+ 198   2          }
+ 199   1          while(*Data != '\0')
+ 200   1          {
+ 201   2              LCDRead();
+ 202   2              LCDWriteDATA(*Data++);
+ 203   2          }
+ 204   1      
+ 205   1         
+ 206   1      }
+ 207          /**************************************************/
+ 208          /*
+ 209                  功能描述：  液晶屏显示多字节数据(适合显示数字)
+ 210                  输入参数：  起始坐标X、Y，及显示的缓冲区
+ 211                  输出参数：
+ 212                  作    者：  
+ 213                  备    注：
+ 214                  版本记录：  2010-04-17        V1.0
+ 215          */
+ 216          /**************************************************/
+ 217          void LCDDisplayData(uint8 X,uint8 Y,uint8 *Data,uint8 Len)
+ 218          {
+ 219   1       
+ 220   1          LCDRead();
+ 221   1          switch(Y)
+ 222   1          {
+ 223   2              case 0:LCDWriteCMD(0X80+X);break;
+ 224   2              case 1:LCDWriteCMD(0X80+0X40+X);break;
+ 225   2      
+ 226   2             
+ 227   2              case 2:LCDWriteCMD(0X80+0X14+X);break;              //适合LCDXX04屏
+ 228   2              case 3:LCDWriteCMD(0X80+0X54+X);break;              //适合LCDXX04屏
+ 229   2              default:LCDClear();return ;break;
+ 230   2              
+ 231   2      
+ 232   2          }
+ 233   1          while(!(Len--))
+ 234   1          {
+ 235   2              //add
+ 236   2              LCDRead();
+ 237   2              LCDWriteDATA(*Data++);
+ 238   2          }
+ 239   1      
+ 240   1          
+ 241   1      }
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 5   
+
+ 242          /**************************************************/
+ 243          /*
+ 244                  功能描述：  液晶屏显示多字节数据(适合显示数字,自适应宽度)
+ 245                  输入参数：  起始坐标X、Y，及显示的缓冲区
+ 246                  输出参数：
+ 247                  作    者：  
+ 248                  备    注：
+ 249                  版本记录：  2010-04-17        V1.0
+ 250          */
+ 251          /**************************************************/
+ 252          void LCDDisplayNum(uint8 X,uint8 Y,long dat,uint8 type)
+ 253          {
+ 254   1       
+ 255   1        //  static datlen_l = 0 ;              //保存上次数据的长度
+ 256   1              uint8 datlen = 0,datc,datcle = 0;
+ 257   1              long temp;
+ 258   1              temp = dat;
+ 259   1          
+ 260   1              if(temp == 0)
+ 261   1              datlen = 1;
+ 262   1      
+ 263   1              while(temp)
+ 264   1              {
+ 265   2                temp = temp / type;
+ 266   2                datlen ++;
+ 267   2              }
+ 268   1      
+ 269   1      //      if(datlen_l > datlen)
+ 270   1      //        datcle = datlen_l - datlen;
+ 271   1      //      else
+ 272   1      //        datcle = 0;
+ 273   1      //
+ 274   1      //      if(datcle != 0)
+ 275   1      //      {
+ 276   1      //              switch(Y)
+ 277   1      //      {
+ 278   1      //              case 0:LCDWriteCMD(0X80+X + datlen );break;
+ 279   1      //              case 1:LCDWriteCMD(0X80+0X40+X+ datlen );break;
+ 280   1      //                      case 2:LCDWriteCMD(0X80+0X14+X+ datlen );break;              //适合LCDXX04屏
+ 281   1      //                      case 3:LCDWriteCMD(0X80+0X54+X+ datlen );break;              //适合LCDXX04屏
+ 282   1      //                      default:LCDClear();return ;break;
+ 283   1      //         }
+ 284   1      //        for(datc = 0;datc < datcle;datc ++)
+ 285   1      //        {
+ 286   1      //              LCDWriteDATA('=');
+ 287   1      //        }
+ 288   1      //      }
+ 289   1          switch(Y)
+ 290   1              {
+ 291   2                      case 0:LCDWriteCMD(0X80+X + datlen );break;
+ 292   2                      case 1:LCDWriteCMD(0X80+0X40+X + datlen  );break;
+ 293   2                              case 2:LCDWriteCMD(0X80+0X14+X + datlen );break;              
+ 294   2                      case 3:LCDWriteCMD(0X80+0X54+X + datlen );break;              
+ 295   2                      default:LCDClear();return ;break;
+ 296   2               }                                                                                                                                //清除多余数据位
+ 297   1              LCDWriteDATA(' ');
+ 298   1      //      LCDWriteDATA(' ');
+ 299   1      
+ 300   1      //      LCDWriteCMD(0X80+0x54 );
+ 301   1      //      LCDWriteDATA(datlen_l+0x30);
+ 302   1      //      LCDWriteDATA(datlen+0x30);
+ 303   1      //      LCDWriteDATA(datcle+0x30);
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 6   
+
+ 304   1      
+ 305   1      
+ 306   1      //      datlen_l = datlen;
+ 307   1      
+ 308   1          LCDRead();
+ 309   1        
+ 310   1          while(datlen --)
+ 311   1          {
+ 312   2              //add
+ 313   2                      datc = dat % type; 
+ 314   2                      dat = dat / type;
+ 315   2                      
+ 316   2                      switch(Y)
+ 317   2              {
+ 318   3                      case 0:LCDWriteCMD(0X80+X + datlen  );break;
+ 319   3                      case 1:LCDWriteCMD(0X80+0X40+X+ datlen );break;
+ 320   3                              case 2:LCDWriteCMD(0X80+0X14+X+ datlen);break;              //适合LCDXX04屏
+ 321   3                      case 3:LCDWriteCMD(0X80+0X54+X+ datlen );break;              //适合LCDXX04屏
+ 322   3                      default:LCDClear();return ;break;
+ 323   3               }
+ 324   2      
+ 325   2              LCDRead();
+ 326   2                      if(datc > 9 )
+ 327   2              LCDWriteDATA(datc + 0x37);
+ 328   2                      else
+ 329   2                       LCDWriteDATA(datc + 0x30);
+ 330   2      
+ 331   2          }
+ 332   1      
+ 333   1      
+ 334   1          
+ 335   1      }
+ 336          
+ 337          
+ 338          
+ 339          /**************************************************/
+ 340          /*
+ 341                  功能描述：  液晶屏自建字库
+ 342                  输入参数：  
+ 343                  输出参数：
+ 344                  作    者：  
+ 345                  备    注：
+ 346                  版本记录：  2010-10-15        V1.0
+ 347          */
+ 348          /**************************************************/
+ 349          void WriteCGRAMDATA(uint8 *dat)
+ 350          {
+ 351   1          unsigned char CountTemp=0;
+ 352   1          unsigned char CountTemp2=0;
+ 353   1       /*   unsigned char code Data[]=
+ 354   1          {   0x00,0x00,0x00,0x1F,0x00,0x00,0x00,0x00,//"一"
+ 355   1              0x00,0x00,0x0E,0x00,0x00,0x1F,0x00,0x00,//"二"
+ 356   1              0x00,0x0E,0x00,0x0E,0x00,0x1F,0x00,0x00,//"三"
+ 357   1              0x00,0x1F,0x11,0x1B,0x1B,0x11,0x1F,0x00,//"四"
+ 358   1              0x08,0x1F,0x12,0x0F,0x0A,0x1F,0x02,0x02,//"年"
+ 359   1              0x0F,0x09,0x0F,0x09,0x0F,0x09,0x0B,0x11,//"月"
+ 360   1              0x0F,0x09,0x09,0x0F,0x09,0x09,0x0F,0x00,//"日"
+ 361   1              0x00,0x04,0x04,0x04,0x04,0x0A,0x0A,0x11,//"人"
+ 362   1          };*/
+ 363   1          for(CountTemp=0;CountTemp<8;CountTemp++)
+ 364   1          {
+ 365   2              //add
+C51 COMPILER V9.01   LCD2004                                                               07/29/2013 15:00:52 PAGE 7   
+
+ 366   2              LCDWriteCMD(0X40+CountTemp*8);
+ 367   2              for(CountTemp2=0;CountTemp2<8;CountTemp2++)
+ 368   2              {
+ 369   3                  //add
+ 370   3                  LCDWriteDATA(dat[CountTemp*8+CountTemp2]);
+ 371   3              }
+ 372   2          }
+ 373   1      
+ 374   1      }
+ 375          
+ 376          /**************************************************/
+ 377          /*
+ 378                  功能描述：  液晶屏显示测试
+ 379                  输入参数：  
+ 380                  输出参数：
+ 381                  作    者：  
+ 382                  备    注：
+ 383                  版本记录：  2010-04-17        V1.0
+ 384          */
+ 385          /**************************************************/
+ 386          void LCDLogo()
+ 387          {
+ 388   1         
+ 389   1          
+ 390   1          LCDPrintChar(0,0,"STC12c60s2 AD test");
+ 391   1          LCDPrintChar(0,1,"456");
+ 392   1      
+ 393   1         
+ 394   1          LCDPrintChar(2,2,"!@#$%^&*~()?");         //为LCD2004时使用     
+ 395   1          LCDPrintChar(6,3,"2010-09-18");         //为LCD2004时使用
+ 396   1         
+ 397   1      
+ 398   1          
+ 399   1      }
+ 400          
+ 401          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    675    ----
+   CONSTANT SIZE    =     47    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      29
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

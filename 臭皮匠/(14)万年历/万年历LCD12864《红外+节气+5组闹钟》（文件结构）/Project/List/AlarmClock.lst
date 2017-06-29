@@ -1,0 +1,243 @@
+C51 COMPILER V9.01   ALARMCLOCK                                                            07/27/2013 10:39:09 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE ALARMCLOCK
+OBJECT MODULE PLACED IN .\Obj\AlarmClock.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\UserDriver\AlarmClock\AlarmClock.c BROWSE INCDIR(..\Include;..\Main;
+                    -..\UserDriver\AlarmClock;..\UserDriver\DisplayTime;..\UserDriver\DS18B20;..\UserDriver\DS1302;..\UserDriver\Font;..\User
+                    -Driver\IR;..\UserDriver\KeyPro;..\UserDriver\LCD12864;..\UserDriver\Lunar) DEBUG OBJECTEXTEND PRINT(.\List\AlarmClock.ls
+                    -t) OBJECT(.\Obj\AlarmClock.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          名称：AlarmClock.c
+   3          功能：闹钟相关程序
+   4          作者：
+   5          时间：
+   6          *********************************************************************************************/             
+   7          #include "STC_NEW_8051.h"
+   8          #include "AlarmClock.h" 
+   9          
+  10          void delayms(uint com)    //延时1毫秒
+  11          {
+  12   1          uchar i,a,b,c;
+  13   1              for(i=0;i<com;i++)
+  14   1              {
+  15   2              for(c=1;c>0;c--)
+  16   2              for(b=222;b>0;b--)
+  17   2                  for(a=12;a>0;a--);
+  18   2              }
+  19   1      }
+  20          
+  21          /**********************************************************
+  22          检查闹钟
+  23          **********************************************************/
+  24          uchar chk_nz(uchar hour,uchar minute,uchar second,uchar week)
+  25          {
+  26   1              uchar hou,min,i,fh=0;;
+  27   1              if(nz_op==0xff)
+  28   1              {
+  29   2                      hou=hour/16*10+hour%16;
+  30   2                      min=minute/16*10+minute%16;
+  31   2                      for(i=0;i<5;i++)//循环5次,检查5个闹钟
+  32   2                      {
+  33   3                              if(nz[i][2]==1)//闹铃模式为1时,为始终开启
+  34   3                                      if(hou==nz[i][0])
+  35   3                                              if(min==nz[i][1])
+  36   3                                                      if(second==0)
+  37   3                                                              fh=1;
+  38   3                              if(nz[i][2]==2)//闹铃模式为2时,为响一次后关闭,返回2+闹钟序号,执行完响铃后关闭
+  39   3                                      if(hou==nz[i][0])
+  40   3                                              if(min==nz[i][1])
+  41   3                                                      if(second==0)
+  42   3                                                      {
+  43   4                                                              if(i==0)
+  44   4                                                                      fh=2;
+  45   4                                                              if(i==1)
+  46   4                                                                      fh=3;
+  47   4                                                              if(i==2)
+  48   4                                                                      fh=4;
+  49   4                                                              if(i==3)
+  50   4                                                                      fh=5;
+  51   4                                                              if(i==4)
+  52   4                                                                      fh=6;
+C51 COMPILER V9.01   ALARMCLOCK                                                            07/27/2013 10:39:09 PAGE 2   
+
+  53   4                                                      }       
+  54   3                              if(nz[i][2]==3&&week>=1&&week<=5)//闹铃模式为3时,为周一至周五响铃
+  55   3                              {
+  56   4                                      if(hou==nz[i][0])
+  57   4                                              if(min==nz[i][1])
+  58   4                                                      if(second==0)
+  59   4                                                              fh=1;
+  60   4                              }
+  61   3                              if(nz[i][2]==4&&week>=1&&week<=6)//闹铃模式为4时,为周一至周六响铃
+  62   3                              {
+  63   4                                      if(hou==nz[i][0])
+  64   4                                              if(min==nz[i][1])
+  65   4                                                      if(second==0)
+  66   4                                                              fh=1;
+  67   4                              }
+  68   3                              if(nz[i][2]==5)//闹铃模式为5时,为仅周六周日响铃
+  69   3                              {
+  70   4                                      if(week==0)
+  71   4                                              if(hou==nz[i][0])
+  72   4                                                      if(min==nz[i][1])
+  73   4                                                              if(second==0)
+  74   4                                                                      fh=1;
+  75   4                                      if(week==6)
+  76   4                                              if(hou==nz[i][0])
+  77   4                                                      if(min==nz[i][1])
+  78   4                                                              if(second==0)
+  79   4                                                                      fh=1;
+  80   4                              }
+  81   3                      }
+  82   2              }
+  83   1              return fh;
+  84   1      }
+  85          /**********************************************************
+  86          读取存在时间芯片里的闹钟数据
+  87          **********************************************************/
+  88          void read_nz_data(void)
+  89          {
+  90   1              nz[0][0]=read_time(0xc1);
+  91   1              nz[0][1]=read_time(0xc3);
+  92   1              nz[0][2]=read_time(0xc5);
+  93   1              nz[1][0]=read_time(0xc7);
+  94   1              nz[1][1]=read_time(0xc9);
+  95   1              nz[1][2]=read_time(0xcb);
+  96   1              nz[2][0]=read_time(0xcd);
+  97   1              nz[2][1]=read_time(0xcf);
+  98   1              nz[2][2]=read_time(0xd1);
+  99   1              nz[3][0]=read_time(0xd3);
+ 100   1              nz[3][1]=read_time(0xd5);
+ 101   1              nz[3][2]=read_time(0xd7);
+ 102   1              nz[4][0]=read_time(0xd9);
+ 103   1              nz[4][1]=read_time(0xdb);
+ 104   1              nz[4][2]=read_time(0xdd);
+ 105   1              nz_op=read_time(0xdf);
+ 106   1      }
+ 107          /**********************************************************
+ 108          保存闹钟数据到时间芯片里面
+ 109          **********************************************************/
+ 110          void save_nz(void)
+ 111          {
+ 112   1              write_time(0x8e,0x00);
+ 113   1              write_time(0xc0,nz[0][0]);
+ 114   1              write_time(0xc2,nz[0][1]);
+C51 COMPILER V9.01   ALARMCLOCK                                                            07/27/2013 10:39:09 PAGE 3   
+
+ 115   1              write_time(0xc4,nz[0][2]);
+ 116   1              write_time(0xc6,nz[1][0]);
+ 117   1              write_time(0xc8,nz[1][1]);
+ 118   1              write_time(0xca,nz[1][2]);
+ 119   1              write_time(0xcc,nz[2][0]);
+ 120   1              write_time(0xce,nz[2][1]);
+ 121   1              write_time(0xd0,nz[2][2]);
+ 122   1              write_time(0xd2,nz[3][0]);
+ 123   1              write_time(0xd4,nz[3][1]);
+ 124   1              write_time(0xd6,nz[3][2]);
+ 125   1              write_time(0xd8,nz[4][0]);
+ 126   1              write_time(0xda,nz[4][1]);
+ 127   1              write_time(0xdc,nz[4][2]);
+ 128   1              write_time(0xde,nz_op);
+ 129   1              write_time(0x8e,0x80);
+ 130   1      }
+ 131          /**********************************************************
+ 132          闹铃
+ 133          **********************************************************/
+ 134          void buzzer_nz(uchar nz_flag)
+ 135          {
+ 136   1              if(nz_flag==1)
+ 137   1              {
+ 138   2                      nz_beep();
+ 139   2              }
+ 140   1              if(nz_flag==2)
+ 141   1              {
+ 142   2                      nz_beep();
+ 143   2                      nz[0][2]=0;
+ 144   2              }
+ 145   1              if(nz_flag==3)
+ 146   1              {
+ 147   2                      nz_beep();
+ 148   2                      nz[1][2]=0;
+ 149   2              }
+ 150   1              if(nz_flag==4)
+ 151   1              {
+ 152   2                      nz_beep();
+ 153   2                      nz[2][2]=0;
+ 154   2              }
+ 155   1              if(nz_flag==5)
+ 156   1              {
+ 157   2                      nz_beep();
+ 158   2                      nz[3][2]=0;
+ 159   2              }
+ 160   1              if(nz_flag==6)
+ 161   1              {
+ 162   2                      nz_beep();
+ 163   2                      nz[4][2]=0;
+ 164   2              }
+ 165   1              save_nz();              
+ 166   1      }
+ 167          /**********************************************************
+ 168          闹铃
+ 169          **********************************************************/
+ 170          void nz_beep(void)
+ 171          {
+ 172   1              uint i=68;//用于计时,如闹铃响一分钟仍无人按下,则自动停止闹铃    
+ 173   1              while(i)
+ 174   1              {
+ 175   2                      ds1302_read();
+ 176   2                      dis_nz();
+C51 COMPILER V9.01   ALARMCLOCK                                                            07/27/2013 10:39:09 PAGE 4   
+
+ 177   2                      didi();
+ 178   2                      i--;
+ 179   2      //              if(read_key()!=0){buzzer=1;lcd_led=1;break;}
+ 180   2                      if(read_key()!=0){buzzer=1;break;}
+ 181   2              }
+ 182   1              lcm_clr2();            //清屏
+ 183   1              Clean_12864_GDRAM();   //清屏
+ 184   1      }
+ 185          /**********************************************************
+ 186          按键音
+ 187          **********************************************************/
+ 188          void key_beep(void)
+ 189          {
+ 190   1              if(key_beep_op==0xff)
+ 191   1              {
+ 192   2                      buzzer=0;
+ 193   2                      delayms(15);
+ 194   2                      buzzer=1;
+ 195   2              }
+ 196   1      }
+ 197          
+ 198          /**********************************************************
+ 199          响铃音
+ 200          **********************************************************/
+ 201          void didi() //
+ 202          {
+ 203   1              buzzer=0;
+ 204   1              delayms(30);
+ 205   1              buzzer=1;
+ 206   1              delayms(30);
+ 207   1              buzzer=0;
+ 208   1              delayms(30);
+ 209   1              buzzer=1;
+ 210   1              delayms(30);
+ 211   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    807    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

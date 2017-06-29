@@ -1,0 +1,175 @@
+C51 COMPILER V9.01   1                                                                     02/23/2014 11:53:29 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE 1
+OBJECT MODULE PLACED IN ..\Obj\1.obj
+COMPILER INVOKED BY: D:\(7)KEIL\C51\BIN\C51.EXE 1.c BROWSE INCDIR(..\驱动) DEBUG OBJECTEXTEND OBJECT(..\Obj\1.obj)
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】：Keil4  
+   4          * 【程序功能】：合理利用                （1，读取）IRcvStr(AT24C02, 0 , &pDat[0], 8);           
+   5                                                                          （2，存入）ISendStr(AT24C02, 0 , &pDat[0], 8)；                         
+   6          * 【晶    振】: 12MHz外部晶振           
+   7          * 【芯    片】: STC89C52RC 
+   8          * 【2 4 c 02】：存放数据中转线
+   9          * 【日    期】: 2013/5/10
+  10          * 【作    者】: Phone   
+  11          ******************************************************************************/
+  12          #include<reg52.h>
+  13          #include<Function.h>
+  14          #define  AT24C02 0xa0  //AT24C02 地址   1010  0000
+  15          //#define uchar unsigned char                      //宏定义
+  16          //#define uint unsigned int
+  17          
+  18          typedef unsigned int uint         ;
+  19          typedef unsigned char uchar       ;
+  20          
+  21          sbit lcdrs = P2^6;                                                        
+  22          sbit lcdrw = P2^5;                                                        
+  23          sbit lcden = P2^7; 
+  24          sbit    K1 = P1^0;       //保存
+  25          sbit    K2 = P1^1;       //读取
+  26          sbit    K3 = P1^2;       //+数据
+  27          sbit    K4 = P1^3;   //-数据
+  28          
+  29          void delay(unsigned int i);
+  30          
+  31          
+  32          unsigned long t,LedNumVal,Count1;
+  33          uchar LedOut[7]={0,10,0,10,0,10,0};  
+  34          uchar code tab1[11]="0123456789 ";       //字符串                               
+  35          unsigned int idata USEC;
+  36          /*************************************************************************************
+  37          写指令
+  38          *************************************************************************************/
+  39          void write_com(uchar com)
+  40          {
+  41   1              lcdrs=0;                                                          //lcdrs为低电平时，写命令
+  42   1              lcdrw=0;
+  43   1              delay(1);
+  44   1              P0=com;
+  45   1              lcden=1;
+  46   1              delay(1);
+  47   1              lcden=0;
+  48   1      }
+  49          /*************************************************************************************
+  50          写数据
+  51          *************************************************************************************/
+  52          void write_data(uchar dat)
+  53          {
+  54   1              lcdrs=1;                                                        //lcdrs为高电平时，写数据
+  55   1              lcdrw=0;
+C51 COMPILER V9.01   1                                                                     02/23/2014 11:53:29 PAGE 2   
+
+  56   1              delay(1);       
+  57   1              P0=dat;
+  58   1              lcden=1;
+  59   1              delay(1);
+  60   1              lcden=0;
+  61   1      }
+  62          
+  63          /*************************************************************************************
+  64          初始化
+  65          *************************************************************************************/
+  66          void  system_ini() 
+  67          {   
+  68   1      
+  69   1              lcden=0;
+  70   1              write_com(0x38);                                        //显示模式设定,设置16*2显示5*7点阵，8位数据接口
+  71   1              write_com(0x0c);                                        //开关显示、光标有无设置、光标闪烁设置
+  72   1              write_com(0x06);                                        //写一个字符后指针加一
+  73   1              write_com(0x01);                                        //清屏指令
+  74   1              TMOD=0x01;                                                      //定时器0，方式1 
+  75   1              TMOD|= 0x11;    //设置定时器0、1为工作方式1（00010001）
+  76   1              TH1 = 0xfe; //11.0592
+  77   1              TL1 = 0x33;                                                                                                                      //这个中断挺有意思
+  78   1              TR1  = 1; 
+  79   1              IE =0x8A;                                                                                                          //不怎么用啊？
+  80   1      }
+  81          
+  82          main()
+  83          { 
+  84   1              unsigned char i;
+  85   1              unsigned char pDat[2];
+  86   1              system_ini();
+  87   1              while(1)
+  88   1              {
+  89   2                      //========================IIC 读取
+  90   2                      if(K2 == 0)        //第二个按钮读取数据
+  91   2                      { 
+  92   3                              IRcvStr(AT24C02, 0X00 , &pDat[0], 8);      //不懂&pDat[o]与下面的PDat  怎么联系  括号里面什么意思？                     
+  93   3                              t=pDat[0]+pDat[1]*0x100;          //pDat是描述8位，0x100=256,对应二进制把数后面加8个0；此句是把两个8位换成16位
+             -；
+  94   3                              Count1 = t;
+  95   3                      }            
+  96   2                      
+  97   2              
+  98   2                      //========================IIC 保存
+  99   2                      if(K1 == 0)    //第一个按钮保存数据
+ 100   2                      { 
+ 101   3                              t= Count1;                      
+ 102   3                              pDat[0]=t;
+ 103   3                              pDat[1]=t>>8;             //16位拆成8位
+ 104   3                              ISendStr(AT24C02, 0x00 , &pDat[0], 8);           //      AT24C02 器件地址， 0 是子地址
+ 105   3                              t = 0;
+ 106   3                      }
+ 107   2      /********以下将2402中保存的数据送到LED数码管显示*************/
+ 108   2                      LedNumVal=Count1;
+ 109   2                      LedOut[0]=LedNumVal%10000/1000;                           
+ 110   2                      LedOut[2]=LedNumVal%1000/100;
+ 111   2                      LedOut[4]=LedNumVal%100/10;
+ 112   2                      LedOut[6]=LedNumVal%10;         
+ 113   2                      write_com(0x80+0x04);   
+ 114   2                      for(i=0;i<7;i++)
+ 115   2                      {
+ 116   3                              write_data(tab1[LedOut[i]]);
+C51 COMPILER V9.01   1                                                                     02/23/2014 11:53:29 PAGE 3   
+
+ 117   3                      }
+ 118   2                                                                                                                      
+ 119   2              }       
+ 120   1      }
+ 121          
+ 122          void delay(unsigned int i)
+ 123          {
+ 124   1              char j;
+ 125   1                      for(i; i > 0; i--)
+ 126   1                              for(j = 200; j > 0; j--)
+ 127   1                                      ;
+ 128   1      }
+ 129          
+ 130          
+ 131          /*************************************
+ 132           [ t1 (0.5ms)中断] 中断中做 PWM 输出
+ 133            ------------1000/(0.02ms*250)=200Hz
+ 134          *************************************/
+ 135          void T1zd(void) interrupt 3   //3 为定时器1的中断号  1 定时器0的中断号 0 外部中断1 2 外部中断2  4 串口中断
+ 136          {
+ 137   1              TH1 = 0xfe; //12M       
+ 138   1              TL1 = 0x33;
+ 139   1              if(USEC++==200)         
+ 140   1              {       
+ 141   2                      USEC=0; 
+ 142   2                      if (!K3) Count1++;     //改变数据
+ 143   2                      if (!K4&Count1!=0) Count1--;    
+ 144   2              }  
+ 145   1      }
+ 146          
+ 147          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    573    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     19       5
+   IDATA SIZE       =      2    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

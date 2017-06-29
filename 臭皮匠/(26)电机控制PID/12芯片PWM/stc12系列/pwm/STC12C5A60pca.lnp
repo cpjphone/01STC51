@@ -1,0 +1,4 @@
+"main.obj",
+"pwm.obj",
+"LCD2004.obj" 
+TO "STC12C5A60pca" 

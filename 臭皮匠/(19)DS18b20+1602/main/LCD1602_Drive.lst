@@ -1,0 +1,88 @@
+C51 COMPILER V9.01   LCD1602_DRIVE                                                         07/19/2013 17:57:04 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD1602_DRIVE
+OBJECT MODULE PLACED IN .\LCD1602_Drive.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\Drive\LCD1602_Drive\LCD1602_Drive.c BROWSE INCDIR(..\Drive\LCD1602_D
+                    -rive;..\Drive\ModuleDrive) DEBUG OBJECTEXTEND PRINT(.\LCD1602_Drive.lst) OBJECT(.\LCD1602_Drive.obj)
+
+line level    source
+
+   1          /*************************************************************************************
+   2          //LCD1602Ê±ÖÓ²âÊÔ³ÌÐò
+   3          *************************************************************************************/
+   4          #include <reg52.h>                                         //Í·ÎÄ¼þ
+   5          //#include <LCD1602_Drive.h>                               //Í·ÎÄ¼þ
+   6          #define uchar unsigned char                        //ºê¶¨Òå
+   7          #define uint unsigned int
+   8          
+   9          sbit lcdrs = P2^6;                                                        
+  10          sbit lcdrw = P2^5;                                                        
+  11          sbit lcden = P2^7;  
+  12          
+  13          void delay(uint x);  //ÉùÃ÷
+  14                  
+  15          /*************************************************************************************
+  16          LCD1602Ð´Ö¸Áî
+  17          *************************************************************************************/
+  18          void LCD1602_write_com(uchar com)
+  19          {
+  20   1              lcdrs=0;                                                          //lcdrsÎªµÍµçÆ½Ê±£¬Ð´ÃüÁî
+  21   1              lcdrw=0;
+  22   1              delay(1);
+  23   1              P0=com;
+  24   1              lcden=1;
+  25   1              delay(1);
+  26   1              lcden=0;
+  27   1      }
+  28          /*************************************************************************************
+  29          LCD1602Ð´Êý¾Ý
+  30          *************************************************************************************/
+  31          void LCD1602_write_data(uchar dat)
+  32          {
+  33   1              lcdrs=1;                                                        //lcdrsÎª¸ßµçÆ½Ê±£¬Ð´Êý¾Ý
+  34   1              lcdrw=0;
+  35   1              delay(1);       
+  36   1              P0=dat;
+  37   1              lcden=1;
+  38   1              delay(1);
+  39   1              lcden=0;
+  40   1      }
+  41          /*************************************************************************************
+  42          LCD1602³õÊ¼»¯
+  43          *************************************************************************************/
+  44          void LCD1602_init()
+  45          {
+  46   1              lcden=0;
+  47   1              LCD1602_write_com(0x38);                                        //ÏÔÊ¾Ä£Ê½Éè¶¨,ÉèÖÃ16*2ÏÔÊ¾5*7µãÕó£¬8Î»Êý¾Ý½Ó¿Ú
+  48   1              LCD1602_write_com(0x0c);                                        //¿ª¹ØÏÔÊ¾¡¢¹â±êÓÐÎÞÉèÖÃ¡¢¹â±êÉÁË¸ÉèÖÃ
+  49   1              LCD1602_write_com(0x06);                                        //Ð´Ò»¸ö×Ö·ûºóÖ¸Õë¼ÓÒ»
+  50   1              LCD1602_write_com(0x01);                                        //ÇåÆÁÖ¸Á
+  51   1      }
+  52          /*************************************************************************************
+  53          Ð´Á¬Ðø×Ö·ûº¯Êý
+  54          *************************************************************************************/
+C51 COMPILER V9.01   LCD1602_DRIVE                                                         07/19/2013 17:57:04 PAGE 2   
+
+  55          void LCD1602_write_word(uchar *s)
+  56          {
+  57   1              while(*s>0)
+  58   1              {
+  59   2                      LCD1602_write_data(*s);
+  60   2                      s++;
+  61   2              }
+  62   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    116    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

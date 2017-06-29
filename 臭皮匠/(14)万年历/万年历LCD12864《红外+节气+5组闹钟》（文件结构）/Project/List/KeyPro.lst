@@ -1,0 +1,544 @@
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE KEYPRO
+OBJECT MODULE PLACED IN .\Obj\KeyPro.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\UserDriver\KeyPro\KeyPro.c BROWSE INCDIR(..\Include;..\Main;..\UserD
+                    -river\AlarmClock;..\UserDriver\DisplayTime;..\UserDriver\DS18B20;..\UserDriver\DS1302;..\UserDriver\Font;..\UserDriver\I
+                    -R;..\UserDriver\KeyPro;..\UserDriver\LCD12864;..\UserDriver\Lunar) DEBUG OBJECTEXTEND PRINT(.\List\KeyPro.lst) OBJECT(.\
+                    -Obj\KeyPro.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          名称：KeyPro.c
+   3          功能：按键处理程序
+   4          作者：
+   5          时间：
+   6          *********************************************************************************************/
+   7          #include "STC_NEW_8051.H"
+   8          #include "KeyPro.h"
+   9          
+  10          /*==========================================================
+  11                          设置
+  12          ==========================================================*/
+  13          void keydone(void)         
+  14          {
+  15   1              uchar flag=0;
+  16   1              uchar key_zt=0;
+  17   1              
+  18   1              while(1)
+  19   1              {       
+  20   2                      switch(read_key())      //读取键值后判断键值进行调整状态值
+  21   2                      {
+  22   3                              case 0: if(key_zt==0)break;
+  23   3                                              else break;
+  24   3                              case 1: if(key_zt==0){key_zt=1;cdds=10;lcm_clr2();Clean_12864_GDRAM();break;}//设置界面
+  25   3                                              if(key_zt==1||key_zt==5||key_zt==6||key_zt==19){key_zt=2;break;}//设置时钟,年界面
+  26   3                                              if(key_zt==2||key_zt==8||key_zt==9){key_zt=7;break;}//月界面
+  27   3                                              if(key_zt==11||key_zt==12||key_zt==7){key_zt=10;break;}//日界面
+  28   3                                              if(key_zt==14||key_zt==15||key_zt==10){key_zt=13;break;}//小时界面
+  29   3                                              if(key_zt==17||key_zt==18||key_zt==13){key_zt=16;break;}//分钟界面
+  30   3                                              if(key_zt==20||key_zt==21||key_zt==16){key_zt=19;break;}//秒数界面
+  31   3                                              if(key_zt==22){key_zt=23;break;}
+  32   3                                              if(key_zt==3){key_zt=25;break;}
+  33   3                                              if(key_zt==26||key_zt==62){key_zt=31;break;}
+  34   3                                              if(key_zt==31){key_zt=34;break;}
+  35   3                                              if(key_zt==27||key_zt==63){key_zt=37;break;}
+  36   3                                              if(key_zt==37){key_zt=40;break;}
+  37   3                                              if(key_zt==28||key_zt==64){key_zt=43;break;}
+  38   3                                              if(key_zt==43){key_zt=46;break;}
+  39   3                                              if(key_zt==29||key_zt==65){key_zt=49;break;}
+  40   3                                              if(key_zt==49){key_zt=52;break;}
+  41   3                                              if(key_zt==30||key_zt==66){key_zt=55;break;}
+  42   3                                              if(key_zt==55){key_zt=58;break;}
+  43   3                                              if(key_zt==34){key_zt=62;break;}
+  44   3                                              if(key_zt==40){key_zt=63;break;}
+  45   3                                              if(key_zt==46){key_zt=64;break;}
+  46   3                                              if(key_zt==52){key_zt=65;break;}
+  47   3                                              if(key_zt==58){key_zt=66;break;}
+  48   3                                              if(key_zt==4){key_zt=78;break;}         //校时调整状态
+  49   3                                              else break;
+  50   3                              case 2: if(key_zt==1){key_zt=3;read_nz_data();break;}//设置闹钟
+  51   3                                              if(key_zt==2){key_zt=5;break;}          //调整年加一
+  52   3                                              if(key_zt==3){key_zt=30;break;}
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 2   
+
+  53   3                                              if(key_zt==7){key_zt=8;break;}          //设置月加一
+  54   3                                              if(key_zt==10){key_zt=11;break;}        //日加一
+  55   3                                              if(key_zt==13){key_zt=14;break;}        //小时加一
+  56   3                                              if(key_zt==16){key_zt=17;break;}        //分钟加一
+  57   3                                              if(key_zt==19){key_zt=20;break;}        //秒数加一
+  58   3                                              if(key_zt==26){key_zt=3;break;}
+  59   3                                              if(key_zt==27){key_zt=26;break;}
+  60   3                                              if(key_zt==28){key_zt=27;break;}
+  61   3                                              if(key_zt==29){key_zt=28;break;}
+  62   3                                              if(key_zt==30){key_zt=29;break;}
+  63   3                                              if(key_zt==31){key_zt=32;break;}
+  64   3                                              if(key_zt==34){key_zt=35;break;}
+  65   3                                              if(key_zt==37){key_zt=38;break;}
+  66   3                                              if(key_zt==40){key_zt=41;break;}
+  67   3                                              if(key_zt==43){key_zt=44;break;}
+  68   3                                              if(key_zt==46){key_zt=47;break;}
+  69   3                                              if(key_zt==49){key_zt=50;break;}
+  70   3                                              if(key_zt==52){key_zt=53;break;}
+  71   3                                              if(key_zt==55){key_zt=56;break;}
+  72   3                                              if(key_zt==58){key_zt=59;break;}
+  73   3                                              if(key_zt==62){key_zt=67;break;}
+  74   3                                              if(key_zt==63){key_zt=69;break;}
+  75   3                                              if(key_zt==64){key_zt=71;break;}
+  76   3                                              if(key_zt==65){key_zt=73;break;}
+  77   3                                              if(key_zt==66){key_zt=75;break;}
+  78   3                                              if(key_zt==4){key_zt=79;break;}   //校时秒数加一
+  79   3                                              else break;
+  80   3                              case 3: if(key_zt==1){key_zt=4;dis_other_flag=0;break;}
+  81   3                                              if(key_zt==2){key_zt=6;break;}    //设置年减一
+  82   3                                              if(key_zt==7){key_zt=9;break;}    //设置月减一
+  83   3                                              if(key_zt==10){key_zt=12;break;}  //设置日减一
+  84   3                                              if(key_zt==13){key_zt=15;break;}  //设置小时减一
+  85   3                                              if(key_zt==16){key_zt=18;break;}  //设置分钟减一
+  86   3                                              if(key_zt==19){key_zt=21;break;}  //设置秒减一
+  87   3                                              if(key_zt==3){key_zt=26;break;}
+  88   3                                              if(key_zt==26){key_zt=27;break;}
+  89   3                                              if(key_zt==27){key_zt=28;break;}
+  90   3                                              if(key_zt==28){key_zt=29;break;}
+  91   3                                              if(key_zt==29){key_zt=30;break;}
+  92   3                                              if(key_zt==31){key_zt=33;break;}
+  93   3                                              if(key_zt==34){key_zt=36;break;}
+  94   3                                              if(key_zt==37){key_zt=39;break;}
+  95   3                                              if(key_zt==40){key_zt=42;break;}
+  96   3                                              if(key_zt==43){key_zt=45;break;}
+  97   3                                              if(key_zt==46){key_zt=48;break;}
+  98   3                                              if(key_zt==49){key_zt=51;break;}
+  99   3                                              if(key_zt==52){key_zt=54;break;}
+ 100   3                                              if(key_zt==55){key_zt=57;break;}
+ 101   3                                              if(key_zt==58){key_zt=60;break;}
+ 102   3                                              if(key_zt==62){key_zt=68;break;}
+ 103   3                                              if(key_zt==63){key_zt=70;break;}
+ 104   3                                              if(key_zt==64){key_zt=72;break;}
+ 105   3                                              if(key_zt==65){key_zt=74;break;}
+ 106   3                                              if(key_zt==66){key_zt=76;break;}
+ 107   3                                              if(key_zt==30){key_zt=3;break;}
+ 108   3                                              if(key_zt==4){key_zt=80;break;}  //校时秒数减一
+ 109   3                                              else break;
+ 110   3                              case 4: if(key_zt==1){key_zt=0;lcm_clr2();Clean_12864_GDRAM();break;}   //如果在主设置界面，按此键退出
+ 111   3                                              if(key_zt==2||key_zt==7||key_zt==10||key_zt==13||key_zt==16||key_zt==19){key_zt=22;break;}
+ 112   3                                              if(key_zt==22){key_zt=24;break;}
+ 113   3                                              if(key_zt==31||key_zt==34||key_zt==62){key_zt=26;break;}
+ 114   3                                              if(key_zt==37||key_zt==40||key_zt==63){key_zt=27;break;}
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 3   
+
+ 115   3                                              if(key_zt==43||key_zt==46||key_zt==64){key_zt=28;break;}
+ 116   3                                              if(key_zt==49||key_zt==52||key_zt==65){key_zt=29;break;}
+ 117   3                                              if(key_zt==55||key_zt==58||key_zt==66){key_zt=30;break;}
+ 118   3                                              if(key_zt==3||key_zt==26||key_zt==27||key_zt==28||key_zt==29||key_zt==30){key_zt=77;break;}                             
+ 119   3                                              if(key_zt==4){key_zt=1;break;}
+ 120   3                                              else break;
+ 121   3                              default:key_zt=0;
+ 122   3                                              break;
+ 123   3                      }
+ 124   2                      switch(key_zt)  //根据状态值动作
+ 125   2                      {
+ 126   3                              case 0: TR0=0;
+ 127   3                                              screen(0);
+ 128   3                                              cdds=10;
+ 129   3                                              break;
+ 130   3                              case 1: TR0=1;
+ 131   3                                              if(cdds_flag==1)//用于判断菜单倒数标志位,为1即自动退出菜单
+ 132   3                                              {
+ 133   4                                                      key_zt=0;
+ 134   4                                                      cdds_flag=0; 
+ 135   4                                              }
+ 136   3                                              screen(1); 
+ 137   3                                              break;
+ 138   3                              case 2: TR0=0;
+ 139   3                                              cdds=10;
+ 140   3                                              screen(2);//设置时钟
+ 141   3                                              break;
+ 142   3                              case 3: TR0=0;
+ 143   3                                              cdds=10;
+ 144   3                                              screen(9);//闹钟总界面
+ 145   3                                              break;
+ 146   3                              case 4: TR0=0;
+ 147   3                                              cdds=10;
+ 148   3                                      //      screen(30);     //其他设置
+ 149   3                                              screen(31);     //误差调整
+ 150   3                                              break;
+ 151   3                              case 5: year=(year/16*10+year%16)+1;  //设置年份加一
+ 152   3                                              if(year>99)year=0;
+ 153   3                                              year=year/10*16+year%10;
+ 154   3                                              key_zt=2;
+ 155   3                                              flag=1;
+ 156   3                                              break;
+ 157   3                              case 6: year=(year/16*10+year%16)-1;  //设置年份减一
+ 158   3                                              if(year>=255)year=99;
+ 159   3                                              year=year/10*16+year%10;
+ 160   3                                              key_zt=2;
+ 161   3                                              flag=1;
+ 162   3                                              break;
+ 163   3                              case 7: screen(3);
+ 164   3                                              break;
+ 165   3                              case 8: month=(month/16*10+month%16)+1; //设置月份加一
+ 166   3                                              if(month>12)month=1;
+ 167   3                                              month=month/10*16+month%10;
+ 168   3                                              key_zt=7;
+ 169   3                                              flag=1;
+ 170   3                                              break;
+ 171   3                              case 9: month=(month/16*10+month%16)-1; //设置月份减一
+ 172   3                                              if(month==0)month=12;
+ 173   3                                              month=month/10*16+month%10;
+ 174   3                                              key_zt=7;
+ 175   3                                              flag=1;
+ 176   3                                              break;
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 4   
+
+ 177   3                              case 10:screen(4);
+ 178   3                                              break;
+ 179   3                              case 11:day=(day/16*10+day%16)+1;               //设置日加一
+ 180   3                                              if(day>chk_max_day())day=1;
+ 181   3                                              day=day/10*16+day%10;
+ 182   3                                              key_zt=10;
+ 183   3                                              flag=1;
+ 184   3                                              break;
+ 185   3                              case 12:day=(day/16*10+day%16)-1;               //设置日减一
+ 186   3                                              if(day==0)day=chk_max_day();
+ 187   3                                              day=day/10*16+day%10;
+ 188   3                                              key_zt=10;
+ 189   3                                              flag=1;
+ 190   3                                              break;
+ 191   3                              case 13:screen(5);
+ 192   3                                              break;
+ 193   3                              case 14:hour=(hour/16*10+hour%16)+1;    //设置时加一
+ 194   3                                              if(hour>=24)hour=0;
+ 195   3                                              hour=hour/10*16+hour%10;
+ 196   3                                              key_zt=13;
+ 197   3                                              flag=1;
+ 198   3                                              break;
+ 199   3                              case 15:hour=(hour/16*10+hour%16)-1;    //设置时减一
+ 200   3                                              if(hour>=255)hour=23;
+ 201   3                                              hour=hour/10*16+hour%10;
+ 202   3                                              key_zt=13;
+ 203   3                                              flag=1;
+ 204   3                                              break;
+ 205   3                              case 16:screen(6);
+ 206   3                                              break;
+ 207   3                              case 17:minute=(minute/16*10+minute%16)+1; //设置分加一
+ 208   3                                              if(minute>=60)minute=0;
+ 209   3                                              minute=minute/10*16+minute%10;
+ 210   3                                              key_zt=16;
+ 211   3                                              flag=1;
+ 212   3                                              break;
+ 213   3                              case 18:minute=(minute/16*10+minute%16)-1; //设置分减一
+ 214   3                                              if(minute>=255)minute=59;
+ 215   3                                              minute=minute/10*16+minute%10;
+ 216   3                                              key_zt=16;
+ 217   3                                              flag=1;
+ 218   3                                              break;
+ 219   3                              case 19:screen(7);
+ 220   3                                              break;
+ 221   3                              case 20:second=(second/16*10+second%16)+1; //设置秒加一
+ 222   3                                              if(second>60)second=0;
+ 223   3                                              second=second/10*16+second%10;
+ 224   3                                              key_zt=19;
+ 225   3                                              flag=1;
+ 226   3                                              break;
+ 227   3                              case 21:second=(second/16*10+second%16)-1; //设置秒减一
+ 228   3                                              if(second>=255)second=59;
+ 229   3                                              second=second/10*16+second%10;
+ 230   3                                              key_zt=19;
+ 231   3                                              flag=1;
+ 232   3                                              break;
+ 233   3                              case 22:if(flag)
+ 234   3                                                      screen(8);
+ 235   3                                              else
+ 236   3                                                      key_zt=1;
+ 237   3                                              break;
+ 238   3                              case 23:ds1302_write();
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 5   
+
+ 239   3                                              flag=0;
+ 240   3                                              key_zt=1;
+ 241   3                                              break;
+ 242   3                              case 24:flag=0;
+ 243   3                                              key_zt=1;
+ 244   3                                              break;
+ 245   3                              case 25:read_nz_data();
+ 246   3                                              nz_op=~nz_op;//闹钟总开关
+ 247   3                                              save_nz();
+ 248   3                                              key_zt=3;
+ 249   3                                              break;
+ 250   3                              case 26:screen(10);//闹钟一界面
+ 251   3                                              break;
+ 252   3                              case 27:screen(11);//闹钟二界面
+ 253   3                                              break;
+ 254   3                              case 28:screen(12);//闹钟三界面
+ 255   3                                              break;
+ 256   3                              case 29:screen(13);//闹钟四界面
+ 257   3                                              break;
+ 258   3                              case 30:screen(14);//闹钟五界面
+ 259   3                                              break;
+ 260   3                              case 31:screen(15);//调整闹钟一小时
+ 261   3                                              break;
+ 262   3                              case 32:nz[0][0]++;
+ 263   3                                              if(nz[0][0]==24)nz[0][0]=0;
+ 264   3                                              key_zt=31;
+ 265   3                                              break;
+ 266   3                              case 33:nz[0][0]--;
+ 267   3                                              if(nz[0][0]==255)nz[0][0]=23;
+ 268   3                                              key_zt=31;
+ 269   3                                              break;
+ 270   3                              case 34:screen(16);//调整闹钟一分钟
+ 271   3                                              break;
+ 272   3                              case 35:nz[0][1]++;
+ 273   3                                              if(nz[0][1]==60)nz[0][1]=0;
+ 274   3                                              key_zt=34;
+ 275   3                                              break;
+ 276   3                              case 36:nz[0][1]--;
+ 277   3                                              if(nz[0][1]==255)nz[0][1]=59;
+ 278   3                                              key_zt=34;
+ 279   3                                              break;
+ 280   3                              case 37:screen(18);//调整闹钟二小时
+ 281   3                                              break;
+ 282   3                              case 38:nz[1][0]++;
+ 283   3                                              if(nz[1][0]==24)nz[1][0]=0;
+ 284   3                                              key_zt=37;
+ 285   3                                              break;
+ 286   3                              case 39:nz[1][0]--;
+ 287   3                                              if(nz[1][0]==255)nz[1][0]=23;
+ 288   3                                              key_zt=37;
+ 289   3                                              break;
+ 290   3                              case 40:screen(19);//调整闹钟二分钟
+ 291   3                                              break;
+ 292   3                              case 41:nz[1][1]++;
+ 293   3                                              if(nz[1][1]==60)nz[1][1]=0;
+ 294   3                                              key_zt=40;
+ 295   3                                              break;
+ 296   3                              case 42:nz[1][1]--;
+ 297   3                                              if(nz[1][1]==255)nz[1][1]=59;
+ 298   3                                              key_zt=40;
+ 299   3                                              break;
+ 300   3                              case 43:screen(21);//调整闹钟三小时
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 6   
+
+ 301   3                                              break;
+ 302   3                              case 44:nz[2][0]++;
+ 303   3                                              if(nz[2][0]==24)nz[2][0]=0;
+ 304   3                                              key_zt=43;
+ 305   3                                              break;
+ 306   3                              case 45:nz[2][0]--;
+ 307   3                                              if(nz[2][0]==255)nz[2][0]=23;
+ 308   3                                              key_zt=43;
+ 309   3                                              break;
+ 310   3                              case 46:screen(22);//调整闹钟三分钟
+ 311   3                                              break;
+ 312   3                              case 47:nz[2][1]++;
+ 313   3                                              if(nz[2][1]==60)nz[2][1]=0;
+ 314   3                                              key_zt=46;
+ 315   3                                              break;
+ 316   3                              case 48:nz[2][1]--;
+ 317   3                                              if(nz[2][1]==255)nz[2][1]=59;
+ 318   3                                              key_zt=46;
+ 319   3                                              break;
+ 320   3                              case 49:screen(24);//调整闹钟四小时
+ 321   3                                              break;
+ 322   3                              case 50:nz[3][0]++;
+ 323   3                                              if(nz[3][0]==24)nz[3][0]=0;
+ 324   3                                              key_zt=49;
+ 325   3                                              break;
+ 326   3                              case 51:nz[3][0]--;
+ 327   3                                              if(nz[3][0]==255)nz[3][0]=23;
+ 328   3                                              key_zt=49;
+ 329   3                                              break;
+ 330   3                              case 52:screen(25);//调整闹钟四分钟
+ 331   3                                              break;
+ 332   3                              case 53:nz[3][1]++;
+ 333   3                                              if(nz[3][1]==60)nz[3][1]=0;
+ 334   3                                              key_zt=52;
+ 335   3                                              break;
+ 336   3                              case 54:nz[3][1]--;
+ 337   3                                              if(nz[3][1]==255)nz[3][1]=59;
+ 338   3                                              key_zt=52;
+ 339   3                                              break;
+ 340   3                              case 55:screen(27);//调整闹钟五小时
+ 341   3                                              break;
+ 342   3                              case 56:nz[4][0]++;
+ 343   3                                              if(nz[4][0]==24)nz[4][0]=0;
+ 344   3                                              key_zt=55;
+ 345   3                                              break;
+ 346   3                              case 57:nz[4][0]--;
+ 347   3                                              if(nz[4][0]==255)nz[4][0]=23;
+ 348   3                                              key_zt=55;
+ 349   3                                              break;
+ 350   3                              case 58:screen(28);//调整闹钟五分钟
+ 351   3                                              break;
+ 352   3                              case 59:nz[4][1]++;
+ 353   3                                              if(nz[4][1]==60)nz[4][1]=0;
+ 354   3                                              key_zt=58;
+ 355   3                                              break;
+ 356   3                              case 60:nz[4][1]--;
+ 357   3                                              if(nz[4][1]==255)nz[4][1]=59;
+ 358   3                                              key_zt=58;
+ 359   3                                              break;
+ 360   3                              case 61:key_zt=1;
+ 361   3                                              break;
+ 362   3                              case 62:screen(17);
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 7   
+
+ 363   3                                              break;
+ 364   3                              case 63:screen(20);
+ 365   3                                              break;
+ 366   3                              case 64:screen(23);
+ 367   3                                              break;
+ 368   3                              case 65:screen(26);
+ 369   3                                              break;
+ 370   3                              case 66:screen(29);
+ 371   3                                              break;
+ 372   3                              case 67:nz[0][2]++;
+ 373   3                                              if(nz[0][2]==6)nz[0][2]=0;
+ 374   3                                              key_zt=62;
+ 375   3                                              break;
+ 376   3                              case 68:nz[0][2]--;
+ 377   3                                              if(nz[0][2]==255)nz[0][2]=5;
+ 378   3                                              key_zt=62;
+ 379   3                                              break;
+ 380   3                              case 69:nz[1][2]++;
+ 381   3                                              if(nz[1][2]==6)nz[1][2]=0;
+ 382   3                                              key_zt=63;
+ 383   3                                              break;
+ 384   3                              case 70:nz[1][2]--;
+ 385   3                                              if(nz[1][2]==255)nz[1][2]=5;
+ 386   3                                              key_zt=63;
+ 387   3                                              break;
+ 388   3                              case 71:nz[2][2]++;
+ 389   3                                              if(nz[2][2]==6)nz[2][2]=0;
+ 390   3                                              key_zt=64;
+ 391   3                                              break;
+ 392   3                              case 72:nz[2][2]--;
+ 393   3                                              if(nz[2][2]==255)nz[2][2]=5;
+ 394   3                                              key_zt=64;
+ 395   3                                              break;
+ 396   3                              case 73:nz[3][2]++;
+ 397   3                                              if(nz[3][2]==6)nz[3][2]=0;
+ 398   3                                              key_zt=65;
+ 399   3                                              break;
+ 400   3                              case 74:nz[3][2]--;
+ 401   3                                              if(nz[3][2]==255)nz[3][2]=5;
+ 402   3                                              key_zt=65;
+ 403   3                                              break;
+ 404   3                              case 75:nz[4][2]++;
+ 405   3                                              if(nz[4][2]==6)nz[4][2]=0;
+ 406   3                                              key_zt=66;
+ 407   3                                              break;
+ 408   3                              case 76:nz[4][2]--;
+ 409   3                                              if(nz[4][2]==255)nz[4][2]=5;
+ 410   3                                              key_zt=66;
+ 411   3                                              break;
+ 412   3                              case 77:save_nz();
+ 413   3                                              key_zt=1;
+ 414   3                                              break;
+ 415   3      /*                      case 78:if(dis_other_flag==0)key_beep_op=~key_beep_op;//判断当前为设置什么项目
+ 416   3                                              if(dis_other_flag==1)nongli_op=~nongli_op;
+ 417   3                                              if(dis_other_flag==2)jieri_op=~jieri_op;
+ 418   3                                              key_zt=4;
+ 419   3                                              if(nongli_op==0x00&&jieri_op==0x00)dis_flag=0;
+ 420   3                                              if(nongli_op==0x00&&jieri_op==0xff)dis_flag=1;
+ 421   3                                              if(nongli_op==0xff&&jieri_op==0x00)dis_flag=2;
+ 422   3                                              if(nongli_op==0xff&&jieri_op==0xff)dis_flag=3;
+ 423   3                                              break;
+ 424   3                              case 79:dis_other_flag++;
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 8   
+
+ 425   3                                              if(dis_other_flag==3)
+ 426   3                                                      dis_other_flag=0;
+ 427   3                                              key_zt=4;
+ 428   3                                              break;
+ 429   3                              case 80:dis_other_flag--;
+ 430   3                                              if(dis_other_flag==255)
+ 431   3                                                      dis_other_flag=2;
+ 432   3                                              key_zt=4;
+ 433   3                                              break;          
+ 434   3      */
+ 435   3                              case 78:autotsf+=1;
+ 436   3                                              if(autotsf==3)autotsf=0;
+ 437   3                                              autotsf=(autotsf/10*16+autotsf%10);     
+ 438   3                                              ds1302_jiaoshi();                 //把要调整的时间误差数据写入时间芯片
+ 439   3                                              key_zt=4;
+ 440   3                                              break;
+ 441   3                              case 79:ssov=(ssov/16*10+ssov%16)+1;
+ 442   3                                              if(ssov==16)ssov=0;
+ 443   3                                              ssov=(ssov/10*16+ssov%10);
+ 444   3                                              ds1302_jiaoshi();                 //把要调整的时间误差数据写入时间芯片
+ 445   3                                              key_zt=4;
+ 446   3                                              break;
+ 447   3                              case 80:ssov=(ssov/16*10+ssov%16)-1;
+ 448   3                                              if(ssov==255)ssov=15;
+ 449   3                                              ssov=(ssov/10*16+ssov%10);
+ 450   3                                              ds1302_jiaoshi();                  //把要调整的时间误差数据写入时间芯片
+ 451   3                                              key_zt=4;
+ 452   3                                              break;          
+ 453   3                              default:key_zt=0;
+ 454   3                                              break;          
+ 455   3                      }
+ 456   2                      nz_flag=chk_nz(hour,minute,second,week);//检查闹钟
+ 457   2                      if(nz_flag!=0);
+ 458   2                      {
+ 459   3                              buzzer_nz(nz_flag);
+ 460   3                      }
+ 461   2                      Conversion(0,year,month,day);//转换农历
+ 462   2                      if(key_zt==0)//在正常显示时,按下key5为切换开关led灯
+ 463   2                      {  
+ 464   3                              if(key5==0||key_light==1)
+ 465   3                              {
+ 466   4                                      delayms(1);
+ 467   4                                      if(key5==0||key_light==1)
+ 468   4                                      {       
+ 469   5                                              key_light=0;
+ 470   5                                              while(!key5);
+ 471   5                                              key_beep();
+ 472   5                                              LCM_BACKLIGHT=~LCM_BACKLIGHT;  // 背光控制
+ 473   5                                      }
+ 474   4                              }
+ 475   3      
+ 476   3                      }
+ 477   2              }
+ 478   1      }
+ 479          uchar read_key(void) //读取键值
+ 480          {
+ 481   1              if(key1==0||key_set==1)
+ 482   1              {
+ 483   2                      delayms(1);
+ 484   2                      if(key1==0||key_set==1){key_set=0;while(!key1);key_beep();return 1;}
+ 485   2              }
+ 486   1              if(key2==0||key_add==1)
+C51 COMPILER V9.01   KEYPRO                                                                07/27/2013 10:39:07 PAGE 9   
+
+ 487   1              {
+ 488   2                      delayms(1);     
+ 489   2                      if(key2==0||key_add==1){key_add=0;while(!key2);key_beep();return 2;}
+ 490   2              }
+ 491   1              if(key3==0||key_minus==1)
+ 492   1              {
+ 493   2                      delayms(1);        
+ 494   2                      if(key3==0||key_minus==1){key_minus=0;while(!key3);key_beep();return 3;}
+ 495   2              }
+ 496   1              if(key4==0||key_ok==1)
+ 497   1              {
+ 498   2                      delayms(1);
+ 499   2                      if(key4==0||key_ok==1){key_ok=0;while(!key4);key_beep();return 4;}
+ 500   2              }
+ 501   1              return 0;
+ 502   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   3146    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

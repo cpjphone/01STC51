@@ -1,0 +1,262 @@
+C51 COMPILER V9.01   KEY_TIME                                                              07/07/2013 17:21:57 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE KEY_TIME
+OBJECT MODULE PLACED IN ..\Obj\key_time.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\菜鸟小春\（4）clock\key_time.c BROWSE DEBUG OBJECTEXTEND PRINT(.\key
+                    -_time.lst) OBJECT(..\Obj\key_time.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          #define uint  unsigned int       //宏定义
+   4          #define uchar  unsigned char
+   5          uchar code led[]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x40,0x77,0x7C,0x39,0x5E,0x79,0x71,0x0
+             -0};//0-9,A-F,灭
+   6          uchar disbuffer[]={0,1,2,3,4,5,6,7,8,9,10};
+   7          uchar count,flag_t,flag_add=0;
+   8          uchar kr,add;
+   9          uint sec,min,hour;
+  10          
+  11          void time_display();
+  12          void jia_add();
+  13          void jian_add();
+  14          /**************************************
+  15          延时函数
+  16          ***************************************/
+  17          void delay(uint ms)
+  18          {
+  19   1              uint i,j;  
+  20   1              for(i=0;i<ms;i++)
+  21   1                      for(j=0;j<121;j++);
+  22   1      }
+  23          void dispmove(uchar val)
+  24          {
+  25   1              uchar i;
+  26   1              for(i=7;i>0;i--)
+  27   1                      disbuffer[i] = disbuffer[i-1];
+  28   1              disbuffer[0] = val;
+  29   1      }
+  30          void display()
+  31          {
+  32   1              uchar i,temp;
+  33   1              temp = 0xfe;
+  34   1              for(i=0;i<8;i++)
+  35   1              {
+  36   2                      P2 = led[disbuffer[i]];
+  37   2                      P0 = temp;
+  38   2                      temp = _crol_(temp,1);
+  39   2                      delay(2);
+  40   2              }
+  41   1      }
+  42          uchar keysearch()
+  43          {
+  44   1              uchar key;
+  45   1              P1 = 0xf0;
+  46   1              key = P1;
+  47   1              key = ~key;
+  48   1              key = key & 0xf0;
+  49   1              return key;             
+  50   1      }
+  51          uchar kscan()
+  52          {
+  53   1              uchar k,knumb,i,temp,ktemp;
+C51 COMPILER V9.01   KEY_TIME                                                              07/07/2013 17:21:57 PAGE 2   
+
+  54   1              k = keysearch();
+  55   1              if(k == 0)
+  56   1                      return 0xff;
+  57   1              delay(3);
+  58   1              k = keysearch();
+  59   1              if(k == 0)
+  60   1                      return 0xff;
+  61   1              temp = 0xfe;
+  62   1              for(i=0;i<4;i++)
+  63   1              {
+  64   2                      P1 = temp;
+  65   2                      ktemp = P1;
+  66   2                      if((ktemp & 0x10) == 0)  knumb = i*4+0;
+  67   2                      if((ktemp & 0x20) == 0)  knumb = i*4+1;
+  68   2                      if((ktemp & 0x40) == 0)  knumb = i*4+2;
+  69   2                      if((ktemp & 0x80) == 0)  knumb = i*4+3;
+  70   2                      temp = _crol_(temp,1);
+  71   2              }
+  72   1              while(1)
+  73   1              {
+  74   2                      k = keysearch();
+  75   2                      time_display();
+  76   2                      if(k == 0)
+  77   2                              break;  
+  78   2              }
+  79   1              return knumb;
+  80   1      }
+  81          void kpro(uchar kk)
+  82          {
+  83   1              switch (kk)
+  84   1              {
+  85   2                      case 4: dispmove(0);
+  86   2                              break;
+  87   2                      case 5: dispmove(1);
+  88   2                              break;
+  89   2                      case 6: dispmove(2);
+  90   2                              break;
+  91   2                      case 7: dispmove(3);
+  92   2                              break;
+  93   2                      case 8: dispmove(4);
+  94   2                              break;
+  95   2                      case 9: dispmove(5);
+  96   2                              break;
+  97   2                      case 10: dispmove(6);
+  98   2                              break;
+  99   2                      case 11: dispmove(7);
+ 100   2                              break;
+ 101   2                      case 12: dispmove(8);
+ 102   2                              break;
+ 103   2                      case 13:dispmove(9);
+ 104   2                              break;
+ 105   2      //              case 14: dispmove(8);
+ 106   2      //                      break;
+ 107   2      //              case 15:dispmove(9);
+ 108   2      //                      break;
+ 109   2                      default:
+ 110   2                              break;
+ 111   2              }       
+ 112   1      }
+ 113          
+ 114          void time_init ()
+ 115          {
+C51 COMPILER V9.01   KEY_TIME                                                              07/07/2013 17:21:57 PAGE 3   
+
+ 116   1              EA = 1;
+ 117   1              ET0 =1;
+ 118   1              TMOD = 0x01;
+ 119   1              TH0 = (65536-50000)/256;//0x3c;
+ 120   1              TL0 = (65536-50000)%256;//0xb0;
+ 121   1              TR0 = 1;
+ 122   1      }
+ 123          
+ 124          void time_display()
+ 125          {
+ 126   1              P2 = led[disbuffer[sec%10]];
+ 127   1              P0 = 0x7f;
+ 128   1              delay (3);
+ 129   1              P2 = led[disbuffer[sec/10]];
+ 130   1              P0 = 0xbf;
+ 131   1              delay (3);
+ 132   1              P2 = led[disbuffer[min%10]];
+ 133   1              P0 = 0xef;
+ 134   1              delay (3);
+ 135   1              P2 = led[disbuffer[min/10]];
+ 136   1              P0 = 0xf7;
+ 137   1              delay (3);
+ 138   1              P2 = led[disbuffer[10]];
+ 139   1              P0 = 0xdf;
+ 140   1              delay (3);
+ 141   1              P2 = led[disbuffer[10]];
+ 142   1              P0 = 0xfb;
+ 143   1              delay (3);
+ 144   1              P2 = led[disbuffer[hour%10]];
+ 145   1              P0 = 0xfd;
+ 146   1              delay (3);
+ 147   1              P2 = led[disbuffer[hour/10]];
+ 148   1              P0 = 0xfe;
+ 149   1              delay (3);
+ 150   1      }
+ 151          
+ 152          void jia_add()
+ 153          {
+ 154   1              if (flag_add == 1)
+ 155   1                      {
+ 156   2                              min=min+add;
+ 157   2                              add=0;
+ 158   2                              //flag_add=0;
+ 159   2                              if (min>59)
+ 160   2                              {
+ 161   3                                      min=min-60;
+ 162   3                                      hour++;
+ 163   3                              }                       
+ 164   2                      }
+ 165   1                      if (flag_add == 2)
+ 166   1                      {
+ 167   2                              hour=hour+add;
+ 168   2                              add=0;
+ 169   2                              //flag_add=0;
+ 170   2                              if (hour>23)
+ 171   2                                      hour=hour-24;                   
+ 172   2                      }
+ 173   1                      if (flag_add>2)
+ 174   1                              flag_add=0;
+ 175   1      
+ 176   1                      time_display();
+ 177   1      }
+C51 COMPILER V9.01   KEY_TIME                                                              07/07/2013 17:21:57 PAGE 4   
+
+ 178          
+ 179          void menu()
+ 180          {
+ 181   1                      kr = kscan();
+ 182   1                      if(kr != 0xff)
+ 183   1                      add=kr-4;
+ 184   1      
+ 185   1                      if (add == 10)
+ 186   1                      {
+ 187   2                              flag_add++;
+ 188   2                              while (add==10)
+ 189   2                              {
+ 190   3                                      time_display();
+ 191   3                                      break;
+ 192   3                              }
+ 193   2                      }
+ 194   1                      jia_add();      
+ 195   1      }
+ 196          main()
+ 197          {
+ 198   1              time_init ();
+ 199   1              while(1)
+ 200   1              {
+ 201   2                      menu();
+ 202   2                              
+ 203   2              }
+ 204   1      }
+ 205          
+ 206          void timer0() interrupt 1
+ 207          {
+ 208   1              TH0 = (65536-50000)/256;//0x3c;
+ 209   1              TL0 = (65536-50000)%256;//0xb0;
+ 210   1              count++;
+ 211   1              if(count > 19)
+ 212   1              {
+ 213   2                      count = 0;
+ 214   2                      if(flag_t == 0)
+ 215   2                              sec++;
+ 216   2                      if(sec > 59)
+ 217   2                      {
+ 218   3                              sec = 0;
+ 219   3                              min++;
+ 220   3                              if(min > 59)
+ 221   3                              {
+ 222   4                                      min = 0;
+ 223   4                                      hour++;
+ 224   4                                      if(hour > 23)
+ 225   4                                              hour = 0;
+ 226   4                              }
+ 227   3                      }       
+ 228   2              }       
+ 229   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    766    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     22       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+C51 COMPILER V9.01   KEY_TIME                                                              07/07/2013 17:21:57 PAGE 5   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

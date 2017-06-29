@@ -1,0 +1,163 @@
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 18:01:38 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DS1302_Y
+OBJECT MODULE PLACED IN .\DS1302_y.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\Drive\DS1302_Drive\DS1302_y.c BROWSE INCDIR(..\Drive\DS1302_Drive) D
+                    -EBUG OBJECTEXTEND PRINT(.\DS1302_y.lst) OBJECT(.\DS1302_y.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          
+   3          #define uchar unsigned char
+   4          #define uint unsigned int
+   5          
+   6          sbit DS1302_RST         = P3^5; 
+   7          sbit DS1302_IO          = P3^4; 
+   8          sbit DS1302_SCLK        = P3^6; 
+   9              
+  10          #include "DS1302_y.h"
+  11          
+  12          /****************************************************************************** 
+  13          * 函数:    static void DS1302Write( uchar Dat )                                         * 
+  14          * 描述:向DS1302写一个字节的内容                                                                                         * 
+  15          * 说明:uchar Dat :    要写的字节                                                                                *  
+  16          ******************************************************************************/ 
+  17          
+  18          static void DS1302Write( uchar Dat ) 
+  19          { 
+  20   1          uchar i; 
+  21   1          for( i = 8; i > 0; i-- ) 
+  22   1          { 
+  23   2              if( Dat & 0x01 ) 
+  24   2              { 
+  25   3                  DS1302_IO_HIGH 
+  26   3              } 
+  27   2              else 
+  28   2              { 
+  29   3                  DS1302_IO_LOW 
+  30   3              } 
+  31   2              Dat >>= 1 ; 
+  32   2      
+  33   2              DS1302_SCLK_HIGH  
+  34   2              DS1302_SCLK_LOW 
+  35   2          } 
+  36   1      } 
+  37          
+  38          
+  39          /****************************************************************************** 
+  40          * 函数:    static uchar DS1302Read( void )                                                                        * 
+  41          * 描述: 从DS1302当前设定的地址读取一个字节的内容                                                          * 
+  42          * 说明:                                                                                                                           * 
+  43          * Return:    返回读出来的值(uchar)                                                                        * 
+  44          ******************************************************************************/ 
+  45          static uchar DS1302Read( void ) 
+  46          { 
+  47   1          uchar i, ReadValue; 
+  48   1          DS1302_IO_HIGH 
+  49   1          for( i = 8; i > 0; i-- ) 
+  50   1          { 
+  51   2              ReadValue >>= 1; //ReadValue=ReadValue>>1;
+  52   2                if( DS1302_IO_READ ) 
+  53   2              { 
+  54   3                  ReadValue |= 0x80; 
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 18:01:38 PAGE 2   
+
+  55   3              } 
+  56   2              else 
+  57   2              { 
+  58   3                  ReadValue &= 0x7f; 
+  59   3              } 
+  60   2      
+  61   2              DS1302_SCLK_HIGH 
+  62   2              DS1302_SCLK_LOW 
+  63   2              
+  64   2          } 
+  65   1          return ReadValue; 
+  66   1      } 
+  67          
+  68          /****************************************************************************** 
+  69          * 函数:    void DS1302WriteByte( uchar Address,  uchar Dat )                              * 
+  70          * 描述:  从DS1302指定的地址写入一个字节的内容                                                     * 
+  71          * 说明:  Address:    要写入数据的地址                                                                     * 
+  72          *               Dat:    写入数据的具体值                                                                  * 
+  73          * Return:                                                                                                 
+             -               * 
+  74          ******************************************************************************/ 
+  75          void DS1302WriteByte( uchar Address,  uchar Dat ) 
+  76          { 
+  77   1          DS1302_RST_LOW 
+  78   1          DS1302_SCLK_LOW 
+  79   1          DS1302_RST_HIGH    
+  80   1      
+  81   1          DS1302Write( Address ); 
+  82   1          DS1302Write( Dat ); 
+  83   1      
+  84   1          DS1302_RST_LOW 
+  85   1          DS1302_SCLK_HIGH 
+  86   1      } 
+  87          
+  88          /****************************************************************************** 
+  89          * 函数:    uchar DS1302ReadByte( uchar Address )                                  * 
+  90          * 描述:从DS1302指定的地址读出一个字节的内容                                                               * 
+  91          * 说明:Address:    要读出数据的地址                                                                       * 
+  92          *                                                                                                                                 * 
+  93          * Return:        指定地址读出的值(uchar)                                                                  * 
+  94          ******************************************************************************/ 
+  95          uchar DS1302ReadByte( uchar Address ) 
+  96          { 
+  97   1          uchar ReadValue; 
+  98   1          DS1302_RST_LOW 
+  99   1          DS1302_SCLK_LOW 
+ 100   1          DS1302_RST_HIGH    
+ 101   1      
+ 102   1          DS1302Write( Address ); 
+ 103   1          ReadValue = DS1302Read(); 
+ 104   1      
+ 105   1          DS1302_RST_LOW 
+ 106   1          DS1302_SCLK_HIGH 
+ 107   1          return ReadValue; 
+ 108   1      } 
+ 109          /****************************************************************************** 
+ 110          * 函数:    void ClockInit( void )                                                                         * 
+ 111          * 描述:初始化写入DS1302时钟寄存器的值(主程序中只需调用一次即可)                           * 
+ 112          * 说明:                                                                                                   
+             -                                     * 
+ 113          *                                                                                                         * 
+ 114          * Return:                                                                                                         * 
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 18:01:38 PAGE 3   
+
+ 115          ******************************************************************************/ 
+ 116          void ClockInit( void ) 
+ 117          { 
+ 118   1          if( DS1302ReadByte( 0xc1) != 0x55 ) 
+ 119   1          { 
+ 120   2              DS1302WriteByte( 0x8e, 0x00 );                                          //允许写操作 
+ 121   2              DS1302WriteByte( DS1302_YEAR_WRITE, 0x08 );             //年 
+ 122   2              DS1302WriteByte( DS1302_WEEK_WRITE, 0x04 );             //星期 
+ 123   2              DS1302WriteByte( DS1302_MONTH_WRITE, 0x12 );            //月 
+ 124   2              DS1302WriteByte( DS1302_DAY_WRITE, 0x11 );          //日 
+ 125   2              DS1302WriteByte( DS1302_HOUR_WRITE, 0x13 );             //小时 
+ 126   2              DS1302WriteByte( DS1302_MINUTE_WRITE, 0x06 );           //分钟 
+ 127   2              DS1302WriteByte( DS1302_SECOND_WRITE, 0x40 );           //秒 
+ 128   2              DS1302WriteByte( 0x90, 0xa5 );                      //充电 
+ 129   2                      DS1302WriteByte( 0xc0, 0x55 );                          //判断是否初始化一次标识写入 
+ 130   2              DS1302WriteByte( 0x8e, 0x80 );                                          //禁止写操作 
+ 131   2          } 
+ 132   1      } 
+ 133           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    166    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

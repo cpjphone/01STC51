@@ -1,0 +1,62 @@
+C51 COMPILER V9.01   DRIVE595                                                              07/27/2013 09:00:04 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DRIVE595
+OBJECT MODULE PLACED IN Drive595.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE Drive595\Drive595.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Drive595.lst) OBJ
+                    -ECT(Drive595.obj)
+
+line level    source
+
+   1          /*********************************************************************************************************
+   2          ** 函数名称: HC595SendData
+   3          ** 功能描述: 向SPI总线发送数据
+   4          *********************************************************************************************************/
+   5          #include <reg51.h> 
+   6          #include <intrins.h>
+   7          
+   8          sbit MOSIO =P3^4;  //串行数据线
+   9          sbit R_CLK =P3^5;  //数据并行输出控制
+  10          sbit S_CLK =P3^6;  //串行时钟线
+  11          
+  12          #define  NOP() _nop_()  /* 定义空指令 */
+  13          
+  14          void HC595SendData(unsigned char SendVal)
+  15          {  
+  16   1              unsigned char i;
+  17   1              
+  18   1      
+  19   1              for(i=0;i<8;i++) 
+  20   1              {
+  21   2                      if((SendVal<<i)&0x80) MOSIO=1; //set dataline high  0X80  最高位与SendVal左移的最高位 进行逻辑运算
+  22   2                      else MOSIO=0;                              // 如果为真 MOSIO = 1  
+  23   2                      
+  24   2                      S_CLK=0;  
+  25   2                      NOP();   //短暂延时产生一定宽度的脉冲信号
+  26   2                      NOP();   //短暂延时                                              //上升沿读取数据
+  27   2                      S_CLK=1;
+  28   2              
+  29   2              }
+  30   1              
+  31   1              
+  32   1      //      R_CLK=0; //set dataline low
+  33   1      //      NOP();  //短暂延时
+  34   1      //      NOP();  //短暂延时              //上升沿读取数据
+  35   1      //      R_CLK=1;        //
+  36   1      
+  37   1      
+  38   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     32    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

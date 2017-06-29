@@ -1,0 +1,94 @@
+A51 MACRO ASSEMBLER  14_4_P325                                                            04/02/2010 22:01:19 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.00
+OBJECT MODULE PLACED IN 14.4-P325.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE 14.4-P325.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1             
+                       2             
+0000                   3               ORG  00H
+0000 020026            4                 LJMP LTB4
+0026                   5                 ORG 0026H   
+0026 7AFF              6     LTB4:   MOV R2,#0FFH    
+0028 900068            7             MOV DPTR,#TAB4
+002B 7820              8                     MOV R0,#20h
+002D E8                9     LT4A:    MOV A,R0
+002E F9               10                     MOV R1,A
+002F 0A               11                 INC R2
+0030 E7               12      LT4B:   MOV A,@R1
+0031 F5F0             13             MOV B,A
+0033 E4               14                     CLR A
+0034 93               15                MOVC A,@A+DPTR
+0035 C2D5             16            CLR F0
+0037 10E702           17                JBC ACC.7,LT4C
+003A D2D5             18                SETB F0
+003C 6023             19     LT4C:  JZ LNED
+003E B5F007           20            CJNE A,B,LT4D
+0041 30D514           21            JNB F0,LYES
+                      22                     ;CJNE A,B,LT4D
+0044 09               23                INC R1
+0045 A3               24                INC DPTR
+0046 80E8             25                SJMP LT4B
+0048 A3               26     LT4D:  INC DPTR
+0049 30D5E1           27     LT4E:  JNB F0,LT4A
+004C E4               28            CLR A
+004D 93               29                MOVC A,@A+DPTR
+004E A3               30                INC DPTR
+004F C2D5             31                      CLR F0
+0051 10E7D9           32                     JBC ACC.7,LT4A
+0054 D2D5             33                     SETB F0
+0056 80F1             34                      SJMP LT4E
+0058 EA               35     LYES:   MOV A,R2
+0059 90007D           36             MOV DPTR,#TAB5
+005C 93               37             MOVC A,@A+DPTR
+005D F5A0             38                 MOV P2,A
+005F 8005             39                     SJMP DONE
+0061 E505             40     LNED:   MOV A,5  ;’“≤ªµΩœ‘ æ8
+0063 93               41             MOVC A,@A+DPTR
+0064 F5A0             42                 MOV P2,A
+0066 80FE             43     done:   sjmp DONE
+0068 52455345         44     TAB4:   DB'RESE',0D4H
+006C D4                      
+006D 42454749         45             DB'BEGI',0CEH
+0071 CE                      
+0072 53544F50         46                     DB'STOP',0D0H
+0076 D0                      
+0077 53454E44         47                     DB'SEND',0C4H
+007B C4                      
+007C 00               48                     DB 0
+007D C0F9A4B0         49     TAB5:  DB 0C0H,0F9H,0A4H,0B0H,99H,92H,82H,0F8H
+0081 999282F8                
+                      50            
+                      51                END
+A51 MACRO ASSEMBLER  14_4_P325                                                            04/02/2010 22:01:19 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+DONE . . . . . . .  C ADDR   0066H   A   
+F0 . . . . . . . .  B ADDR   00D0H.5 A   
+LNED . . . . . . .  C ADDR   0061H   A   
+LT4A . . . . . . .  C ADDR   002DH   A   
+LT4B . . . . . . .  C ADDR   0030H   A   
+LT4C . . . . . . .  C ADDR   003CH   A   
+LT4D . . . . . . .  C ADDR   0048H   A   
+LT4E . . . . . . .  C ADDR   0049H   A   
+LTB4 . . . . . . .  C ADDR   0026H   A   
+LYES . . . . . . .  C ADDR   0058H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+TAB4 . . . . . . .  C ADDR   0068H   A   
+TAB5 . . . . . . .  C ADDR   007DH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

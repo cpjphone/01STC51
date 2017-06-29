@@ -1,0 +1,8 @@
+".\Obj\Main.obj",
+".\Obj\NRF24L01.obj",
+".\Obj\LCD1602.obj",
+".\Obj\Display.obj",
+".\Obj\DS18B20.obj",
+".\Obj\Delay.obj" 
+TO ".\Obj\Send" 
+PRINT(".\List\Send.m51") RAMSIZE(256) 

@@ -1,0 +1,152 @@
+C51 COMPILER V9.01   APP                                                                   04/12/2015 23:25:31 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE APP
+OBJECT MODULE PLACED IN ..\Obj\App.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\Source\APP\App.c BROWSE INCDIR(..\Source\BSP;..\Source\BSP\Interrupt;..\
+                    -Source\BSP\LCD1602;..\Source\BSP\LED;..\Source\BSP\DHT11) DEBUG OBJECTEXTEND PRINT(..\Obj\List\App.lst) TABS(2) OBJECT(.
+                    -.\Obj\App.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    APP.c
+   4            * @author  phone
+   5            * @version V1.0
+   6            * @date    2014-11-06
+   7            * @brief   
+   8            ******************************************************************************
+   9            * @attention
+  10            *
+  11            * @{实验平台:
+  12            * @{雅典娜程序整理  
+  13            * @{ USE_STM3210B_EVAL
+  14            --cpu Cortex-M3 -g --apcs=interwork 
+  15            -I C:\Keil\ARM\RV31\INC 
+  16            ******************************************************************************
+  17            */ 
+  18            
+  19          /* Includes ------------------------------------------------------------------*/ 
+  20          
+  21          //void Delay(__IO u32 nCount); 
+  22          
+  23                                                                     
+  24          #include "BSP.h"
+  25          #include "dht11.h"
+  26          
+  27          sbit DANGER = P1^1;
+  28          sbit LED = P1^0;
+  29          
+  30          unsigned char code dis_VOL[] = {"FIRE:"};
+  31          unsigned char code YES[] = {"YES"};
+  32          unsigned char code NO[] = {"N O"};
+  33          
+  34          /**---------------------------------------------------------------------------------
+  35          * @brief     ms延时
+  36          ---------------------------------------------------------------------------------*/                       
+             -                                                   
+  37          static void delay(int ms)                                                         
+  38          {                                                                          
+  39   1         int i;                                                                  
+  40   1         while(ms--)                                                             
+  41   1         {                                                                       
+  42   2           for(i = 0; i< 250; i++)                                               
+  43   2           {                                                                     
+  44   3            _nop_();                                                             
+  45   3            _nop_();                                                             
+  46   3            _nop_();                                                             
+  47   3            _nop_();                                                             
+  48   3           }                                                                     
+  49   2         }                                                                       
+  50   1      } 
+  51          
+  52          /**---------------------------------------------------------------------------------
+C51 COMPILER V9.01   APP                                                                   04/12/2015 23:25:31 PAGE 2   
+
+  53            * @brief       数据处理函数
+  54            * @param        无
+  55            * @arg         NULL
+  56            * @retval     null
+  57            ---------------------------------------------------------------------------------*/
+  58          //unsigned char* DATA_DEAL(water_date t)
+  59          //{
+  60          //  unsigned char  DIS_DATA[] = {"000mL;000L;000M3"}; 
+  61          //  if(t.mL_data || t.L_data || t.M3_data)
+  62          //  {
+  63          //    DIS_DATA[0] = (t.mL_data * 1000/450)%1000/100 + 0x30;
+  64          //    DIS_DATA[1] = (t.mL_data * 1000/450)%100/10 + 0x30;
+  65          //    DIS_DATA[2] = (t.mL_data * 1000/450)%10 + 0x30;
+  66          //    
+  67          //    DIS_DATA[6] = t.L_data%1000/100 + 0x30;
+  68          //    DIS_DATA[7] = t.L_data%100/10 + 0x30;
+  69          //    DIS_DATA[8] = t.L_data%10 + 0x30;
+  70          //    
+  71          //    DIS_DATA[11] = t.M3_data%1000/100 + 0x30;
+  72          //    DIS_DATA[12] = t.M3_data%100/10 + 0x30;
+  73          //    DIS_DATA[13] = t.M3_data%10 + 0x30;
+  74          
+  75          //    return DIS_DATA;
+  76          //  }
+  77          //  else return 0;
+  78          //}
+  79          
+  80          
+  81          
+  82          /**---------------------------------------------------------------------------------
+  83            * @brief       主函数.
+  84            * @param        无
+  85            * @arg         NULL
+  86            * @retval     null
+  87            ---------------------------------------------------------------------------------*/
+  88          #if 1
+  89          void main()
+  90          {
+  91   1        ALL_Config();
+  92   1        //LCD1602_WRITE(1,0,dis_FL);
+  93   1        LCD1602_WRITE(1,0,dis_VOL);
+  94   1        LED = 1;
+  95   1        while(1)
+  96   1        {
+  97   2          //DATA_DEAL(water_data1);
+  98   2          read_TRH();   //读取数据
+  99   2          
+ 100   2          //LCD1602_WRITE(2,0,DATA_DEAL(water_data1));
+ 101   2          
+ 102   2          if(DANGER == 1)
+ 103   2          {
+ 104   3            LED = 0;
+ 105   3            LCD1602_WRITE(1,5,YES);
+ 106   3          }
+ 107   2          else 
+ 108   2          {
+ 109   3            LED = 1;
+ 110   3            LCD1602_WRITE(1,5,NO);
+ 111   3          }
+ 112   2          
+ 113   2          LCD1602_WRITE(2,0,str1);
+ 114   2          LCD1602_WRITE(2,8,str2);
+C51 COMPILER V9.01   APP                                                                   04/12/2015 23:25:31 PAGE 3   
+
+ 115   2          
+ 116   2          delay(15);  
+ 117   2        }
+ 118   1      }
+ 119          
+ 120          #endif
+ 121          
+ 122          /*********************************************END OF FILE**********************/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    120    ----
+   CONSTANT SIZE    =     14    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

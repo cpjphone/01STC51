@@ -1,0 +1,321 @@
+C51 COMPILER V9.01   CLOCK2                                                                07/02/2013 12:02:39 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CLOCK2
+OBJECT MODULE PLACED IN ..\Obj\clock2.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\²ËÄñÐ¡´º\£¨4£©clock\clock2.c BROWSE DEBUG OBJECTEXTEND PRINT(.\clock
+                    -2.lst) OBJECT(..\Obj\clock2.obj)
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * ¡¾Óï    ÑÔ¡¿£ºCÓïÑÔ
+   3          * ¡¾±àÒë»·¾³¡¿£ºKeil4  
+   4          * ¡¾³ÌÐò¹¦ÄÜ¡¿£ºÀûÓÃ¶¨Ê±Æ÷×öÊ±ÖÓ¡£ÔÚP3¿Ú½Ó4¸ö°´¼üµ÷ÕûÊ±¼ä£¬²¢¾ß±¸Á¬¼ÓµÄ¹¦ÄÜ
+   5          * ¡¾¼¼ÊõÖ§³Ö¡¿£ºÖÐ¶Ï¶¨Ê±Æ÷                              
+   6          * ¡¾¾§    Õñ¡¿: 12MHzÍâ²¿¾§Õñ           
+   7          * ¡¾Ð¾    Æ¬¡¿: STC89C52RC 
+   8          * ¡¾ÈÕ    ÆÚ¡¿: 2013/6/12
+   9          * ¡¾×÷    Õß¡¿: Phone
+  10          ******************************************************************************/
+  11          
+  12          #include <reg52.h>
+  13          #include <intrins.h>
+  14          #define uint  unsigned int                      //ºê¶¨Òå
+  15          #define uchar  unsigned char
+  16          uchar code tab[] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x40,0x80,0x00};
+  17          uchar disp_buffer[8]={0};
+  18          sbit keyadd = P3^3;                                     //Á¬+°´¼ü£¬ÅÐ¶ÏÁ¬¼ÓÊ±ÓÃµ½
+  19          sbit keyadd2 = P3^4;                            //Á¬-°´¼ü£¬ÅÐ¶ÏÁ¬¼ÓÊ±ÓÃµ½
+  20          uchar count,countset,flag_t,setadd = 0; //count:¼Ç20ÎªÒ»Ãë£¬flag_t:µ÷»»Ê±Ãë±êÖ¾£¬setadd£º¼Æ5 flagadd±ä»¯ Á
+             -¬¼Ó
+  21          char sec,min,hour;
+  22          bit shan,flagadd = 0;                           //flagadd£ºÁ¬¼Ó±êÖ¾£¬1£ºÁ¬¼Ó
+  23          /*************************************************************
+  24          funtion:ÑÓÊ±º¯Êý
+  25          *************************************************************/
+  26          void delayms(uint ms)
+  27          {
+  28   1              uint i,j;  
+  29   1              for(i=0;i<ms;i++)
+  30   1                      for(j=0;j<121;j++);
+  31   1      }
+  32          /***************************************************************
+  33          funtion:ÊýÂë¹ÜÏÔÊ¾º¯Êý
+  34          ***************************************************************/
+  35          void display()
+  36          {
+  37   1              uchar i,temp;
+  38   1              temp = 0xfe;
+  39   1              for(i=0;i<8;i++)
+  40   1              {
+  41   2                      P2 = temp;
+  42   2                      P1 = tab[disp_buffer[i]];
+  43   2                      delayms(2);
+  44   2                      P1 = 0x00;
+  45   2                      temp = _crol_(temp,1);                            //ÒòÎªÒÆÎ»Óë·Å¶ÎÍ¬Ê±£¬¹Êi ÊÇ¼¸£¬¾ÍËÍµ½ÄÄÎ»È¥¡£
+  46   2              }
+  47   1      }
+  48          /*************************************************/
+  49          //µ÷ÕûÏÔÊ¾º¯Êý
+  50          /*************************************************/
+  51          void displayset()       
+  52          {
+  53   1              uchar i,temp;
+C51 COMPILER V9.01   CLOCK2                                                                07/02/2013 12:02:39 PAGE 2   
+
+  54   1              temp = 0xfe;
+  55   1              for(i=0;i<8;i++)
+  56   1              {
+  57   2                      P2 = temp;
+  58   2                      if(flag_t == 2)          //µ÷Ê±
+  59   2                      {
+  60   3                              if(i == 0 || i == 1)
+  61   3                              {
+  62   4                                      if(shan == 1)
+  63   4                                              P1 = tab[12];
+  64   4                                      else
+  65   4                                              P1 = tab[disp_buffer[i]];       
+  66   4                              }
+  67   3                              else
+  68   3                                      P1 = tab[disp_buffer[i]];
+  69   3                      }
+  70   2                      if(flag_t == 1)            //µ÷·Ö
+  71   2                      {
+  72   3                              if(i == 3 || i == 4)
+  73   3                              {
+  74   4                                      if(shan == 1)
+  75   4                                              P1 = tab[12];
+  76   4                                      else
+  77   4                                              P1 = tab[disp_buffer[i]];       
+  78   4                              }
+  79   3                              else
+  80   3                                      P1 = tab[disp_buffer[i]];
+  81   3                      }
+  82   2                      delayms(2);
+  83   2                      P1 = 0x00;
+  84   2                      temp = _crol_(temp,1);  
+  85   2              }
+  86   1      }
+  87          
+  88          /****************************************************************
+  89          funtion:£¨1£©°´¼üÉ¨Ãè³ÌÐò£º´øÓÐ²ÎÊý·µ»ØµÄ£¬·µ»Ø°´¼üÖµ£»
+  90                          £¨2£©°´ÏÂ5S ÖÆ¶¯¼Ó,¼õ   
+  91          ****************************************************************/
+  92          uchar keyscan()
+  93          {
+  94   1              uchar temp,ktemp,i;
+  95   1              P3 = P3 | 0x3c;
+  96   1              temp = P3;
+  97   1              if((temp | 0xc3) == 0xff)
+  98   1                      return(0);
+  99   1              delayms(5);
+ 100   1              temp = P3;
+ 101   1              if((temp | 0xc3) == 0xff)
+ 102   1                      return(0);
+ 103   1              while(1)
+ 104   1              {
+ 105   2                      if(flagadd == 1)
+ 106   2                      {
+ 107   3                              if(keyadd == 0)    //ÅÐ¶ÏÁ¬¼Ó°´¼üÎª¡® + ¡®¼ü , ´ËÅÐ¶Ï±ØÐëÔÚ while£¨1£©ÖÐ
+ 108   3                              {
+ 109   4                                      if(flag_t == 1)
+ 110   4                                      {
+ 111   5                                              min++;
+ 112   5                                              if(min > 59)
+ 113   5                                                      min = 0;
+ 114   5                                      }
+ 115   4                                      if(flag_t == 2)
+C51 COMPILER V9.01   CLOCK2                                                                07/02/2013 12:02:39 PAGE 3   
+
+ 116   4                                      {
+ 117   5                                              hour++;
+ 118   5                                              if(hour > 23)
+ 119   5                                                      hour = 0;
+ 120   5                                      }                                       
+ 121   4                              }
+ 122   3                              if(keyadd2 == 0)           //ÅÐ¶ÏÁ¬¼Ó°´¼üÎª¡® - ¡®¼ü , ´ËÅÐ¶Ï±ØÐëÔÚ while£¨1£©ÖÐ
+ 123   3                              {
+ 124   4                                      if(flag_t == 1)
+ 125   4                                      {
+ 126   5                                              min--;
+ 127   5                                              if(min <= 0)
+ 128   5                                                      min = 59;
+ 129   5                                      }
+ 130   4                                      if(flag_t == 2)
+ 131   4                                      {
+ 132   5                                              hour--;
+ 133   5                                              if(hour <= 0)
+ 134   5                                                      hour = 24;
+ 135   5                                      }                                       
+ 136   4                              }                                       
+ 137   3                      }
+ 138   2                      disp_buffer[1] = hour%10;
+ 139   2                      disp_buffer[0] = hour/10;
+ 140   2                      disp_buffer[4] = min%10;
+ 141   2                      disp_buffer[3] = min/10;
+ 142   2                      disp_buffer[7] = sec%10;
+ 143   2                      disp_buffer[6] = sec/10;
+ 144   2                      for(i=0;i<10;i++)
+ 145   2                      {       
+ 146   3                              display();
+ 147   3                      }
+ 148   2                      ktemp = P3;
+ 149   2                      //display();
+ 150   2                      if((ktemp | 0xc3) == 0xff)
+ 151   2                              break;
+ 152   2              }
+ 153   1              flagadd = 0;            
+ 154   1              return temp;
+ 155   1      }
+ 156          
+ 157          //uchar keyscan()
+ 158          //{
+ 159          //      uchar temp,ktemp;
+ 160          //      P3 = P3 | 0x3c;
+ 161          //      temp = P3;
+ 162          //      if((temp | 0xc3) == 0xff)
+ 163          //              return(0);
+ 164          //      delayms(5);
+ 165          //      temp = P3;
+ 166          //      if((temp | 0xc3) == 0xff)
+ 167          //              return(0);
+ 168          //      while(1)
+ 169          //      {
+ 170          //              ktemp = P3;
+ 171          //              display();
+ 172          //              if((ktemp | 0xc3) == 0xff)
+ 173          //                      break;
+ 174          //      }               
+ 175          //      return temp;
+ 176          //}
+ 177          /************************************************************
+C51 COMPILER V9.01   CLOCK2                                                                07/02/2013 12:02:39 PAGE 4   
+
+ 178          funtion: °´¼ü´«µÝº¯Êý
+ 179          ************************************************************/
+ 180          void kpro(uchar temp)
+ 181          {       
+ 182   1              if((temp & 0x3c) == 0x38)
+ 183   1              {
+ 184   2                      flag_t++;
+ 185   2                      if(flag_t > 2)
+ 186   2                      {
+ 187   3                              flag_t = 0;
+ 188   3                              sec = 0;
+ 189   3                      }
+ 190   2              }
+ 191   1              if((temp & 0x3c) == 0x34)
+ 192   1              {
+ 193   2                      if(flag_t == 1)
+ 194   2                      {
+ 195   3                              min++;
+ 196   3                              if(min > 59)
+ 197   3                                      min = 0;
+ 198   3                      }
+ 199   2                      if(flag_t == 2)
+ 200   2                      {
+ 201   3                              hour++;
+ 202   3                              if(hour > 23)
+ 203   3                                      hour = 0;
+ 204   3                      }
+ 205   2              }
+ 206   1              if((temp & 0x3c) == 0x2c)
+ 207   1              {
+ 208   2                      if(flag_t == 1)
+ 209   2                      {
+ 210   3                              min--;
+ 211   3                              if(min < 0)
+ 212   3                                      min = 59;
+ 213   3                      }
+ 214   2                      if(flag_t == 2)
+ 215   2                      {
+ 216   3                              hour--;
+ 217   3                              if(hour < 0)
+ 218   3                                      hour = 23;
+ 219   3                      }
+ 220   2              }
+ 221   1              if((temp & 0x3c) == 0x1c)                // 7 0001 1100 0
+ 222   1              {;}      //±¸ÓÃ         
+ 223   1      }
+ 224          /***********************************************************************/
+ 225          //
+ 226          /***********************************************************************/
+ 227          void main()
+ 228          {
+ 229   1              uchar k;
+ 230   1              EA = 1;
+ 231   1              ET0 =1;
+ 232   1              TMOD = 0x01;
+ 233   1              TH0 = (65536-50000)/256;//0x3c;
+ 234   1              TL0 = (65536-50000)%256;//0xb0;
+ 235   1              TR0 = 1;
+ 236   1              while(1)
+ 237   1              {       
+ 238   2                      k = keyscan();
+ 239   2                      if(k != 0)
+C51 COMPILER V9.01   CLOCK2                                                                07/02/2013 12:02:39 PAGE 5   
+
+ 240   2                              kpro(k);                        
+ 241   2                              disp_buffer[2] = 10;
+ 242   2                              disp_buffer[5] = 11;
+ 243   2                              disp_buffer[1] = hour%10;
+ 244   2                              disp_buffer[0] = hour/10;
+ 245   2                              disp_buffer[4] = min%10;
+ 246   2                              disp_buffer[3] = min/10;
+ 247   2                              disp_buffer[7] = sec%10;
+ 248   2                              disp_buffer[6] = sec/10;                
+ 249   2                      if(flag_t != 0)
+ 250   2                              displayset();
+ 251   2                      else
+ 252   2                              display();
+ 253   2              }
+ 254   1      }
+ 255          
+ 256          void timer0() interrupt 1
+ 257          {
+ 258   1              TH0 = (65536-50000)/256;//0x3c;
+ 259   1              TL0 = (65536-50000)%256;//0xb0;
+ 260   1              count++;
+ 261   1              countset++;
+ 262   1              if(countset>5)
+ 263   1                      {countset = 0;shan = ~shan;}
+ 264   1              if(count > 19)
+ 265   1              {
+ 266   2                      count = 0;
+ 267   2                      setadd++;
+ 268   2                      if(setadd > 3)
+ 269   2                      {
+ 270   3                              setadd = 0;
+ 271   3                              flagadd = 1;
+ 272   3                      }
+ 273   2                      if(flag_t == 0)
+ 274   2                              sec++;
+ 275   2                      if(sec > 59)
+ 276   2                      {
+ 277   3                              sec = 0;
+ 278   3                              min++;
+ 279   3                              if(min > 59)
+ 280   3                              {
+ 281   4                                      min = 0;
+ 282   4                                      hour++;
+ 283   4                                      if(hour > 23)
+ 284   4                                              hour = 0;
+ 285   4                              }
+ 286   3                      }       
+ 287   2              }       
+ 288   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    732    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

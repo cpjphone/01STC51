@@ -1,0 +1,449 @@
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN lcd1602.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE lcd1602.c BROWSE INCDIR(..\ModuleDrive) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>                                                         //定义头文件
+   2          #include <18b20Drive.h>
+   3          
+   4          #define uint unsigned int                                         //宏定义  
+   5          #define uchar unsigned char
+   6          
+   7          uchar Second,Minute,Hour,Date,Month,Year,week;//时间等变量
+   8          #define one 0x80                                                //第一行的初始位置
+   9          #define two 0xc0                                            //第二行初始位置
+  10          
+  11          sbit RS_1602=P2^6;                                              //1602数据命令端
+  12          sbit RW_1602=P2^5;
+  13          sbit E_1602=P2^7;                                               //1602使能端
+  14          
+  15          sbit IO_1302=P3^4;                                              //1302数据端
+  16          sbit CLK_1302=P3^6;                                             //1302时钟端
+  17          sbit RST_1302=P3^5;                                             //1302复位端
+  18          
+  19          sbit key_mode=P2^0;                                             //功能按键
+  20          sbit key_up=P2^1;                                               //增量键
+  21          sbit key_down=P2^2;                                             //减量键
+  22          
+  23          sbit ACC0=ACC^0;
+  24          sbit ACC7=ACC^7;
+  25          
+  26          uchar code tab1[]={"20  -  -   week "}; //液晶第一行默认显示数据
+  27          uchar code tab2[]={"  :  :  "};                 //液晶第二行默认显示数据
+  28          
+  29          uchar code LCD1602_tab1[11]="0123456789.";       //字符串
+  30          uchar tab[4];    //时高位,时低位,：,分高位,分低位,：,秒高位,秒低位
+  31          
+  32          void init();                                                    //定时器0初始化
+  33          uchar BCD_Decimal(uchar bcd);                   //BCD转16进制数
+  34          uchar Dec_BCD(uchar Dec);                               //16进制数转BCD
+  35          
+  36          void delay(uint xms);                                   //延时函数
+  37          
+  38          void write_1602com(uchar com);                          //液晶写入指令函数
+  39          void write_1602dat(uchar dat);                          //液晶写入数据函数
+  40          void write_1602word(uchar *s);
+  41          void write_hms(uchar add,uchar dat);    //1602写时分秒
+  42          void write_ymd(uchar add,uchar dat);    //1602写年月日
+  43          void write_week(uchar week);                    //1602写星期函数
+  44          void lcd_init();                                                                //液晶初始化函数
+  45          
+  46          void write_byte(uchar dat);                             //1302字节写
+  47          uchar read_byte();                                              //1302字节读
+  48          void write_1302(uchar add,uchar dat);   //1302地址写
+  49          uchar read_1302(uchar add);                             //1302地址读
+  50          void ds1302_init();                                             //1302初始化
+  51          
+  52          void keyscan();                                                 //按键处理子程序
+  53          
+  54          main()
+  55          {
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 2   
+
+  56   1              
+  57   1              RW_1602=0;
+  58   1              lcd_init();                                                     //液晶初始化函数
+  59   1              ds1302_init();                                          //1302初始化
+  60   1              init();                                                         //定时器0初始化
+  61   1              DS18B20_init();
+  62   1              while(1)
+  63   1                      keyscan();                                              //按键处理子程序
+  64   1      }
+  65          
+  66          void init()                                                             //定时器0初始化
+  67          {
+  68   1              TMOD=0x01;                                                      //定时器016位定时器模式
+  69   1              TH0=0;                                                          //定时器0初值为0
+  70   1              TL0=0;                                                          //
+  71   1              EA=1;                                                           //总总中断使能
+  72   1              ET0=1;                                                          //定时器0中断使能
+  73   1              TR0=1;                                                          //定时器0启动
+  74   1      }
+  75          uchar BCD_Decimal(uchar bcd)                    //BCD转16进制数
+  76          {
+  77   1              uchar Decimal;
+  78   1              Decimal=bcd>>4;                                         //高4位移到低4位
+  79   1              return(Decimal=Decimal*10+(bcd&=0x0F));//原高4位数据*10+低4位
+  80   1      }
+  81          
+  82          uchar Dec_BCD(uchar Dec)                                //16进制数转BCD
+  83          {
+  84   1              uchar BCD;
+  85   1              BCD=(Dec)/10*16+(Dec)%10;
+  86   1              return(BCD);
+  87   1      }
+  88          
+  89          void delay(uint xms)                                    //延时函数
+  90          {
+  91   1              uint i,j;
+  92   1              for(i=xms;i>0;i--)
+  93   1                      for(j=100;j>0;j--);
+  94   1      }
+  95          /******************液晶写入************************/
+  96          void write_1602com(uchar com)                           //液晶写入指令函数
+  97          {
+  98   1              RS_1602=0;                                                      //置为写入命令
+  99   1              P0=com;                                                         //送入数据
+ 100   1              delay(1);
+ 101   1              E_1602=1;                                                       //拉高使能端
+ 102   1              delay(1);
+ 103   1              E_1602=0;                                                       //完成高脉冲
+ 104   1      }
+ 105          
+ 106          void write_1602dat(uchar dat)                           //液晶写入数据函数
+ 107          {
+ 108   1              RS_1602=1;                                                      //置为写入数据
+ 109   1              P0=dat;                                                         //送入数据
+ 110   1              delay(1);
+ 111   1              E_1602=1;                                                       //拉高使能端
+ 112   1              delay(1);
+ 113   1              E_1602=0;                                                       //完成高脉冲
+ 114   1      }
+ 115          
+ 116          void write_1602word(uchar *s)
+ 117          {
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 3   
+
+ 118   1              while(*s>0)
+ 119   1              {
+ 120   2                      write_1602dat(*s);
+ 121   2                      s++;
+ 122   2              }
+ 123   1      }
+ 124          
+ 125          void write_hms(uchar add,uchar dat)             //1602写时分秒
+ 126          {
+ 127   1              uchar gw,sw;
+ 128   1              gw=dat%10;                                                      //分出个位数据
+ 129   1              sw=dat/10;                                                      //分出十位数据
+ 130   1              write_1602com(two+add);                         //在第二行对应位置显示
+ 131   1              write_1602dat(0x30+sw);
+ 132   1              write_1602dat(0x30+gw);
+ 133   1      }
+ 134          
+ 135          void write_ymd(uchar add,uchar dat)             //1602写年月日
+ 136          {
+ 137   1              uchar gw,sw;
+ 138   1              gw=dat%10;                                                      //分出个位数据
+ 139   1              sw=dat/10;                                                      //分出十位数据
+ 140   1              write_1602com(one+add);                         //在第一行对应位置显示
+ 141   1              write_1602dat(0x30+sw);
+ 142   1              write_1602dat(0x30+gw);
+ 143   1      }
+ 144          
+ 145          void write_week(uchar week)                             //1602写星期函数
+ 146          {
+ 147   1              write_1602com(one+0x0f);                        //在第一行0x0B位置显示
+ 148   1              write_1602dat(0x30+week);
+ 149   1      }
+ 150          
+ 151          void lcd_init()                                                         //液晶初始化函数
+ 152          {
+ 153   1              uchar kk;
+ 154   1              write_1602com(0x38);                            //设置液晶工作模式就是给1602 说了一句话而已
+ 155   1              write_1602com(0x0c);                            //开显示不显示光标
+ 156   1              write_1602com(0x06);                            //整屏不移动，指针加一
+ 157   1              write_1602com(0x01);
+ 158   1              write_1602com(one);                                     //第一行字符写入的位置
+ 159   1              for(kk=0;kk<16;kk++)
+ 160   1                      write_1602dat(tab1[kk]);
+ 161   1              write_1602com(two);                             //第二行字符写入的位置
+ 162   1              for(kk=0;kk<8;kk++)
+ 163   1                      write_1602dat(tab2[kk]);
+ 164   1      }
+ 165          /********************ds1302****************************/
+ 166          
+ 167          void write_byte(uchar dat)                              //1302字节写
+ 168          {
+ 169   1              uchar kk;
+ 170   1              ACC=dat;        
+ 171   1              RST_1302=1;                                                     //启动读写操作
+ 172   1              for(kk=8;kk>0;kk--)                                     //8位数据
+ 173   1              {
+ 174   2                      IO_1302=ACC0;                                   //先传送数据低位
+ 175   2                      CLK_1302=0;
+ 176   2                      CLK_1302=1;                                             //上升沿输入数据
+ 177   2                      ACC=ACC>>1;                                             //右移位
+ 178   2              }
+ 179   1      }
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 4   
+
+ 180          uchar read_byte()                                               //1302字节读
+ 181          {
+ 182   1              uchar kk;
+ 183   1              RST_1302=1;                                                     //启动读写操作
+ 184   1              for(kk=8;kk>0;kk--)
+ 185   1              {
+ 186   2                      ACC7=IO_1302;                                   //先读入数据低位
+ 187   2                      CLK_1302=1;
+ 188   2                      CLK_1302=0;                                             //下降沿输出数据
+ 189   2                      ACC=ACC>>1;                                             //右移位
+ 190   2              }
+ 191   1              return (ACC);
+ 192   1      }
+ 193          void write_1302(uchar add,uchar dat)    //1302地址写
+ 194          {
+ 195   1              RST_1302=0;
+ 196   1              CLK_1302=0;
+ 197   1              RST_1302=1;                                                     //启动读写操作
+ 198   1              write_byte(add);                                        //写地址
+ 199   1              write_byte(dat);                                        //写数据
+ 200   1              CLK_1302=1;
+ 201   1              RST_1302=0;                                                     //禁止读写操作
+ 202   1      }
+ 203          uchar read_1302(uchar add)                              //1302地址读
+ 204          {
+ 205   1              uchar temp;
+ 206   1              RST_1302=0;
+ 207   1              CLK_1302=0;
+ 208   1              RST_1302=1;                                                     //启动读写操作
+ 209   1              write_byte(add);                                        //写地址
+ 210   1              temp=read_byte();                                       //读数据
+ 211   1              CLK_1302=1;
+ 212   1              RST_1302=0;                                                     //禁止读写操作
+ 213   1              return(temp);
+ 214   1      }
+ 215          void ds1302_init()                                              //1302初始化
+ 216          {
+ 217   1              RST_1302=0;                                                     //禁止读写操作
+ 218   1              CLK_1302=0;                                                     //时钟为低
+ 219   1              write_1302(0x80,Second|0x00);           //允许写        秒写进
+ 220   1      }
+ 221          
+ 222          void keyscan()                                                  //按键处理子程序
+ 223          {
+ 224   1              uchar key1n;                                            //功能键按下次数
+ 225   1              if(key_mode==0)                                         //key_down为功能键
+ 226   1              {
+ 227   2                      delay(5);                                               //延时去抖动
+ 228   2                      if(key_mode==0)                                 //功能键确认按下
+ 229   2                      {
+ 230   3                              while(!key_mode);                       //等待按键释放
+ 231   3                              key1n++;                                        //功能键按下次数加一
+ 232   3                              if(key1n==9)                            //为9时 调为1  则1~8
+ 233   3                                      key1n=1;
+ 234   3                              switch(key1n)                           //功能键按键次数不同实现不同操作
+ 235   3                              {
+ 236   4                                      case 1:                                 //时调整秒
+ 237   4                                              TR0=0;                                          //关闭定时器
+ 238   4                                              write_1602com(two+0x07);        //写入光标位置
+ 239   4                                              write_1602com(0x0f);            //设置光标为闪烁         开始
+ 240   4                                              write_1302(0x8e,0x00);          //允许写,位0 为0 表示写操作
+ 241   4                                              write_1302(0x80,0x80|Dec_BCD(Second));//Second
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 5   
+
+ 242   4                                              break;
+ 243   4                                      case 2: write_1602com(two+4);break;             //Minute闪烁
+ 244   4                                      case 3: write_1602com(two+1);break;             //Hour闪烁
+ 245   4                                      case 4: write_1602com(one+0x0f);break;  //week闪烁
+ 246   4                                      case 5: write_1602com(one+0x09);break;  //Date闪烁
+ 247   4                                      case 6: write_1602com(one+0x06);break;  //Month闪烁
+ 248   4                                      case 7: write_1602com(one+0x03);break;  //Year闪烁
+ 249   4                                      case 8:
+ 250   4                                              write_1602com(0x0c);                            //设置光标不闪烁        终止
+ 251   4                                              write_1302(0x80,0x00|Dec_BCD(Second));  //Second
+ 252   4                                              write_1302(0x8e,0x80);                          //禁止写
+ 253   4                                              TR0=1;                                                          //打开定时器
+ 254   4                                              break;  
+ 255   4                              }       
+ 256   3                      }
+ 257   2              }
+ 258   1              if(key1n!=0)                                            //当key_mode按下以后。再按以下键才有效
+ 259   1              {
+ 260   2                      if(key_up==0)                                   //上调键
+ 261   2                      {
+ 262   3                              delay(5);                                       //延时去抖动
+ 263   3                              if(key_up==0)                           //上调键确认按下
+ 264   3                              {
+ 265   4                                      while(!key_up);                 //等待按键释放
+ 266   4                                      switch(key1n)                   //功能键按键次数不同实现不同操作
+ 267   4                                      {
+ 268   5                                              case 1:Second++;                        //秒加1
+ 269   5                                                      if(Second==60)                  //加到60时调为0
+ 270   5                                                              Second=0;
+ 271   5                                                      write_hms(0x07,Second); //显示新的秒数
+ 272   5                                                      write_1302(0x80,0x80|Dec_BCD(Second));//写入新的秒数
+ 273   5                                                      write_1602com(two+0x08);//因指针自动加一，要写回原位置 ，经典的自动加1
+ 274   5                                                      break;
+ 275   5                                              case 2:Minute++;                        //分钟加1
+ 276   5                                                      if(Minute==60)                  //加到60时调为0
+ 277   5                                                              Minute=0;
+ 278   5                                                      write_hms(3,Minute);    //显示新的分钟
+ 279   5                                                      write_1302(0x82,Dec_BCD(Minute));//写入新的分钟
+ 280   5                                                      write_1602com(two+4);   //光标在原位闪烁
+ 281   5                                                      break;
+ 282   5                                              case 3:Hour++;                          //小时加1
+ 283   5                                                      if(Hour==24)                    //加到24时调为0
+ 284   5                                                              Hour=0;
+ 285   5                                                      write_hms(0,Hour);              //显示新的小时
+ 286   5                                                      write_1302(0x84,Dec_BCD(Hour)); //写入新的小时
+ 287   5                                                      write_1602com(two+1);   //光标在原位闪烁
+ 288   5                                                      break;
+ 289   5                                              case 4:week++;                          //星期加1
+ 290   5                                                      if(week==8)                             //加到8时调为1
+ 291   5                                                              week=1;
+ 292   5                                                      write_week(week);               //显示新的星期
+ 293   5                                                      write_1302(0x8a,week);  //写入新的星期
+ 294   5                                                      write_1602com(one+0x0f);//光标在原位闪烁
+ 295   5                                                      break;
+ 296   5                                              case 5:Date++;                          //日期加1
+ 297   5                                                      if(Date==32)                    //加到32时调为1
+ 298   5                                                              Date=1;
+ 299   5                                                      write_ymd(8,Date);              //显示新的日期
+ 300   5                                                      write_1302(0x86,Dec_BCD(Date));//写入新的日期
+ 301   5                                                      write_1602com(one+9);   //光标在原位闪烁
+ 302   5                                                      break;
+ 303   5                                              case 6:Month++;                         //月份加1
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 6   
+
+ 304   5                                                      if(Month==13)                   //加到13时调为1
+ 305   5                                                              Month=1;
+ 306   5                                                      write_ymd(5,Month);             //显示新的月份
+ 307   5                                                      write_1302(0x88,Dec_BCD(Month));//写入新的月份
+ 308   5                                                      write_1602com(one+6);   //光标在原位闪烁
+ 309   5                                                      break;
+ 310   5                                              case 7:Year++;                          //年加1
+ 311   5                                                      if(Year==100)                   //加到100时调为0
+ 312   5                                                              Year=0;
+ 313   5                                                      write_ymd(2,Year);              //显示新的年份
+ 314   5                                                      write_1302(0x8c,Dec_BCD(Year));//写入新的年份
+ 315   5                                                      write_1602com(one+3);   //光标在原位闪烁
+ 316   5                                                      break;
+ 317   5                                      }
+ 318   4                              }
+ 319   3                      }
+ 320   2                      if(key_down==0)                                                 //下调键
+ 321   2                      {
+ 322   3                              delay(5);                                                       //延时去抖动
+ 323   3                              if(key_down==0)                                         //下调键确认按下
+ 324   3                              {
+ 325   4                                      while(!key_down);                               //等待按键释放
+ 326   4                                      switch(key1n)                                   //功能键按键次数不同实现不同操作
+ 327   4                                      {
+ 328   5                                              case 1:Second--;                        //秒减1
+ 329   5                                                      if(Second==-1)                  //减为-1时 调为59
+ 330   5                                                              Second=59;
+ 331   5                                                      write_hms(0x0a,Second); //显示新的秒数
+ 332   5                                                      write_1302(0x80,0x80|Dec_BCD(Second));//写入新的秒数
+ 333   5                                                      write_1602com(two+0x0b);//光标在原位闪烁
+ 334   5                                                      break;
+ 335   5                                              case 2:Minute--;                        //分钟减1
+ 336   5                                                      if(Minute==-1)                  //减为-1时 调为59
+ 337   5                                                              Minute=59;
+ 338   5                                                      write_hms(7,Minute);    //显示新的分钟数
+ 339   5                                                      write_1302(0x82,Dec_BCD(Minute));//写入新的分钟数
+ 340   5                                                      write_1602com(two+8);   //光标在原位闪烁
+ 341   5                                                      break;
+ 342   5                                              case 3:Hour--;                          //小时减1
+ 343   5                                                      if(Hour==-1)                    //减为-1时 调为59
+ 344   5                                                              Hour=23;
+ 345   5                                                      write_hms(4,Hour);              //显示新的小时数
+ 346   5                                                      write_1302(0x84,Dec_BCD(Hour));//写入新的小时数
+ 347   5                                                      write_1602com(two+5);   //光标在原位闪烁
+ 348   5                                                      break;
+ 349   5                                              case 4:week--;                          //星期减1
+ 350   5                                                      if(week==0)                             //减为0时 调为7
+ 351   5                                                              week=7;
+ 352   5                                                      write_week(week);               //显示新的星期数
+ 353   5                                                      write_1302(0x8a,week);  //写入新的星期数
+ 354   5                                                      write_1602com(one+0x0f);//光标在原位闪烁
+ 355   5                                                      break;
+ 356   5                                              case 5:Date--;                          //日期减1
+ 357   5                                                      if(Date==0)                             //减为0时 调为31
+ 358   5                                                              Date=31;
+ 359   5                                                      write_ymd(8,Date);              //显示新的日期数
+ 360   5                                                      write_1302(0x86,Dec_BCD(Date));//写入新的日期数
+ 361   5                                                      write_1602com(one+9);   //光标在原位闪烁
+ 362   5                                                      break;
+ 363   5                                              case 6:Month--;                         //月份减1
+ 364   5                                                      if(Month==0)                    //减为0时 调为12
+ 365   5                                                              Month=12;
+C51 COMPILER V9.01   LCD1602                                                               07/21/2013 15:49:17 PAGE 7   
+
+ 366   5                                                      write_ymd(5,Month);             //显示新的月份数
+ 367   5                                                      write_1302(0x88,Dec_BCD(Month));//写入新的月份数
+ 368   5                                                      write_1602com(one+6);   //光标在原位闪烁
+ 369   5                                                      break;  
+ 370   5                                              case 7:Year--;                          //年份减1
+ 371   5                                                      if(Year==-1)                    //减为-1时 调为99
+ 372   5                                                              Year=99;
+ 373   5                                                      write_ymd(2,Year);              //显示新的年份数
+ 374   5                                                      write_1302(0x8c,Dec_BCD(Year));//写入新的年份数
+ 375   5                                                      write_1602com(one+3);   //光标在原位闪烁
+ 376   5                                                      break;
+ 377   5                                      }
+ 378   4                              }
+ 379   3                      }
+ 380   2              }
+ 381   1      }
+ 382          
+ 383          void timer0() interrupt 1 
+ 384          {
+ 385   1              uchar i;
+ 386   1              uint temp;
+ 387   1              Second = BCD_Decimal(read_1302(0x81));          //读取1302的秒
+ 388   1              Minute = BCD_Decimal(read_1302(0x83));          //读取1302的分钟
+ 389   1              Hour  = BCD_Decimal(read_1302(0x85));           //读取1302的小时
+ 390   1              Date  = BCD_Decimal(read_1302(0x87));           //读取1302的日期
+ 391   1              Month = BCD_Decimal(read_1302(0x89));           //读取1302的月份
+ 392   1              week=BCD_Decimal(read_1302(0x8b));                      //读取1302的星期
+ 393   1              Year=BCD_Decimal(read_1302(0x8d));                      //读取1302的年
+ 394   1              write_hms(6,Second);                                            //1602显示的秒
+ 395   1              write_hms(3,Minute);                                            //1602显示的分钟
+ 396   1              write_hms(0,Hour);                                                      //1602显示的小时
+ 397   1              write_ymd(8,Date);                                                      //1602显示的日期
+ 398   1          write_ymd(5,Month);                                                 //1602显示的月份
+ 399   1              write_ymd(2,Year);                                                      //1602显示的年
+ 400   1              write_week(week);                                                       //1602显示的星期
+ 401   1              temp=DS18B20_readtemperature();
+ 402   1                      tab[3]=temp%10;
+ 403   1                      tab[2]=10;
+ 404   1                      tab[1]=temp%100/10;
+ 405   1                      tab[0]=temp/100;
+ 406   1                      write_1602com(0xc0+11);                                 //设置指针地址为第一行第五个位置
+ 407   1                      for(i=0;i<4;i++)
+ 408   1                      {
+ 409   2                              write_1602dat(LCD1602_tab1[tab[i]]);
+ 410   2                      }
+ 411   1                      write_1602com(0xc0+15);                                 //设置指针地址为第二行第一个位置
+ 412   1                      write_1602word("C");
+ 413   1              
+ 414   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1337    ----
+   CONSTANT SIZE    =     39    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

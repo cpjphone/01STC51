@@ -1,0 +1,284 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        01/09/2015  20:42:09  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE shizhong.obj, .\LCD1602_Drive.obj TO 1602 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  shizhong.obj (SHIZHONG)
+  .\LCD1602_Drive.obj (LCD1602_DRIVE)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL\C51\LIB\C51S.LIB (?C?CLDPTR)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  1602 (SHIZHONG)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     000CH     UNIT         ?DT?SHIZHONG
+            DATA    0014H     0005H     UNIT         _DATA_GROUP_
+            IDATA   0019H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     003FH     UNIT         ?PR?TIMER0?SHIZHONG
+            CODE    00D9H     0036H     UNIT         ?PR?MAIN?SHIZHONG
+            CODE    010FH     0034H     UNIT         ?PR?DEAL?SHIZHONG
+            CODE    0143H     0026H     UNIT         ?CO?SHIZHONG
+            CODE    0169H     0026H     UNIT         ?PR?_LCD1602_WRITE_WORD?LCD1602_DRIVE
+            CODE    018FH     0020H     UNIT         ?PR?_DELAY?SHIZHONG
+            CODE    01AFH     001CH     UNIT         ?PR?_LCD1602_WRITE_COM?LCD1602_DRIVE
+            CODE    01CBH     001CH     UNIT         ?PR?_LCD1602_WRITE_DATA?LCD1602_DRIVE
+            CODE    01E7H     0019H     UNIT         ?C?LIB_CODE
+            CODE    0200H     0016H     UNIT         ?PR?LCD1602_INIT?LCD1602_DRIVE
+            CODE    0216H     0010H     UNIT         ?PR?INTERRUPT_INIT?SHIZHONG
+            CODE    0226H     000EH     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   1602 (SHIZHONG)
+
+
+SEGMENT                                         DATA_GROUP 
+  +--> CALLED SEGMENT                         START    LENGTH
+-------------------------------------------------------------
+?C_C51STARTUP                                 -----    -----
+  +--> ?PR?MAIN?SHIZHONG
+  +--> ?C_INITSEG
+
+?PR?MAIN?SHIZHONG                             0014H    0001H
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/09/2015  20:42:09  PAGE 2
+
+
+  +--> ?PR?INTERRUPT_INIT?SHIZHONG
+  +--> ?PR?LCD1602_INIT?LCD1602_DRIVE
+  +--> ?PR?DEAL?SHIZHONG
+  +--> ?PR?_LCD1602_WRITE_COM?LCD1602_DRIVE
+  +--> ?PR?_LCD1602_WRITE_DATA?LCD1602_DRIVE
+  +--> ?CO?SHIZHONG
+  +--> ?PR?_LCD1602_WRITE_WORD?LCD1602_DRIVE
+
+?PR?LCD1602_INIT?LCD1602_DRIVE                -----    -----
+  +--> ?PR?_LCD1602_WRITE_COM?LCD1602_DRIVE
+
+?PR?_LCD1602_WRITE_COM?LCD1602_DRIVE          0015H    0001H
+  +--> ?PR?_DELAY?SHIZHONG
+
+?PR?_LCD1602_WRITE_DATA?LCD1602_DRIVE         0018H    0001H
+  +--> ?PR?_DELAY?SHIZHONG
+
+?PR?_LCD1602_WRITE_WORD?LCD1602_DRIVE         0015H    0003H
+  +--> ?PR?_LCD1602_WRITE_DATA?LCD1602_DRIVE
+
+
+
+SYMBOL TABLE OF MODULE:  1602 (SHIZHONG)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        SHIZHONG
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  C:0216H         PUBLIC        interrupt_init
+  C:0159H         PUBLIC        table
+  D:00A8H         PUBLIC        IE
+  C:018FH         PUBLIC        _delay
+  C:010FH         PUBLIC        deal
+  D:00B8H         PUBLIC        IP
+  C:00D9H         PUBLIC        main
+  D:0008H         PUBLIC        count
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  D:0009H         PUBLIC        tab
+  C:0161H         PUBLIC        table1
+  D:0011H         PUBLIC        sec
+  D:0012H         PUBLIC        min
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
+  D:0013H         PUBLIC        hou
+  D:008AH         PUBLIC        TL0
+  C:009AH         PUBLIC        timer0
+  B:0088H.4       PUBLIC        TR0
+  D:00C8H         PUBLIC        T2CON
+  C:014EH         PUBLIC        LCD1602_tab1
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _DELAY
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/09/2015  20:42:09  PAGE 3
+
+
+  D:0006H         SYMBOL        x
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0002H         SYMBOL        j
+  -------         ENDDO         
+  C:018FH         LINE#         18
+  C:018FH         LINE#         19
+  C:018FH         LINE#         21
+  C:0199H         LINE#         22
+  C:01AEH         LINE#         23
+  -------         ENDPROC       _DELAY
+  -------         PROC          INTERRUPT_INIT
+  C:0216H         LINE#         28
+  C:0216H         LINE#         29
+  C:0216H         LINE#         31
+  C:0219H         LINE#         32
+  C:021CH         LINE#         33
+  C:021FH         LINE#         34
+  C:0221H         LINE#         35
+  C:0223H         LINE#         36
+  C:0225H         LINE#         37
+  -------         ENDPROC       INTERRUPT_INIT
+  -------         PROC          DEAL
+  C:010FH         LINE#         41
+  C:010FH         LINE#         42
+  C:010FH         LINE#         43
+  C:0117H         LINE#         44
+  C:0120H         LINE#         45
+  C:0128H         LINE#         46
+  C:0131H         LINE#         47
+  C:0139H         LINE#         48
+  C:0142H         LINE#         49
+  -------         ENDPROC       DEAL
+  -------         PROC          MAIN
+  -------         DO            
+  D:0014H         SYMBOL        i
+  -------         ENDDO         
+  C:00D9H         LINE#         54
+  C:00D9H         LINE#         55
+  C:00D9H         LINE#         57
+  C:00DCH         LINE#         58
+  C:00DFH         LINE#         59
+  C:00DFH         LINE#         60
+  C:00DFH         LINE#         61
+  C:00E2H         LINE#         62
+  C:00E7H         LINE#         63
+  C:00EAH         LINE#         64
+  C:00EAH         LINE#         65
+  C:00F6H         LINE#         66
+  C:00FFH         LINE#         67
+  C:0104H         LINE#         68
+  C:010DH         LINE#         69
+  -------         ENDPROC       MAIN
+  -------         PROC          TIMER0
+  C:009AH         LINE#         74
+  C:009EH         LINE#         76
+  C:00A1H         LINE#         77
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/09/2015  20:42:09  PAGE 4
+
+
+  C:00A4H         LINE#         78
+  C:00A6H         LINE#         79
+  C:00ADH         LINE#         80
+  C:00ADH         LINE#         81
+  C:00B0H         LINE#         82
+  C:00B2H         LINE#         83
+  C:00B9H         LINE#         84
+  C:00B9H         LINE#         85
+  C:00BCH         LINE#         86
+  C:00BEH         LINE#         87
+  C:00C5H         LINE#         88
+  C:00C5H         LINE#         89
+  C:00C8H         LINE#         90
+  C:00CAH         LINE#         91
+  C:00D1H         LINE#         92
+  C:00D1H         LINE#         93
+  C:00D4H         LINE#         94
+  C:00D4H         LINE#         95
+  C:00D4H         LINE#         96
+  C:00D4H         LINE#         97
+  C:00D4H         LINE#         98
+  -------         ENDPROC       TIMER0
+  -------         ENDMOD        SHIZHONG
+
+  -------         MODULE        LCD1602_DRIVE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A0H.7       PUBLIC        lcden
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  B:00A0H.5       PUBLIC        lcdrs
+  B:00A0H.6       PUBLIC        lcdrw
+  C:01CBH         PUBLIC        _LCD1602_write_data
+  D:0098H         PUBLIC        SCON
+  C:0200H         PUBLIC        LCD1602_init
+  D:0088H         PUBLIC        TCON
+  C:0169H         PUBLIC        _LCD1602_write_word
+  C:01AFH         PUBLIC        _LCD1602_write_com
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _LCD1602_WRITE_COM
+  D:0015H         SYMBOL        com
+  C:01AFH         LINE#         18
+  C:01B1H         LINE#         19
+  C:01B1H         LINE#         20
+  C:01B3H         LINE#         21
+  C:01B5H         LINE#         22
+  C:01BCH         LINE#         23
+  C:01BFH         LINE#         24
+  C:01C1H         LINE#         25
+  C:01C8H         LINE#         26
+  C:01CAH         LINE#         27
+  -------         ENDPROC       _LCD1602_WRITE_COM
+  -------         PROC          _LCD1602_WRITE_DATA
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/09/2015  20:42:09  PAGE 5
+
+
+  D:0018H         SYMBOL        dat
+  C:01CBH         LINE#         31
+  C:01CDH         LINE#         32
+  C:01CDH         LINE#         33
+  C:01CFH         LINE#         34
+  C:01D1H         LINE#         35
+  C:01D8H         LINE#         36
+  C:01DBH         LINE#         37
+  C:01DDH         LINE#         38
+  C:01E4H         LINE#         39
+  C:01E6H         LINE#         40
+  -------         ENDPROC       _LCD1602_WRITE_DATA
+  -------         PROC          LCD1602_INIT
+  C:0200H         LINE#         44
+  C:0200H         LINE#         45
+  C:0200H         LINE#         46
+  C:0202H         LINE#         47
+  C:0207H         LINE#         48
+  C:020CH         LINE#         49
+  C:0211H         LINE#         50
+  -------         ENDPROC       LCD1602_INIT
+  -------         PROC          _LCD1602_WRITE_WORD
+  D:0015H         SYMBOL        s
+  C:0169H         LINE#         55
+  C:016FH         LINE#         56
+  C:016FH         LINE#         57
+  C:017EH         LINE#         58
+  C:017EH         LINE#         59
+  C:0181H         LINE#         60
+  C:018CH         LINE#         61
+  C:018EH         LINE#         62
+  -------         ENDPROC       _LCD1602_WRITE_WORD
+  -------         ENDMOD        LCD1602_DRIVE
+
+  -------         MODULE        ?C?CLDPTR
+  C:01E7H         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+Program Size: data=26.0 xdata=0 code=556
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,77 @@
+C51 COMPILER V9.01   KEY                                                                   06/02/2013 11:57:34 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN key.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE key.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>
+   2          
+   3          #define uint  unsigned int       //宏定义
+   4          #define uchar  unsigned char
+   5          #define on 0
+   6          #define off 1
+   7          sbit key = P3^2;
+   8          sbit led = P1^0; 
+   9          uchar code lab[8] = {0xfe,0xfd,0xfb,0xf7,0xef,0xdf,0xbf,0x7f};
+  10          /**************************************
+  11          延时函数
+  12          ***************************************/
+  13          void delay(uint ms)
+  14          {
+  15   1              uint i,j;  
+  16   1              for(i=0;i<ms;i++)
+  17   1                      for(j=0;j<121;j++);
+  18   1      }
+  19          uchar keycan()
+  20          {
+  21   1              uchar flag;
+  22   1              if(key == 0)
+  23   1              {
+  24   2                      delay(5);
+  25   2                      if(key == 0)
+  26   2                      {
+  27   3                              flag = 1;
+  28   3                              while(1)
+  29   3                              {
+  30   4                                      if(key != 0)
+  31   4                                              break;  
+  32   4                              }       
+  33   3                      }
+  34   2              }
+  35   1              else
+  36   1                      flag = 0;
+  37   1              return flag;
+  38   1      }
+  39          main()
+  40          {
+  41   1              uchar k,a;
+  42   1              while(1)
+  43   1              {
+  44   2                      k = keycan();   //
+  45   2                      if(k == 1)              //按键处理
+  46   2                              a = ~a; 
+  47   2                      if(a == 0)              //功能
+  48   2                              led = on;
+  49   2                      else
+  50   2                              led = off;      
+  51   2              }
+  52   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.01   KEY                                                                   06/02/2013 11:57:34 PAGE 2   
+
+   CODE SIZE        =     78    ----
+   CONSTANT SIZE    =      8    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,119 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        07/17/2013  20:50:52  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\(3)KEIL4\C51\BIN\BL51.EXE 232send.obj TO 232发送程序
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  232send.obj (232SEND)
+  D:\(3)KEIL4\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  232发送程序 (232SEND)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0001H     UNIT         ?DT?232SEND
+            IDATA   0009H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0034H     UNIT         ?PR?MAIN?232SEND
+            CODE    0037H     002EH     UNIT         ?CO?232SEND
+            CODE    0065H     0015H     UNIT         ?PR?_DELAY?232SEND
+            CODE    007AH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   232发送程序 (232SEND)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?232SEND
+
+?PR?MAIN?232SEND
+  +--> ?CO?232SEND
+  +--> ?PR?_DELAY?232SEND
+
+
+
+SYMBOL TABLE OF MODULE:  232发送程序 (232SEND)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        232SEND
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  C:0037H         PUBLIC        MESSAGE
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/17/2013  20:50:52  PAGE 2
+
+
+  D:00A8H         PUBLIC        IE
+  C:0065H         PUBLIC        _delay
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  B:0098H.1       PUBLIC        TI
+  C:0003H         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+  D:0008H         PUBLIC        a
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  C:0003H         LINE#         21
+  C:0003H         LINE#         24
+  C:0006H         LINE#         25
+  C:0009H         LINE#         26
+  C:000CH         LINE#         28
+  C:000FH         LINE#         29
+  C:0012H         LINE#         30
+  C:0014H         LINE#         31
+  C:0016H         LINE#         32
+  C:0018H         LINE#         35
+  C:0018H         LINE#         36
+  C:0018H         LINE#         37
+  C:001BH         LINE#         39
+  C:0023H         LINE#         40
+  C:0023H         LINE#         41
+  C:0025H         LINE#         42
+  C:0028H         LINE#         43
+  C:002AH         LINE#         45
+  C:002CH         LINE#         47
+  C:002EH         LINE#         48
+  C:0035H         LINE#         49
+  -------         ENDPROC       MAIN
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        i
+  -------         DO            
+  D:0005H         SYMBOL        j
+  -------         ENDDO         
+  C:0065H         LINE#         59
+  C:0065H         LINE#         60
+  C:0065H         LINE#         62
+  C:006EH         LINE#         63
+  C:0079H         LINE#         65
+  -------         ENDPROC       _DELAY
+  -------         ENDMOD        232SEND
+
+Program Size: data=10.0 xdata=0 code=134
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

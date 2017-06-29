@@ -1,0 +1,5 @@
+"..\Obj\1.obj",
+"..\Obj\2402.obj",
+"..\Obj\I2C.obj" 
+TO "..\Obj\1" 
+PRINT(".\1.m51")

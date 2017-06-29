@@ -1,0 +1,70 @@
+C51 COMPILER V9.01   MAIN                                                                  07/19/2013 15:31:00 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE main.c BROWSE INCDIR(..\Drive\LCD1602_Drive;..\Drive\DS1302_Drive) DEBU
+                    -G OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>                                                         //定义头文件
+   2          #include "LCD1602_Drive.h"                         //头文件
+*** ERROR C141 IN LINE 11 OF ..\DRIVE\LCD1602_DRIVE\LCD1602_DRIVE.H: syntax error near 'com', expected ')'
+*** ERROR C141 IN LINE 14 OF ..\DRIVE\LCD1602_DRIVE\LCD1602_DRIVE.H: syntax error near 'dat', expected ')'
+*** ERROR C141 IN LINE 18 OF ..\DRIVE\LCD1602_DRIVE\LCD1602_DRIVE.H: syntax error near '*', expected ')'
+   3          #include"DS1302_Drive.h"
+   4          #define uint unsigned int                                         //宏定义  
+   5          #define uchar unsigned char
+   6          
+   7          //typedef unsigned char  uchar                     //宏定义
+   8          //typedef unsigned int  uint
+   9          
+  10          
+  11          uchar code tab1[]={"20  -  -   week "}; //液晶第一行默认显示数据
+  12          uchar code tab2[]={"  :  :  "};                 //液晶第二行默认显示数据
+  13          uchar tab[16];
+  14          
+  15          /*************************************************************************************
+  16          延时函数                                                                
+  17          *************************************************************************************/
+  18          void delay(uint x)
+  19          {
+  20   1              uint i,j;
+  21   1              for(i=0;i<x;i++)
+  22   1                      for(j=0;j<120;j++);
+  23   1      }
+  24          /*************************************************************************************
+  25          主函数
+  26          *************************************************************************************/
+  27          void main()
+  28          {
+  29   1              uchar i;
+  30   1              uint temp;
+  31   1              LCD1602_init();
+  32   1              ClockInit() ;
+  33   1              ClockUpdata();
+  34   1              while(1)
+  35   1              {
+  36   2                      
+  37   2                      tab2[7] =       CurrentTime.Second&0x0f;
+  38   2                      tab2[6] =       (CurrentTime.Second>>4)&0x07;
+  39   2                      tab2[4] =       CurrentTime.Minute&0x0f;
+  40   2                      tab2[3] =       (CurrentTime.Minute>>4)&0x07;
+  41   2                      tab2[1] =       CurrentTime.Hour&0x0f;
+  42   2                      tab2[0] =       (CurrentTime.Hour>>4)&0x01;
+  43   2      
+  44   2      
+  45   2                      LCD1602_write_com(0xc0+0);                                      //设置指针地址为第一行第五个位置
+  46   2                      for(i=0;i<8;i++)
+  47   2                      {
+  48   3                              LCD1602_write_data(tab2[i]);
+  49   3                      }
+  50   2      //              LCD1602_write_com(0x80+0x08);                                   //设置指针地址为第二行第一个位置
+  51   2      //              LCD1602_write_word("C");
+C51 COMPILER V9.01   MAIN                                                                  07/19/2013 15:31:00 PAGE 2   
+
+  52   2              }                                                               
+  53   1      }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  3 ERROR(S)

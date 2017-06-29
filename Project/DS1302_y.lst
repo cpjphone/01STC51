@@ -1,0 +1,217 @@
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 13:42:11 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DS1302_Y
+OBJECT MODULE PLACED IN ..\Obj\DS1302_y.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_y.c BROWSE DEBUG OBJECTEXTEND PR
+                    -INT(.\DS1302_y.lst) OBJECT(..\Obj\DS1302_y.obj)
+
+line level    source
+
+   1          #include<    >
+*** ERROR C309 IN LINE 1 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_y.c: bad or missing filename
+*** WARNING C318 IN LINE 1 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_y.c: can't open file ''
+   2          
+   3          sbit DS1302_RST         = P2^0; 
+*** ERROR C202 IN LINE 3 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_Y.C: 'P2': undefined identifier
+   4          sbit DS1302_IO          = P2^1; 
+*** ERROR C202 IN LINE 4 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_Y.C: 'P2': undefined identifier
+   5          sbit DS1302_SCLK        = P2^2; 
+*** ERROR C202 IN LINE 5 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_Y.C: 'P2': undefined identifier
+   6              
+   7          //-------------------------时钟芯片的寄存器宏定义----------------------------// 
+   8          #define DS1302_SECOND_WRITE             0x80          //写时钟芯片的寄存器位置 
+   9          #define DS1302_MINUTE_WRITE             0x82 
+  10          #define DS1302_HOUR_WRITE               0x84 
+  11          #define DS1302_WEEK_WRITE               0x8A 
+  12          #define DS1302_DAY_WRITE                0x86 
+  13          #define DS1302_MONTH_WRITE              0x88 
+  14          #define DS1302_YEAR_WRITE               0x8C 
+  15          
+  16          #define DS1302_SECOND_READ              0x81          //读时钟芯片的寄存器位置 
+  17          #define DS1302_MINUTE_READ              0x83 
+  18          #define DS1302_HOUR_READ                0x85 
+  19          #define DS1302_WEEK_READ                0x8B 
+  20          #define DS1302_DAY_READ                 0x87 
+  21          #define DS1302_MONTH_READ               0x89 
+  22          #define DS1302_YEAR_READ                0x8D 
+  23          //-----------------------------------操作宏----------------------------------// 
+  24          #define DS1302_SCLK_HIGH        DS1302_SCLK = 1; 
+  25          #define DS1302_SCLK_LOW         DS1302_SCLK = 0; 
+  26          
+  27          #define DS1302_IO_HIGH          DS1302_IO  = 1; 
+  28          #define DS1302_IO_LOW           DS1302_IO  = 0; 
+  29          #define DS1302_IO_READ          DS1302_IO 
+  30          
+  31          #define DS1302_RST_HIGH         DS1302_RST  = 1; 
+  32          #define DS1302_RST_LOW          DS1302_RST  = 0; 
+  33          
+  34          
+  35          
+  36          
+  37          /**************************************************************************** 
+  38          * 保存时间数据的结构体* 
+  39          ****************************************************************************/ 
+  40          struct 
+  41          { 
+  42              uchar Second; 
+*** ERROR C141 IN LINE 42 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_Y.C: syntax error near 'uchar'
+*** ERROR C129 IN LINE 42 OF ..\菜鸟小春\(22)DS1302\时钟芯片\DS1302_Y.C: missing ';' before 'Second'
+  43              uchar Minute; 
+  44              uchar Hour; 
+  45              uchar Day; 
+  46              uchar Week; 
+  47              uchar Month; 
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 13:42:11 PAGE 2   
+
+  48              uchar Year; 
+  49          }CurrentTime; 
+  50          
+  51          /****************************************************************************** 
+  52          * 函数:    static void DS1302Write( uchar Dat )                                         * 
+  53          * 描述:向DS1302写一个字节的内容                                                                                         * 
+  54          * 说明:uchar Dat :    要写的字节                                                                                *  
+  55          ******************************************************************************/ 
+  56          
+  57          static void DS1302Write( uchar Dat ) 
+  58          { 
+  59              uchar i; 
+  60              for( i = 8; i > 0; i-- ) 
+  61              { 
+  62                  if( Dat & 0x01 ) 
+  63                  { 
+  64                      DS1302_IO_HIGH 
+  65                  } 
+  66                  else 
+  67                  { 
+  68                      DS1302_IO_LOW 
+  69                  } 
+  70                  Dat >>= 1 ; 
+  71          
+  72                  DS1302_SCLK_HIGH  
+  73                  DS1302_SCLK_LOW 
+  74              } 
+  75          } 
+  76          
+  77          
+  78          /****************************************************************************** 
+  79          * 函数:    static uchar DS1302Read( void )                                                                        * 
+  80          * 描述: 从DS1302当前设定的地址读取一个字节的内容                                                          * 
+  81          * 说明:                                                                                                                           * 
+  82          * Return:    返回读出来的值(uchar)                                                                        * 
+  83          ******************************************************************************/ 
+  84          static uchar DS1302Read( void ) 
+  85          { 
+  86              uchar i, ReadValue; 
+  87              DS1302_IO_HIGH 
+  88              for( i = 8; i > 0; i-- ) 
+  89              { 
+  90                  ReadValue >>= 1; //ReadValue=ReadValue>>1;
+  91                    if( DS1302_IO_READ ) 
+  92                  { 
+  93                      ReadValue |= 0x80; 
+  94                  } 
+  95                  else 
+  96                  { 
+  97                      ReadValue &= 0x7f; 
+  98                  } 
+  99          
+ 100                  DS1302_SCLK_HIGH 
+ 101                  DS1302_SCLK_LOW 
+ 102                  
+ 103              } 
+ 104              return ReadValue; 
+ 105          } 
+ 106          
+ 107          /****************************************************************************** 
+ 108          * 函数:    void DS1302WriteByte( uchar Address,  uchar Dat )                              * 
+ 109          * 描述:  从DS1302指定的地址写入一个字节的内容                                                     * 
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 13:42:11 PAGE 3   
+
+ 110          * 说明:  Address:    要写入数据的地址                                                                     * 
+ 111          *               Dat:    写入数据的具体值                                                                  * 
+ 112          * Return:                                                                                                 
+             -               * 
+ 113          ******************************************************************************/ 
+ 114          void DS1302WriteByte( uchar Address,  uchar Dat ) 
+ 115          { 
+ 116              DS1302_RST_LOW 
+ 117              DS1302_SCLK_LOW 
+ 118              DS1302_RST_HIGH    
+ 119          
+ 120              DS1302Write( Address ); 
+ 121              DS1302Write( Dat ); 
+ 122          
+ 123              DS1302_RST_LOW 
+ 124              DS1302_SCLK_HIGH 
+ 125          } 
+ 126          
+ 127          /****************************************************************************** 
+ 128          * 函数:    uchar DS1302ReadByte( uchar Address )                                  * 
+ 129          * 描述:从DS1302指定的地址读出一个字节的内容                                                               * 
+ 130          * 说明:Address:    要读出数据的地址                                                                       * 
+ 131          *                                                                                                                                 * 
+ 132          * Return:        指定地址读出的值(uchar)                                                                  * 
+ 133          ******************************************************************************/ 
+ 134          uchar DS1302ReadByte( uchar Address ) 
+ 135          { 
+ 136              uchar ReadValue; 
+ 137              DS1302_RST_LOW 
+ 138              DS1302_SCLK_LOW 
+ 139              DS1302_RST_HIGH    
+ 140          
+ 141              DS1302Write( Address ); 
+ 142              ReadValue = DS1302Read(); 
+ 143          
+ 144              DS1302_RST_LOW 
+ 145              DS1302_SCLK_HIGH 
+ 146              return ReadValue; 
+ 147          } 
+ 148          /****************************************************************************** 
+ 149          * 函数:    void ClockInit( void )                                                                         * 
+ 150          * 描述:初始化写入DS1302时钟寄存器的值(主程序中只需调用一次即可)                           * 
+ 151          * 说明:                                                                                                   
+             -                                     * 
+ 152          *                                                                                                         * 
+ 153          * Return:                                                                                                         * 
+ 154          ******************************************************************************/ 
+ 155          void ClockInit( void ) 
+ 156          { 
+ 157              if( DS1302ReadByte( 0xc1) != 0x55 ) 
+ 158              { 
+ 159                  DS1302WriteByte( 0x8e, 0x00 );                                          //允许写操作 
+ 160                  DS1302WriteByte( DS1302_YEAR_WRITE, 0x08 );             //年 
+ 161                  DS1302WriteByte( DS1302_WEEK_WRITE, 0x04 );             //星期 
+ 162                  DS1302WriteByte( DS1302_MONTH_WRITE, 0x12 );            //月 
+ 163                  DS1302WriteByte( DS1302_DAY_WRITE, 0x11 );          //日 
+ 164                  DS1302WriteByte( DS1302_HOUR_WRITE, 0x13 );             //小时 
+ 165                  DS1302WriteByte( DS1302_MINUTE_WRITE, 0x06 );           //分钟 
+ 166                  DS1302WriteByte( DS1302_SECOND_WRITE, 0x40 );           //秒 
+ 167                  DS1302WriteByte( 0x90, 0xa5 );                      //充电 
+ 168                          DS1302WriteByte( 0xc0, 0x55 );                          //判断是否初始化一次标识写入 
+ 169                  DS1302WriteByte( 0x8e, 0x80 );                                          //禁止写操作 
+C51 COMPILER V9.01   DS1302_Y                                                              07/19/2013 13:42:11 PAGE 4   
+
+ 170              } 
+ 171          } 
+ 172          /****************************************************************************** 
+ 173          * 函数:    void ClockUpdata( void )                                                                           * 
+ 174          * 描述:读取时间数据,并保存在结构体CurrentTime中                                                   * 
+ 175          * 说明:                                                                                                   
+             -                                                   * 
+ 176          *                                                                                                                                 * 
+ 177          * Return:                                                                                                 
+             -                                         * 
+ 178          ******************************************************************************/ 
+ 179          void ClockUpdata( void ) 
+ 180          { 
+ 181              CurrentTime.Second  = DS1302ReadByte( DS1302_SECOND_READ ); 
+ 182              CurrentTime.Minute  = DS1302ReadByte( DS1302_MINUTE_READ ); 
+ 183              CurrentTime.Hour    = DS1302ReadByte( DS1302_HOUR_READ ); 
+ 184              CurrentTime.Day             = DS1302ReadByte( DS1302_DAY_READ ); 
+ 185              CurrentTime.Month   = DS1302ReadByte( DS1302_MONTH_READ ); 
+ 186              CurrentTime.Week    = DS1302ReadByte( DS1302_WEEK_READ ); 
+ 187              CurrentTime.Year    = DS1302ReadByte( DS1302_YEAR_READ ); 
+ 188          } 
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  6 ERROR(S)

@@ -1,0 +1,157 @@
+#include<reg52.h>
+#define uint unsigned int
+#define uchar unsigned char
+sbit IN1=P1^0;
+sbit IN2=P1^1;
+sbit IN3=P1^2;
+sbit IN4=P1^3;
+sbit pwm1=P1^4;
+sbit pwm2=P1^5;
+uchar timer0;timer1;timer2;timer3;m;
+//void  delay(uint x);
+void main()
+{
+	TMOD=0X01;
+	TH0=(65536-500)/256;
+	TL0=(65536-500)%256;
+	EA=1;
+	ET0=1;
+	TR0=1;
+	timer0=0;
+	timer1=20;
+	pwm1=0;
+	pwm2=0;
+	IN1=1;
+	IN2=0;
+	IN3=1;
+	IN4=0;
+	m=0;
+	while(1)
+	{
+		//timer2=10;
+		
+		m++;
+		//timer2=5;
+	//	delay(250);
+		/*timer2=1;
+		delay(250);*/
+		switch(m)
+		{
+			case 1: {timer2=10;} break;
+			case 2: {timer2=5;} break;
+			case 3: {timer2=1;m=0;} break;
+		}
+	//delay(1);
+	}
+}
+void T0timer() interrupt 1
+{
+	TH0=(65536-500)/256;
+	TL0=(65536-500)%256;
+	//timer3++;
+	//if(timer3==6000)
+	//{
+		timer0++;
+		if(timer0==timer2)
+		{
+			pwm1=1;
+			pwm2=1;
+		}
+		if(timer0==timer1)
+		{
+			pwm1=0;
+			pwm2=0;
+			if(timer2!=0)
+				timer2=0;
+			timer0=0;
+		}
+	//}
+		//delay(5000);
+}
+/*void  delay(uint x)
+{
+	uchar i,j;
+	for(i=x;i>0;i--)
+		for(j=250;j>0;j--);
+}*/
+
+
+
+µÚ¶þ´Î
+#include<reg52.h>
+#define uint unsigned int
+#define uchar unsigned char
+sbit IN1=P1^0;
+sbit IN2=P1^1;
+sbit IN3=P1^2;
+sbit IN4=P1^3;
+sbit pwm1=P1^4;
+sbit pwm2=P1^5;
+uchar timer0;timer1;timer2;timer3;m;
+void  delay(uint x);
+void main()
+{
+	TMOD=0X01;
+	TH0=(65536-500)/256;
+	TL0=(65536-500)%256;
+	EA=1;
+	ET0=1;
+	TR0=1;
+	timer0=0;
+	timer1=20;
+	pwm1=0;
+	pwm2=0;
+	IN1=1;
+	IN2=0;
+	IN3=1;
+	IN4=0;
+	m=0;
+	while(1)
+	{
+		uint i;
+		/*timer2=10;
+		 for(i=10;i>0;i--)
+		delay(5000);
+	 
+		timer2=5;
+		for(i=10;i>0;i--)
+		delay(5000);
+	
+		i++;
+		delay(5000);
+		timer2=1;
+		delay(250);*/
+		switch(m)
+		{
+			case 1: {timer2=10;} break;
+			case 2: {timer2=5;} break;
+			case 3: {timer2=1;m=0;} break;
+		}
+	//delay(1);
+	}
+}
+void T0timer() interrupt 1
+{
+	TH0=(65536-500)/256;
+	TL0=(65536-500)%256;
+	timer0++;
+	if(timer0==timer2)
+	{
+		pwm1=1;
+		pwm2=1;
+	}
+	if(timer0==timer1)
+	{
+		pwm1=0;
+		pwm2=0;
+		if(timer2!=0)
+			timer2=0;
+		timer0=0;
+	}
+}
+void  delay(uint x)
+{
+	uchar i,j;
+	for(i=x;i>0;i--)
+		for(j=110;j>0;j--);
+}

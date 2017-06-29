@@ -1,0 +1,189 @@
+C51 COMPILER V9.01   IR                                                                    07/27/2013 10:39:10 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE IR
+OBJECT MODULE PLACED IN .\Obj\IR.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE ..\UserDriver\IR\IR.c BROWSE INCDIR(..\Include;..\Main;..\UserDriver\Al
+                    -armClock;..\UserDriver\DisplayTime;..\UserDriver\DS18B20;..\UserDriver\DS1302;..\UserDriver\Font;..\UserDriver\IR;..\Use
+                    -rDriver\KeyPro;..\UserDriver\LCD12864;..\UserDriver\Lunar) DEBUG OBJECTEXTEND PRINT(.\List\IR.lst) OBJECT(.\Obj\IR.obj)
+
+line level    source
+
+   1          /********************************************************************************************
+   2          名称：IR.c
+   3          功能：红外
+   4          作者：
+   5          时间：
+   6          *********************************************************************************************/
+   7          #include "STC_NEW_8051.H"
+   8          #include "IR.h"
+   9          
+  10          unsigned char keya,keyb,keyc,keyd,keye,keyf,keyg,keyh,keyi,keyj;
+  11          unsigned char key_add,key_minus,key_set,key_ok,key_up,
+  12                                    key_down,key_alarm,key_voioff,key_voion,key_light;
+  13          
+  14          unsigned char IRCOM[]={0x00,0x00,0x00,0x00,0x10,0x10};
+  15          
+  16          /***************************************************************
+  17                      外部中断0响应函数，完成对红外遥控的解码
+  18          -------------------------协议--------------------------   
+  19          ----开始拉低9ms,接着是一个4.5ms的高脉冲,通知器件开始传送数据了
+  20          ----接着是26位前导脉冲,用于识别该型号的摇控。                            
+  21          ----然后是发送8位数据的原码，接着又发送8位数据的反码.
+  22          ----最后是一个长脉冲，和开始位一样，拉低9ms和一个4.5ms脉冲表示结束。
+  23          ----每个按键不同之处只在于那8位数据的原码和反码，因此只需要识别
+  24          ----8位原码就可以识别按键了
+  25          ****************************************************************/
+  26           void delayA(unsigned char x)    //x*0.14MS
+  27          {
+  28   1        unsigned char i;
+  29   1        while(x--)
+  30   1       {
+  31   2        for (i = 0; i<13; i++) {}
+  32   2       }
+  33   1      } 
+  34          //=====================================================
+  35          void IR_IN() interrupt 0 //using 0
+  36          {
+  37   1              unsigned char j,k,N=0;
+  38   1          EX0 = 0;   
+  39   1              delayA(15);
+  40   1              if (IRIN==1) 
+  41   1          { 
+  42   2                      EX0 =1;
+  43   2                  return;
+  44   2              }                            
+  45   1        while (!IRIN)                 //确认IR信号出现
+  46   1        {delayA(1);}                     //等IR变为高电平，跳过9ms的前导低电平信号。
+  47   1      
+  48   1              for(j=0;j<4;j++)         //收集四组数据
+  49   1          { 
+  50   2              for(k=0;k<8;k++)        //每组数据有8位
+  51   2                      {
+  52   3                              while (IRIN)            //等 IR 变为低电平，跳过4.5ms的前导高电平信号。
+  53   3                      {delayA(1);}
+C51 COMPILER V9.01   IR                                                                    07/27/2013 10:39:10 PAGE 2   
+
+  54   3                      while (!IRIN)          //等 IR 变为高电平
+  55   3                              {delayA(1);}  
+  56   3                      while (IRIN)           //计算IR高电平时长
+  57   3                      {
+  58   4                        delayA(1);
+  59   4                        N++;           
+  60   4                        if(N>=30)
+  61   4                                { 
+  62   5                                      EX0=1;return;             //0.14ms计数过长自动离开
+  63   5                                }      
+  64   4                      }                        //高电平计数完毕                
+  65   3                  IRCOM[j]=IRCOM[j] >> 1;                  //数据最高位补“0”
+  66   3                  if (N>=8) {IRCOM[j] = IRCOM[j] | 0x80;}  //数据最高位补“1”
+  67   3                  N=0;
+  68   3                      }//end for k
+  69   2          }//end for j
+  70   1         
+  71   1          if (IRCOM[2]!=~IRCOM[3])   //接收时间是否正确
+  72   1          { 
+  73   2            EX0=1;
+  74   2            return; 
+  75   2          }
+  76   1      /*================红外编码处理====================*/  
+  77   1           switch(IRCOM[2])
+  78   1               {
+  79   2                      case 0x00: keya=1;              break;   //1
+  80   2                      case 0x01: keyb=1;              break;   //2
+  81   2                      case 0x02: keyc=1;              break;   //3
+  82   2                      case 0x03: keyd=1;              break;   //4
+  83   2                      case 0x04: keye=1;              break;   //5
+  84   2                      case 0x05: keyf=1;              break;   //6
+  85   2                      case 0x06: keyg=1;              break;   //7
+  86   2      //              case 0x07: keyh=1;              break;   //8
+  87   2                      case 0x08: keyi=1;                      break;   //9
+  88   2      //              case 0x09: keyj=1;              break;   //0
+  89   2      //遥控器1(电视遥控器)
+  90   2      /*
+  91   2                      case 0x13: key_minish=1;        break;   //-
+  92   2                      case 0x12: key_add=1;           break;   //+
+  93   2                      case 0x18: key_manue=1;         break;   //菜单
+  94   2                      case 0x19: key_ok=1;            break;   //OK
+  95   2                      case 0x15: key_alarm=1;     break;   //关闹钟的开与关
+  96   2      */
+  97   2      //遥控器2(ALETNK遥控器)
+  98   2                      case 0x15: key_add=1;           break;   //+ 
+  99   2                      case 0x07: key_minus=1;         break;   //-  
+ 100   2                      case 0x44: key_set=1;           break;   //菜单 
+ 101   2                      case 0x40: key_ok=1;            break;   //OK   
+ 102   2                      case 0x47: key_alarm=1;     break;   //关闹钟的开与关
+ 103   2                      case 0x45: key_light=1;         break;   //背光控制
+ 104   2      
+ 105   2                      case 0x10: key_up=1;        break;   //上
+ 106   2                      case 0x11: key_down=1;      break;   //下
+ 107   2                      case 0x14: key_voioff=1;    break;   //静音
+ 108   2                      case 0x17: key_voion=1;     break;   //声音
+ 109   2                      default:                                        break;   //别的键按下
+ 110   2              }
+ 111   1       /*   if(key_alarm==1)//闹钟的开与关的设置标志位
+ 112   1                 {
+ 113   1                      key_beep();
+ 114   1                      key_alarm=0;
+ 115   1                      ala_flag=~ala_flag;
+C51 COMPILER V9.01   IR                                                                    07/27/2013 10:39:10 PAGE 3   
+
+ 116   1                      key_alarm=0;
+ 117   1                 }
+ 118   1          if(key_light==1)
+ 119   1                {
+ 120   1                 key_beep();
+ 121   1                 key_light=0;
+ 122   1             back_light_flag=~back_light_flag;
+ 123   1                 key_light=0; 
+ 124   1                 } 
+ 125   1       */       
+ 126   1           EX0 = 1; //开中断
+ 127   1      } 
+ 128          /**************************
+ 129            ALIENTEK遥控器键码值
+ 130                  45H | 46H | 47H 
+ 131                  ---------------
+ 132                  44H | 40H | 43H
+ 133                  ---------------
+ 134                  07H | 15H | 09H
+ 135                  ---------------
+ 136                  16H | 19H | 0DH
+ 137                  ---------------
+ 138                  0CH | 18H | 5EH
+ 139                  ---------------
+ 140                  08H | 1CH | 5AH
+ 141                  ---------------
+ 142                  42H | 52H | 4AH
+ 143          ***************************/
+ 144          
+ 145          /**************************
+ 146          HS-021车载MP3遥控器键码值
+ 147                  45H | 46H | 47H 
+ 148                  ---------------
+ 149                  44H | 40H | 43H
+ 150                  ---------------
+ 151                  07H | 15H | D9H
+ 152                  ---------------
+ 153                  16H | 19H | 0DH
+ 154                  ---------------
+ 155                  0CH | 18H | 5EH
+ 156                  ---------------
+ 157                  08H | 1CH | 5AH
+ 158                  ---------------
+ 159                  42H | 52H | 4AH
+ 160          ***************************/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    343    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     26       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

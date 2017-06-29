@@ -1,0 +1,29 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\ËÄÂ·ºìÍâÌ½²â×ÊÁÏ\ËÄÂ·ºìÍâÌ½²â×ÊÁÏ\Ð¡³µÑ°¼£³ÌÐò\Ð¡³µ¿ØÖÆ.uvproj
+Project File Date:  <unknown>
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling Ð¡³µ¿ØÖÆ.C...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY?Ð¡³µ¿Ø_Æ
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?RUN?Ð¡³µ¿Ø_Æ
+Program Size: data=15.2 xdata=0 code=445
+creating hex file from "Ð¡³µ¿ØÖÆ"...
+"Ð¡³µ¿ØÖÆ" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling Ð¡³µ¿ØÖÆ.C...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY?Ð¡³µ¿Ø_Æ
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?RUN?Ð¡³µ¿Ø_Æ
+Program Size: data=15.2 xdata=0 code=445
+creating hex file from "Ð¡³µ¿ØÖÆ"...
+"Ð¡³µ¿ØÖÆ" - 0 Error(s), 2 Warning(s).

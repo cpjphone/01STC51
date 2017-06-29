@@ -1,0 +1,72 @@
+C51 COMPILER V9.01   DPY                                                                   07/26/2013 23:41:18 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DPY
+OBJECT MODULE PLACED IN dpy.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE dpy.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          #define uint  unsigned int       //宏定义
+   4          #define uchar  unsigned char
+   5          
+   6          uchar code led[10] = {0xC0,0xF9,0xA4,0xB0,
+   7                                  0x99,0x92,0x82,0xF8,0x80,0x90};//0-9
+   8          
+   9          uchar code disb[6] = {1,2,3,4,5,6};
+  10          uchar disbuffer[6] = {1,2,3,4,5,6};
+  11          /**************************************
+  12          延时函数
+  13          ***************************************/
+  14          void delay(uint ms)
+  15          {
+  16   1              uint i,j;  
+  17   1              for(i=0;i<ms;i++)
+  18   1                      for(j=0;j<121;j++);
+  19   1      }
+  20          void display()
+  21          {
+  22   1              uchar i,temp;
+  23   1              temp = 0x7f;
+  24   1              for(i=0;i<6;i++)
+  25   1              {
+  26   2                      P1 = ~led[disbuffer[i]];
+  27   2                      P0 = temp;
+  28   2                      temp = _cror_(temp,1);
+  29   2                      delay(2);
+  30   2              }
+  31   1      }
+  32          main()
+  33          {       
+  34   1              uint i,s;
+  35   1              while(1)
+  36   1              {
+  37   2                      for(i=0;i<100;i++)
+  38   2                      {
+  39   3                              display();                      
+  40   3                      }
+  41   2                      for(i=0;i<6;i++,s++)
+  42   2                      {
+  43   3                              disbuffer[i] = disb[(s+1)%6];
+  44   3                      }
+  45   2                      s++;    
+  46   2              }
+  47   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    182    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6       5
+C51 COMPILER V9.01   DPY                                                                   07/26/2013 23:41:18 PAGE 2   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

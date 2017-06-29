@@ -1,0 +1,129 @@
+C51 COMPILER V9.01   KONGZHI                                                               07/19/2013 08:59:09 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE KONGZHI
+OBJECT MODULE PLACED IN kongzhi.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE kongzhi.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】：Keil4  
+   4          * 【程序功能】：通过串口助手向单片机发送数据，然后通过第一位数码管显示，注意：只能发送00~09十个数字。
+   5          * 【技术支持】：单片机串口通信; 工作方式1; 波特率为9600bps;                             
+   6          * 【晶    振】: 12MHz外部晶振           
+   7          * 【芯    片】: stc89C52rc  
+   8          * 【日    期】: 2013/7/18
+   9          * 【作    者】: 西亚斯，小春    
+  10          ******************************************************************************/
+  11          #include<reg52.h>                     //定义头文件
+  12          #include<intrins.h>
+  13          
+  14          #define uchar unsigned char       //宏定义
+  15          #define uint  unsigned int
+  16          
+  17          sbit LED0 = P1^0;
+  18          sbit LED1 = P1^1;
+  19          sbit LED2 = P1^2;
+  20          sbit LED3 = P1^3;
+  21          sbit LED4 = P1^4;
+  22          sbit LED5 = P1^5;
+  23          sbit LED6 = P1^6;
+  24          sbit LED7 = P1^7;                       //定义控制对象
+  25          
+  26          uchar buffer ,flag;                     //定义buffer缓冲变量，与收发标志位
+  27          
+  28          /******************************************************************************
+  29           * 函数名: 接收数据（包含发送）
+  30           * 函数功能: 单片机接收PC机通过串口发送的数据
+  31           *
+  32           * 输入: PC机串口调试助手输入
+  33           * 输出: 0——8
+  34           * 返回值:num
+  35           *
+  36           * 修改历史: 无
+  37           * --------------------
+  38           *.Phone., Written By:
+  39           * --------------------
+  40           ******************************************************************************/
+  41          uchar receive()                 
+  42          {
+  43   1              char num;
+  44   1              if(1 == RI)                                                     //当接收完一帧数据后RI被硬件置1
+  45   1              {                                                                       
+  46   2                      flag = 1;                                               //标志位置1，允许发送
+  47   2                      buffer = SBUF;                                  // SBUF 寄存器中值 传递给我们定义的中间变量buffer中
+  48   2                      RI = 0;                                                 //通过软件把RI置0，以便再次接收数据
+  49   2              }
+  50   1              if(1 == flag) SBUF = buffer;        //发送接受到的数据
+  51   1              flag = 0;                                                       //标志位置 0 为下次发送做准备
+  52   1              switch(buffer)                                          //将接受到的数据，换种方式记忆
+  53   1              {
+  54   2                      case 1 : num = 1;
+  55   2                                      break;
+C51 COMPILER V9.01   KONGZHI                                                               07/19/2013 08:59:09 PAGE 2   
+
+  56   2                      case 2 : num = 2;
+  57   2                                      break;  
+  58   2                      case 3 : num = 3;
+  59   2                                      break;
+  60   2                      case 4 : num = 4;
+  61   2                                      break;
+  62   2                      case 5 : num = 5;
+  63   2                                      break;
+  64   2                      case 6 : num = 6;
+  65   2                                      break;
+  66   2                      case 7 : num = 7;
+  67   2                                      break;  
+  68   2                      case 8 : num = 8;
+  69   2                                      break;
+  70   2                      default: num = 0;
+  71   2                                      break;
+  72   2              }
+  73   1              return(num);
+  74   1      }
+  75          
+  76          void main()
+  77          {
+  78   1              char k;
+  79   1              SCON = 0x70;    //选择方式1，允许接收
+  80   1              PCON = 0x80;    //SMOD=1,波特率加倍
+  81   1              TMOD = 0x20;    //定时器1工作在方式2
+  82   1              TH1 = 0xFA;
+  83   1              TL1 = 0xFA;
+  84   1              TR1 = 1;                 //打开定时器1
+  85   1              while(1)
+  86   1              {
+  87   2                      k = receive();
+  88   2                      if(1 == k) {P1 = 0xff;  LED0 = 0;}
+  89   2                      if(2 == k) {P1 = 0xff;  LED1 = 0;}
+  90   2                      if(3 == k) {P1 = 0xff;  LED2 = 0;}
+  91   2                      if(4 == k) {P1 = 0xff;  LED3 = 0;}
+  92   2                      if(5 == k) {P1 = 0xff;  LED4 = 0;}  
+  93   2                      if(6 == k) {P1 = 0xff;  LED5 = 0;}
+  94   2                      if(7 == k) {P1 = 0xff;  LED6 = 0;}
+  95   2                      if(8 == k) {P1 = 0xff;  LED7 = 0;}
+  96   2                      if(0 == k) {P1 = 0xff;                   }
+  97   2              }
+  98   1      }
+  99          
+ 100          
+ 101          
+ 102          
+ 103          
+ 104          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    195    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

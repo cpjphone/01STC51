@@ -1,0 +1,216 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        07/20/2013  09:47:23  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\(3)KEIL4\C51\BIN\BL51.EXE .\keymatrix.obj, main.obj TO keymatrix RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\keymatrix.obj (KEYMATRIX)
+  main.obj (MAIN)
+  D:\(3)KEIL4\C51\LIB\C51S.LIB (?C_STARTUP)
+  D:\(3)KEIL4\C51\LIB\C51S.LIB (?C?CCASE)
+  D:\(3)KEIL4\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  keymatrix (KEYMATRIX)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0008H     UNIT         ?DT?MAIN
+            DATA    0010H     0004H     UNIT         ?DT?KEYMATRIX
+            DATA    0014H     0002H     UNIT         _DATA_GROUP_
+            IDATA   0016H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     00EAH     UNIT         ?PR?MAIN?MAIN
+            CODE    00EDH     00CBH     UNIT         ?PR?KEYBOARD_MATRIX?KEYMATRIX
+            CODE    01B8H     008CH     UNIT         ?C_C51STARTUP
+            CODE    0244H     0026H     UNIT         ?C?LIB_CODE
+            CODE    026AH     0010H     UNIT         ?CO?MAIN
+            CODE    027AH     000DH     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   keymatrix (KEYMATRIX)
+
+
+SEGMENT                                 DATA_GROUP 
+  +--> CALLED SEGMENT                 START    LENGTH
+-----------------------------------------------------
+?C_C51STARTUP                         -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                         0014H    0001H
+  +--> ?PR?KEYBOARD_MATRIX?KEYMATRIX
+  +--> ?CO?MAIN
+
+?PR?KEYBOARD_MATRIX?KEYMATRIX         0015H    0001H
+
+
+
+SYMBOL TABLE OF MODULE:  keymatrix (KEYMATRIX)
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/20/2013  09:47:23  PAGE 2
+
+
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        KEYMATRIX
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00A0H         PUBLIC        P2
+  C:00EDH         PUBLIC        keyboard_matrix
+  -------         PROC          KEYBOARD_MATRIX
+  -------         DO            
+  D:0015H         SYMBOL        num_key
+  D:0007H         SYMBOL        temp
+  D:0010H         SYMBOL        temp_code
+  D:0011H         SYMBOL        temp_circle
+  D:0012H         SYMBOL        num_check
+  D:0013H         SYMBOL        key_flag
+  -------         ENDDO         
+  C:00EDH         LINE#         13
+  C:00EDH         LINE#         14
+  C:00EDH         LINE#         15
+  C:00F0H         LINE#         16
+  C:00F0H         LINE#         22
+  C:00F3H         LINE#         23
+  C:00F5H         LINE#         24
+  C:00FAH         LINE#         25
+  C:00FAH         LINE#         26
+  C:00FCH         LINE#         27
+  C:0105H         LINE#         28
+  C:0105H         LINE#         29
+  C:0108H         LINE#         30
+  C:010AH         LINE#         31
+  C:010AH         LINE#         32
+  C:010DH         LINE#         34
+  C:010DH         LINE#         35
+  C:0110H         LINE#         36
+  C:0119H         LINE#         37
+  C:0119H         LINE#         38
+  C:011BH         LINE#         39
+  C:0154H         LINE#         40
+  C:0154H         LINE#         42
+  C:0157H         LINE#         43
+  C:0159H         LINE#         44
+  C:015CH         LINE#         45
+  C:015EH         LINE#         46
+  C:0161H         LINE#         47
+  C:0163H         LINE#         48
+  C:0166H         LINE#         49
+  C:0168H         LINE#         51
+  C:016BH         LINE#         52
+  C:016DH         LINE#         53
+  C:0170H         LINE#         54
+  C:0172H         LINE#         55
+  C:0175H         LINE#         56
+  C:0177H         LINE#         57
+  C:017AH         LINE#         58
+  C:017CH         LINE#         60
+  C:017FH         LINE#         61
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/20/2013  09:47:23  PAGE 3
+
+
+  C:0181H         LINE#         62
+  C:0184H         LINE#         63
+  C:0186H         LINE#         64
+  C:0189H         LINE#         65
+  C:018BH         LINE#         66
+  C:018EH         LINE#         67
+  C:0190H         LINE#         69
+  C:0193H         LINE#         70
+  C:0195H         LINE#         71
+  C:0198H         LINE#         72
+  C:019AH         LINE#         73
+  C:019DH         LINE#         74
+  C:019FH         LINE#         75
+  C:01A2H         LINE#         76
+  C:01A2H         LINE#         77
+  C:01A2H         LINE#         78
+  C:01A2H         LINE#         79
+  C:01AFH         LINE#         80
+  C:01B2H         LINE#         81
+  C:01B2H         LINE#         82
+  C:01B5H         LINE#         83
+  C:01B5H         LINE#         84
+  C:01B5H         LINE#         85
+  C:01B7H         LINE#         86
+  -------         ENDPROC       KEYBOARD_MATRIX
+  -------         ENDMOD        KEYMATRIX
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:0008H         PUBLIC        disp_buffer
+  C:0003H         PUBLIC        main
+  C:026AH         PUBLIC        tab
+  -------         PROC          MAIN
+  -------         DO            
+  D:0007H         SYMBOL        num
+  D:0014H         SYMBOL        i
+  -------         ENDDO         
+  C:0003H         LINE#         11
+  C:0003H         LINE#         12
+  C:0003H         LINE#         14
+  C:0003H         LINE#         15
+  C:0003H         LINE#         16
+  C:0006H         LINE#         17
+  C:004EH         LINE#         18
+  C:004EH         LINE#         20
+  C:0055H         LINE#         21
+  C:0058H         LINE#         22
+  C:005FH         LINE#         23
+  C:0061H         LINE#         24
+  C:0068H         LINE#         25
+  C:006AH         LINE#         26
+  C:0071H         LINE#         27
+  C:0073H         LINE#         29
+  C:007AH         LINE#         30
+  C:007CH         LINE#         31
+  C:0083H         LINE#         32
+BL51 BANKED LINKER/LOCATER V6.22                                                      07/20/2013  09:47:23  PAGE 4
+
+
+  C:0085H         LINE#         33
+  C:008CH         LINE#         34
+  C:008EH         LINE#         35
+  C:0095H         LINE#         36
+  C:0097H         LINE#         38
+  C:009EH         LINE#         39
+  C:00A0H         LINE#         40
+  C:00A7H         LINE#         41
+  C:00A9H         LINE#         42
+  C:00B0H         LINE#         43
+  C:00B2H         LINE#         44
+  C:00B9H         LINE#         45
+  C:00BBH         LINE#         47
+  C:00C2H         LINE#         48
+  C:00C4H         LINE#         49
+  C:00CBH         LINE#         50
+  C:00CDH         LINE#         51
+  C:00D4H         LINE#         52
+  C:00D6H         LINE#         53
+  C:00DDH         LINE#         54
+  C:00DDH         LINE#         55
+  C:00DDH         LINE#         56
+  C:00EAH         LINE#         57
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?CCASE
+  C:0244H         PUBLIC        ?C?CCASE
+  -------         ENDMOD        ?C?CCASE
+
+Program Size: data=23.0 xdata=0 code=647
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

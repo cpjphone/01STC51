@@ -1,0 +1,37 @@
+#include <reg52.h>
+#include <intrins.h>
+
+typedef unsigned char uchar;
+typedef unsigned char uint;
+
+uint USE_C;
+
+void  main()
+{
+    TMOD=0x10;   //定时/计数器1工作于方式1
+    TH0=0x4C;	 //定时器初始值
+    TL0=0x00;    //50ms定时常数
+	//THO=(65536-45872)/256;   11.0592MHZ
+	//TLO=(65536-45872)%256;
+    EA=1;        //开总中断
+    ET1=1;       //允许定时/计数器1 中断
+    TR1=1;       //启动定时/计数器1 中断
+ 
+    while(1);
+} 
+
+
+/*********************************************************
+  中断服务函数
+**********************************************************/
+void Time1(void) interrupt 3 // using 0
+{
+   TH1=0x4c;               //50ms定时
+   TL1=0x00;
+   if (++USE_C == 20)	  //每隔1秒发声
+   { P2=~P2;
+	 USE_C = 0;
+   }
+
+   
+}

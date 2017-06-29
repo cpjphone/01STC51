@@ -1,0 +1,16 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Administrator\Desktop\113\1.uvproj
+Project File Date:  07/19/2013
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling main.c...
+compiling DS1302_Drive.c...
+linking...
+Program Size: data=26.0 xdata=0 code=490
+creating hex file from "1"...
+"1" - 0 Error(s), 0 Warning(s).

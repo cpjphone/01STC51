@@ -1,0 +1,205 @@
+C51 COMPILER V9.01   Ð¡³µ¿Ø_Æ                                                              12/16/2013 21:56:09 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE Ð¡³µ¿Ø_Æ
+OBJECT MODULE PLACED IN Ð¡³µ¿ØÖÆ.OBJ
+COMPILER INVOKED BY: D:\°²×°Èí¼þ\keil4\C51\BIN\C51.EXE Ð¡³µ¿ØÖÆ.C BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          
+   3                  #include<AT89x51.H>
+   4          
+   5                  #define Left_moto_pwm     P1_6     //½ÓÇý¶¯Ä£¿éENA      Ê¹ÄÜ¶Ë£¬ÊäÈëPWMÐÅºÅµ÷½ÚËÙ¶È
+   6                  #define Right_moto_pwm    P1_7     //½ÓÇý¶¯Ä£¿éENB
+   7          
+   8              #define you       P1_0         //ËÄÂ·Ñ°¼£Ä£¿é½Ó¿ÚµÚÒ»Â·
+   9                  #define qian      P1_1     //ËÄÂ·Ñ°¼£Ä£¿é½Ó¿ÚµÚ¶þÂ·
+  10              #define zuo       P1_2         //ËÄÂ·Ñ°¼£Ä£¿é½Ó¿ÚµÚÈýÂ·
+  11                  #define hou       P1_3     //ËÄÂ·Ñ°¼£Ä£¿é½Ó¿ÚµÚËÄÂ·
+  12          
+  13          
+  14                  #define Left_moto_go      {P3_4=0,P3_5=1;} //P3_4 P3_5 ½ÓIN1  IN2    µ± P3_4=0,P3_5=1; Ê±×óµç»úÇ°½ø
+  15                  #define Left_moto_back    {P3_4=1,P3_5=0;} //P3_4 P3_5 ½ÓIN1  IN2    µ± P3_4=1,P3_5=0; Ê±×óµç»úºóÍË    
+  16                  #define Left_moto_stp     {P3_4=1,P3_5=1;} //P3_4 P3_5 ½ÓIN1  IN2    µ± P3_4=1,P3_5=1; Ê±×óµç»úÍ£×ª      
+             -         
+  17                  #define Right_moto_go     {P3_6=0,P3_7=1;} //P3_6 P3_7 ½ÓIN1  IN2        µ± P3_6=0,P3_7=1; Ê±ÓÒµç»úÇ°×ª
+  18                  #define Right_moto_back   {P3_6=1,P3_7=0;} //P3_6 P3_7 ½ÓIN1  IN2        µ± P3_6=1,P3_7=0; Ê±ÓÒµç»úºóÍË
+  19              #define Right_moto_stp    {P3_6=1,P3_7=1;} //P3_6 P3_7 ½ÓIN1  IN2    µ± P3_6=1,P3_7=0; Ê±ÓÒµç»úÍ£×ª
+  20                  unsigned char pwm_val_left  =0;//±äÁ¿¶¨Òå
+  21                  unsigned char push_val_left =0;// ×óµç»úÕ¼¿Õ±ÈN/10
+  22                  unsigned char pwm_val_right =0;
+  23                  unsigned char push_val_right=0;// ÓÒµç»úÕ¼¿Õ±ÈN/10
+  24                  bit Right_moto_stop=1;
+  25                  bit Left_moto_stop =1;
+  26                  unsigned  int  time=0;
+  27          /************************************************************************/
+  28                          void delay(unsigned int k)         //ÑÓÊ±º¯Êý
+  29          {    
+  30   1           unsigned int x,y;
+  31   1               for(x=0;x<k;x++) 
+  32   1                 for(y=0;y<2000;y++);
+  33   1      }
+  34          
+  35          /************************************************************************/
+  36               void  run(void)    //Ç°½øº¯Êý
+  37          {
+  38   1           push_val_left  =1;  //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  39   1               push_val_right =1;      //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  40   1               Left_moto_go ;          //×óµç»úÇ°½ø
+  41   1               Right_moto_go ;         //ÓÒµç»úÇ°½ø
+  42   1      }
+  43          
+  44          /************************************************************************/
+  45               void  back(void)   //HOUº¯Êý
+  46          {
+  47   1           push_val_left  =6;  //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  48   1               push_val_right =6;      //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  49   1               Left_moto_back;                 //×óµç»úÇ°½ø
+  50   1               Right_moto_back;        //ÓÒµç»úÇ°½ø
+  51   1      }
+  52          
+  53          /************************************************************************/
+  54               void  left(void)   //×ó×ªº¯Êý
+C51 COMPILER V9.01   Ð¡³µ¿Ø_Æ                                                              12/16/2013 21:56:09 PAGE 2   
+
+  55          {
+  56   1           push_val_left  =1;  //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  57   1               push_val_right =1;      //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  58   1               Right_moto_go;         //ÓÒµç»ú¼ÌÐø
+  59   1               Left_moto_stp;         //×óµç»úÍ£×ß
+  60   1      }
+  61          
+  62           /************************************************************************/
+  63               void  right(void)  //ÓÒ×ªº¯Êý
+  64          {
+  65   1           push_val_left  =1;  //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  66   1               push_val_right =1;      //PWM µ÷½Ú²ÎÊý1-10   1Îª×îÂý£¬10ÊÇ×î¿ì  ¸ÄÕâ¸öÖµ¿ÉÒÔ¸Ä±äÆäËÙ¶È
+  67   1               Right_moto_stp;                //ÓÒµç»úÍ£×ß
+  68   1               Left_moto_go;          //×óµç»ú¼ÌÐø
+  69   1      }
+  70           
+  71          /************************************************************************/
+  72          /*                    PWMµ÷ÖÆµç»ú×ªËÙ                                   */
+  73          /************************************************************************/
+  74          /*                    ×óµç»úµ÷ËÙ                                        */
+  75          /*µ÷½Úpush_val_leftµÄÖµ¸Ä±äµç»ú×ªËÙ,Õ¼¿Õ±È            */
+  76                          void pwm_out_left_moto(void)
+  77          {  
+  78   1         if(Left_moto_stop)
+  79   1         {
+  80   2          if(pwm_val_left<=push_val_left)
+  81   2                     {Left_moto_go;} 
+  82   2              else 
+  83   2                     {Left_moto_stp;} 
+  84   2         }
+  85   1          else  {Left_moto_stp;}
+  86   1      }
+  87          /******************************************************************/
+  88          /*                    ÓÒµç»úµ÷ËÙ                                  */  
+  89             void pwm_out_right_moto(void)
+  90          { 
+  91   1        if(Right_moto_stop)
+  92   1         { 
+  93   2          if(pwm_val_right<=push_val_right)
+  94   2                     {Right_moto_go;} 
+  95   2              else 
+  96   2                     {Right_moto_stp;}        
+  97   2         }
+  98   1          else    {Right_moto_stp;}
+  99   1      }
+ 100          /***************************************************/
+ 101          ///*TIMER0ÖÐ¶Ï·þÎñ×Óº¯Êý²úÉúPWMÐÅºÅ*/
+ 102                  void timer0()interrupt 1   using 2
+ 103          {
+ 104   1           TH0=0XF8;    //1Ms¶¨Ê±
+ 105   1               TL0=0X30;
+ 106   1               time++;
+ 107   1               pwm_val_left++;
+ 108   1               pwm_val_right++;
+ 109   1               if(pwm_val_left>=10)
+ 110   1               pwm_val_left=0;
+ 111   1               if(pwm_val_right>=10)
+ 112   1               pwm_val_right=0;
+ 113   1                      pwm_out_left_moto();
+ 114   1                  pwm_out_right_moto();
+ 115   1              
+ 116   1       }      
+C51 COMPILER V9.01   Ð¡³µ¿Ø_Æ                                                              12/16/2013 21:56:09 PAGE 3   
+
+ 117           /***************************************************/
+ 118          
+ 119                  void main(void)
+ 120          {
+ 121   1              int x;
+ 122   1              TMOD=0X01;
+ 123   1              TH0= 0XF8;                //1ms¶¨Ê±
+ 124   1              TL0= 0X30;
+ 125   1              TR0= 1;
+ 126   1              ET0= 1;
+ 127   1              EA = 1;
+ 128   1              while(1)                                                        /*ÎÞÏÞÑ­»·*/
+ 129   1              {
+ 130   2              if(~qian)
+ 131   2                      {
+ 132   3                              for(x=0;x<30;x++) 
+ 133   3                              back();
+ 134   3                      }
+ 135   2                      if(~zuo)
+ 136   2                      {
+ 137   3                              for(x=0;x<30;x++)
+ 138   3                              right();
+ 139   3                      }
+ 140   2                      if(~you)
+ 141   2                      {                
+ 142   3                              for(x=0;x<30;x++)
+ 143   3                              left();
+ 144   3                      }
+ 145   2                      else
+ 146   2                      right();
+ 147   2                        
+ 148   2              
+ 149   2      
+ 150   2      
+ 151   2      
+ 152   2      //                          switch(P1&0x0f)
+ 153   2      //      {
+ 154   2      //              case 0x00:                                              // È«²¿Ã»ÓÐÑ¹Ïß£¬Ö±×ª
+ 155   2      //                      run();
+ 156   2      //                      break;
+ 157   2      //              case 0x01:                                              // ÓÒÑ¹Ïß£¬×ó×ª
+ 158   2      //                      left();
+ 159   2      //                      break;
+ 160   2      //              case 0x02:                                              // ÓÒÑ¹Ïß£¬×ó×ª
+ 161   2      //                  left();
+ 162   2      //                      break;
+ 163   2      //              case 0x04:                                              // ×óÑ¹Ïß£¬ÓÒ×ª
+ 164   2      //                      right();
+ 165   2      //                      delay(6);                                       //×ªÏòÑÓÊ±
+ 166   2      //                      break;
+ 167   2      //              case 0x08:                                              // ×óÑ¹Ïß£¬ÓÒ×ª
+ 168   2      //                      right();                                        
+ 169   2      //                      delay(6);                                       //×ªÏòÑÓÊ±
+ 170   2      //                      break;
+ 171   2      //      
+ 172   2      //        }
+ 173   2              }
+ 174   1      }
+ 175                  
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.01   Ð¡³µ¿Ø_Æ                                                              12/16/2013 21:56:09 PAGE 4   
+
+   CODE SIZE        =    278    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

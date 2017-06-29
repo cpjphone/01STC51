@@ -1,0 +1,6 @@
+"Hardwork.obj",
+"I2C.obj",
+"2402.obj",
+"18B20Drive.obj" 
+TO "Hardwork" 
+RAMSIZE(256) 

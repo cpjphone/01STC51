@@ -1,0 +1,72 @@
+C51 COMPILER V9.01   KEYSELF                                                               07/26/2013 23:20:04 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE KEYSELF
+OBJECT MODULE PLACED IN keyself.obj
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE Drive\keyself.c BROWSE DEBUG OBJECTEXTEND PRINT(.\keyself.lst) OBJECT(k
+                    -eyself.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          
+   3          //独立键盘.无按键动作时其返回值num_key=0,否则返回按键号num_key 
+   4          extern unsigned char keyboard_self() 
+   5          { 
+   6   1              unsigned char num_key=0;//按键号 
+   7   1              unsigned char temp=0;//用于读取P2线上按键值 
+   8   1              static unsigned char temp_code=0;//保存按键值 
+   9   1              static unsigned char num_check=0;//低电平有效次数 
+  10   1              static unsigned char key_flag=0;//按键有效标识 
+  11   1      
+  12   1              temp=P2&0xF0;//读取P2线数据 
+  13   1      
+  14   1              if(temp!=0xF0)//低电平判断 
+  15   1              { 
+  16   2                      num_check++; 
+  17   2                      if(num_check==10)//连续10次(10ms)低电平有效,则认为按键有效 
+  18   2                      { 
+  19   3                              key_flag=1;//使能按键有效标识 
+  20   3                              temp_code=temp;//保存按键值 
+  21   3                      } 
+  22   2              } 
+  23   1              else//松手时判断 
+  24   1              { 
+  25   2                      num_check=0; 
+  26   2      
+  27   2                      if(key_flag==1)//按键有效 
+  28   2                      { 
+  29   3                              key_flag=0; 
+  30   3      
+  31   3                              switch(temp_code)//读取按键号 
+  32   3                              { 
+  33   4                                      case 0xE0: num_key=1; 
+  34   4                                                 break; 
+  35   4                                      case 0xD0: num_key=2; 
+  36   4                                                 break; 
+  37   4                                      case 0xB0: num_key=3; 
+  38   4                                                 break; 
+  39   4                                      case 0x70: num_key=4; 
+  40   4                                                 break; 
+  41   4                              } 
+  42   3                      } 
+  43   2              } 
+  44   1      
+  45   1              return(num_key); 
+  46   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     70    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+C51 COMPILER V9.01   KEYSELF                                                               07/26/2013 23:20:04 PAGE 2   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

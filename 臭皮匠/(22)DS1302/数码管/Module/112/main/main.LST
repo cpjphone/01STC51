@@ -1,0 +1,108 @@
+C51 COMPILER V9.01   MAIN                                                                  07/19/2013 18:01:38 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\(3)keil4\C51\BIN\C51.EXE main.c BROWSE INCDIR(..\Drive\DS1302_Drive) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          
+   4          #include "DS1302_y.h"
+   5          
+   6          uchar disp_buffer[8];
+   7          uchar code lab[11]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x40}; 
+   8          /**************************************************************************** 
+   9          * 保存时间数据的结构体* 
+  10          ****************************************************************************/ 
+  11          struct 
+  12          { 
+  13              uchar Second; 
+  14              uchar Minute; 
+  15              uchar Hour; 
+  16              uchar Day; 
+  17              uchar Week; 
+  18              uchar Month; 
+  19              uchar Year; 
+  20          }CurrentTime; 
+  21          /****************************************************************/
+  22          //      delayms(unsigned int ms);延时程序  带有输入参数 ms
+  23          /****************************************************************/
+  24          void delayms(unsigned int m)
+  25          {
+  26   1              unsigned int i,j;
+  27   1              for(i=0;i<m;i++)
+  28   1              {
+  29   2                      for(j=0;j<123;j++)
+  30   2                      {}
+  31   2              }
+  32   1      }
+  33           
+  34          void display()
+  35          {
+  36   1              uchar i,temp;   
+  37   1              temp = 0xfe;
+  38   1              for(i=0;i<8;i++)
+  39   1              {
+  40   2                      P0 = temp;
+  41   2                      P2 = lab[disp_buffer[i]];
+  42   2                      delayms(2);
+  43   2                      P2 = 0x00;
+  44   2                      temp = _crol_(temp,1);
+  45   2              }                               
+  46   1      }
+  47          
+  48          /****************************************************************************** 
+  49          * 函数:    void ClockUpdata( void )                                                                           * 
+  50          * 描述:读取时间数据,并保存在结构体CurrentTime中                                                   *                                          
+             -                        * 
+  51          ******************************************************************************/ 
+  52          void ClockUpdata( void ) 
+  53          {               
+  54   1          CurrentTime.Second  = DS1302ReadByte( DS1302_SECOND_READ ); 
+C51 COMPILER V9.01   MAIN                                                                  07/19/2013 18:01:38 PAGE 2   
+
+  55   1          CurrentTime.Minute  = DS1302ReadByte( DS1302_MINUTE_READ ); 
+  56   1          CurrentTime.Hour    = DS1302ReadByte( DS1302_HOUR_READ ); 
+  57   1          CurrentTime.Day             = DS1302ReadByte( DS1302_DAY_READ ); 
+  58   1          CurrentTime.Month   = DS1302ReadByte( DS1302_MONTH_READ ); 
+  59   1          CurrentTime.Week    = DS1302ReadByte( DS1302_WEEK_READ ); 
+  60   1          CurrentTime.Year    = DS1302ReadByte( DS1302_YEAR_READ ); 
+  61   1      }
+  62          void main()
+  63          {
+  64   1              uchar i;
+  65   1              ClockInit();
+  66   1              while(1)
+  67   1              {
+  68   2                      ClockUpdata();
+  69   2                      disp_buffer[7]  =       CurrentTime.Second&0x0f;
+  70   2                      disp_buffer[6]  =       (CurrentTime.Second>>4)&0x07;
+  71   2                      disp_buffer[5]  =       10;
+  72   2                      disp_buffer[4]  =       CurrentTime.Minute&0x0f;
+  73   2                      disp_buffer[3]  =       (CurrentTime.Minute>>4)&0x07;
+  74   2                      disp_buffer[2]  =       10;
+  75   2                      disp_buffer[1]  =       CurrentTime.Hour&0x0f;
+  76   2                      disp_buffer[0]  =       (CurrentTime.Hour>>4)&0x01;
+  77   2                      for(i=0;i<25;i++)
+  78   2                      {
+  79   3                              display();
+  80   3                      }               
+  81   2              }
+  82   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    197    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

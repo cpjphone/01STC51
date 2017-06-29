@@ -1,0 +1,33 @@
+sfr WDT_CONTR=0xe1;  //WDT_CONTR寄存器 
+sbit led1=P1^0;
+
+void delayms(uint xms)
+{
+    uint i, j;
+    for(i=xms; i > 0; i--)
+        for(j = 120; j > 0; j--);
+}
+
+void main()
+{
+	WDT_CONTR=0x35;         //00110101  D4位CLR_WDT 为1时，看门狗将从新计数。硬件自动将					//此位清零；
+
+	led1=0;
+	delayms(500);
+	led1=1;	
+	while(1)
+	{
+	delayms(1000);
+	WDT_CONTR=0x35;
+	
+
+	}
+
+	}
+
+
+//sfr WDT_CONTR=0xe1； 定义STC单片机中新加入的看门狗寄存器
+//D4位CLR_WDT 为1 也可以叫做喂狗 两次喂狗时间不能超过看门狗的溢出时间，若大于则看门狗将复位//单片机，及单片机复位从头重新执行程序
+
+
+// 看门狗定时器溢出，——执行——复位（对80C51来说 9引脚置低电平）		     

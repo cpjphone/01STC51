@@ -1,0 +1,298 @@
+C51 COMPILER V9.01   LCD_1602                                                              04/12/2015 23:25:32 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD_1602
+OBJECT MODULE PLACED IN ..\Obj\LCD_1602.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\Source\BSP\LCD1602\LCD_1602.c BROWSE INCDIR(..\Source\BSP;..\Source\BSP\
+                    -Interrupt;..\Source\BSP\LCD1602;..\Source\BSP\LED;..\Source\BSP\DHT11) DEBUG OBJECTEXTEND PRINT(..\Obj\List\LCD_1602.lst
+                    -) TABS(2) OBJECT(..\Obj\LCD_1602.obj)
+
+line level    source
+
+   1          
+   2          /**
+   3            ******************************************************************************
+   4            * @file     BSP.c
+   5            * @author   Phone
+   6            * @version  V1.0
+   7            * @date      2015/01/10
+   8            * @brief   LCD1602配置驱动函数
+   9            ******************************************************************************
+  10            * @attention
+  11            * 雅典娜程序
+  12            * CPJ智能控制
+  13            * @endverbatim
+  14            ******************************************************************************
+  15            * @attention
+  16            * 无
+  17            ******************************************************************************
+  18            */  
+  19          #include <reg51.h>
+  20          #include <intrins.h>   
+  21          #include "LCD_1602_HARD.h"
+  22          #include "LCD_1602_SOFT.h"
+  23                                                                                     
+  24          #define uchar unsigned char                                                
+  25          #define uint unsigned int    
+  26            
+  27          LCD1602WTITE_FLAG LCE1602_STATUS;                                                                         
+             -                                                        
+  28                                                                                     
+  29          //uchar code dis1[] = {"BIG BIG WORLD"};                                  
+  30          //uchar code dis2[] = {"I LOVE SIAS"};                                  
+  31          //unsigned char code dis1[] = {"BIG BIG WORLD"};                                                          
+             -                 
+  32                                                                                     
+  33          /**---------------------------------------------------------------------------------
+  34          * @brief     ms延时
+  35          ---------------------------------------------------------------------------------*/                       
+             -                                                   
+  36          static void delay(int ms)                                                         
+  37          {                                                                          
+  38   1         int i;                                                                  
+  39   1         while(ms--)                                                             
+  40   1         {                                                                       
+  41   2           for(i = 0; i< 250; i++)                                               
+  42   2           {                                                                     
+  43   3            _nop_();                                                             
+  44   3            _nop_();                                                             
+  45   3            _nop_();                                                             
+  46   3            _nop_();                                                             
+  47   3           }                                                                     
+  48   2         }                                                                       
+  49   1      }                                                                          
+  50                                                                                         
+C51 COMPILER V9.01   LCD_1602                                                              04/12/2015 23:25:32 PAGE 2   
+
+  51          /**---------------------------------------------------------------------------------
+  52          * @brief     测忙
+  53          * @retval    lcd_busy为1时，忙，等待。lcd-busy为0时,闲，可写指令与数据。  
+  54          ---------------------------------------------------------------------------------*/                       
+             -                                                  
+  55          static bit lcd_busy()                                                             
+  56          {                                                                          
+  57   1          bit result;                                                            
+  58   1          LCD_RS = 0;                                                            
+  59   1          LCD_RW = 1;                                                            
+  60   1          LCD_EN = 1;                                                            
+  61   1          _nop_();                                                               
+  62   1          _nop_();                                                               
+  63   1          _nop_();                                                               
+  64   1          _nop_();                                                               
+  65   1           result = (bit)(LCD1602_DATA&0x80);                                              
+  66   1          LCD_EN = 0;                                                            
+  67   1          return result;                                                         
+  68   1      }                                                                          
+  69              
+  70          /**---------------------------------------------------------------------------------
+  71          * @brief     写命令
+  72          * @param      RS=L，RW=L，E=高脉冲，D0-D7=指令码。    
+  73          * @arg         NULL
+  74          * @retval     null
+  75          ---------------------------------------------------------------------------------*/                       
+             -                                                  
+  76          static void lcd_wcmd(uchar cmd)                                                   
+  77          {                                                                          
+  78   1         while(lcd_busy());                                                      
+  79   1          LCD_RS = 0;                                                            
+  80   1          LCD_RW = 0;                                                            
+  81   1          LCD_EN = 0;                                                            
+  82   1          _nop_();                                                               
+  83   1          _nop_();                                                               
+  84   1          LCD1602_DATA = cmd;                                                              
+  85   1          _nop_();                                                               
+  86   1          _nop_();                                                               
+  87   1          _nop_();                                                               
+  88   1          _nop_();                                                               
+  89   1          LCD_EN = 1;                                                            
+  90   1          _nop_();                                                               
+  91   1          _nop_();                                                               
+  92   1          _nop_();                                                               
+  93   1          _nop_();                                                               
+  94   1          LCD_EN = 0;                                                            
+  95   1      }                                                                          
+  96                                                                                      
+  97          /**---------------------------------------------------------------------------------
+  98          * @brief      写数据（显示部分）
+  99          * @param        RS=H，RW=L，E=高脉冲，D0-D7=数据。  
+ 100          * @arg         NULL
+ 101          * @retval     null
+ 102          ---------------------------------------------------------------------------------*/                       
+             -                                                   
+ 103          static void lcd_wdat(uchar dat)                                                   
+ 104          {                                                                          
+ 105   1         while(lcd_busy());                                                      
+ 106   1          LCD_RS = 1;                                                            
+ 107   1          LCD_RW = 0;                                                            
+ 108   1          LCD_EN = 0;                                                            
+ 109   1          LCD1602_DATA = dat;                                                              
+C51 COMPILER V9.01   LCD_1602                                                              04/12/2015 23:25:32 PAGE 3   
+
+ 110   1          _nop_();                                                               
+ 111   1          _nop_();                                                               
+ 112   1          _nop_();                                                               
+ 113   1          _nop_();                                                               
+ 114   1          LCD_EN = 1;                                                            
+ 115   1          _nop_();                                                               
+ 116   1          _nop_();                                                               
+ 117   1          _nop_();                                                               
+ 118   1          _nop_();                                                               
+ 119   1          LCD_EN = 0;                                                            
+ 120   1      }                                                                          
+ 121                                                                                        
+ 122          /**---------------------------------------------------------------------------------
+ 123          * @brief     设定显示位置  
+ 124          * @param        无
+ 125          ---------------------------------------------------------------------------------*/
+ 126                                                                                     
+ 127          static void lcd_pos(uchar pos)                                                    
+ 128          {                                                                          
+ 129   1         lcd_wcmd(pos|0x80);      //数据指针=80+地址变量                         
+ 130   1      }                                                                          
+ 131                                                                                     
+ 132          /**---------------------------------------------------------------------------------
+ 133          * @brief      LCD屏幕初始化
+ 134          * @param        无
+ 135          ---------------------------------------------------------------------------------*/                       
+             -                                                        
+ 136          void LCD_1602_CONFIG()                                                            
+ 137          {                                                                          
+ 138   1          delay(15);                     //等待LCD电源稳定                       
+ 139   1          lcd_wcmd(0x38);          //16*2显示，5*7点阵，8位数据                  
+ 140   1          delay(5);                                                              
+ 141   1          lcd_wcmd(0x38);                                                        
+ 142   1          delay(5);                                                              
+ 143   1          lcd_wcmd(0x38);                                                        
+ 144   1          delay(5);                                                              
+ 145   1                                                                                 
+ 146   1          lcd_wcmd(0x0c);          //显示开，关光标                              
+ 147   1          delay(5);                                                              
+ 148   1          lcd_wcmd(0x06);          //移动光标                                    
+ 149   1          delay(5);                                                              
+ 150   1          lcd_wcmd(0x01);          //清除LCD的显示内容                           
+ 151   1          delay(5);                                                              
+ 152   1      }    
+ 153          #if 0
+              /**---------------------------------------------------------------------------------
+              * @brief    清屏子程序  
+              * @param        无
+              ---------------------------------------------------------------------------------*/                       
+             -                                                    
+              static void lcd_clr()                                                             
+              {                                                                          
+                  lcd_wcmd(0x01);          //清除LCD的显示内容                           
+                  delay(5);                                                              
+              }                                                                          
+                                                                                             
+              /**---------------------------------------------------------------------------------
+              * @brief     闪动子程序   
+              * @param        无
+              ---------------------------------------------------------------------------------*/                       
+             -                                                    
+              static void flash()                                                               
+C51 COMPILER V9.01   LCD_1602                                                              04/12/2015 23:25:32 PAGE 4   
+
+              {                                                                          
+                  delay(600);                     //控制停留时间                         
+                  lcd_wcmd(0x08);            //关闭显示                                  
+                  delay(200);                    //延时                                  
+                  lcd_wcmd(0x0c);            //开显示                                    
+                  delay(200);                                                            
+                  lcd_wcmd(0x08);            //关闭显示                                  
+                  delay(200);                     //延时                                 
+                  lcd_wcmd(0x0c);            //开显示                                    
+                  delay(200);                                                            
+              }                                                                          
+              #endif 
+ 181          /**---------------------------------------------------------------------------------
+ 182          * @brief      对应位置显示函数
+ 183          * @param      y：1，2（从第几行开始写）
+ 184                        x：0-15（从改行的第几位开始写）
+ 185          * @arg         NULL
+ 186          * @retval     null
+ 187          ---------------------------------------------------------------------------------*/
+ 188          unsigned char LCD1602_WRITE(unsigned char y,unsigned char x,unsigned char *write_data)
+ 189          {
+ 190   1        unsigned char i;
+ 191   1        lcd_wcmd(0x06);            //向右移动光标
+ 192   1        if(y == 1)
+ 193   1        { 
+ 194   2          lcd_pos(x);                //设置显示位置为第一行的第1个字符
+ 195   2          i = 0;
+ 196   2          while(*(write_data + i) != '\0')
+ 197   2          {                           //显示字符"WLCOME  TO"
+ 198   3            lcd_wdat(*(write_data + i));
+ 199   3            i++;
+ 200   3          //  delay(200);                //控制两字之间显示速度
+ 201   3            if(i > 15)
+ 202   3            {
+ 203   4              LCE1602_STATUS = WRITE_NO;
+ 204   4              return LCE1602_STATUS;    
+ 205   4            }  
+ 206   3          }
+ 207   2          LCE1602_STATUS = WRITE_OK;
+ 208   2          return LCE1602_STATUS;  
+ 209   2        }
+ 210   1        else
+ 211   1        {
+ 212   2          lcd_pos(0x40 + x);                //设置显示位置为第一行的第1个字符
+ 213   2          i = 0;
+ 214   2          while(*(write_data + i) != '\0')
+ 215   2          {                           //显示字符"WLCOME  TO"
+ 216   3            lcd_wdat(*(write_data + i));
+ 217   3            i++;
+ 218   3          //  delay(200);                //控制两字之间显示速度
+ 219   3            if(i > 15)
+ 220   3            {
+ 221   4              LCE1602_STATUS = WRITE_NO;
+ 222   4              return LCE1602_STATUS;    
+ 223   4            }  
+ 224   3          }
+ 225   2          LCE1602_STATUS = WRITE_OK;
+ 226   2          return LCE1602_STATUS;  
+ 227   2        }
+ 228   1      }
+ 229            
+ 230          /*********************************************END OF FILE**********************/
+C51 COMPILER V9.01   LCD_1602                                                              04/12/2015 23:25:32 PAGE 5   
+
+ 231          #if 0
+              void main()
+              {
+                LCD_1602_CONFIG();
+                LCD1602_WRITE(1,0,dis1);
+                while(1);
+              
+              }
+              
+              #endif
+ 241          
+ 242          
+ 243          
+ 244          
+ 245          
+ 246          
+ 247          
+ 248          
+ 249          
+ 250          
+ 251          
+ 252          
+ 253          
+ 254          
+ 255          
+ 256          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    281    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

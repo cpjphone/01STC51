@@ -1,0 +1,95 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Phone\Desktop\51设计\臭皮匠\(24)12864\xiaotaogei\14 12864液晶\EX14.1 12864基础实验\12864.uvproj
+Project File Date:  <unknown>
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+A51 MACRO ASSEMBLER V8.02 - SN: K1JMC-TA4QFC
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2008
+"D:\(7)KEIL\C51\BIN\A51.EXE" "E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51" SET (SMALL) DEBUG PRINT(.\STARTUP.lst) OBJECT(.\STARTUP.obj) EP
+A51 FATAL ERROR -
+  FILE:       E:\000实验教程\14 12864液晶\EX14.1 12864基础实验\STARTUP.A51
+  ERROR:      FILE DOES NOT EXIST
+A51 TERMINATED.
+Target not created
+Build target 'Target 1'
+compiling main.c...
+MAIN.C(29): warning C290: missing return value
+MAIN.C(40): warning C290: missing return value
+MAIN.C(53): warning C290: missing return value
+MAIN.C(66): warning C290: missing return value
+MAIN.C(80): warning C290: missing return value
+linking...
+Program Size: data=11.0 xdata=0 code=323
+creating hex file from "12864"...
+"12864" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+linking...
+Program Size: data=11.0 xdata=0 code=323
+creating hex file from "12864"...
+"12864" - 0 Error(s), 0 Warning(s).

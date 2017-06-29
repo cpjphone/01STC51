@@ -1,0 +1,154 @@
+C51 COMPILER V8.02   謃籣                                                                  08/04/2013 08:06:21 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE 謃籣
+OBJECT MODULE PLACED IN 主机.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE 主机.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】：Keil4  
+   4          * 【程序功能】：主机通过1，2，3，4键分别控制发送A,B,C,D
+   5          * 【技术支持】：                                
+   6          * 【晶    振】: 12MHz外部晶振           
+   7          * 【芯    片】:   
+   8          * 【日    期】: 
+   9          * 【作    者】: 王云飞  
+  10          ******************************************************************************/
+  11          #include<reg52.h>                     //定义头文件
+  12          
+  13          #define uchar unsigned char       //宏定义
+  14          #define uint  unsigned int
+  15          
+  16          sbit led1=P1^0;
+  17          sbit led2=P1^1;
+  18          sbit led3=P1^2;
+  19          sbit led4=P1^3;
+  20          
+  21          sbit key1=P2^0;
+  22          sbit key2=P2^1;
+  23          sbit key3=P2^2;
+  24          sbit key4=P2^3;
+  25          
+  26          uchar flag;
+  27          
+  28          void key_scan ();
+  29          
+  30          /******************************************************************************
+  31           * 函数名: 数据发送
+  32           * 函数功能:通过P3.1口将SBUF中的数据发送出去 
+  33           *
+  34           * 输入:Sdata
+  35           * 输出:无
+  36           * 返回值:无
+  37           ******************************************************************************/
+  38          void send(uchar Sdata)
+  39          {
+  40   1              SBUF = Sdata;
+  41   1              while(TI == 0);
+  42   1              TI = 0;
+  43   1      }
+  44          
+  45          void delay (uint z)
+  46          {
+  47   1              uint a,b;
+  48   1              for (a=110;a>0;a--)
+  49   1                      for (b=z;b>0;b--);
+  50   1      }
+  51          
+  52          
+  53          void dispose()
+  54          {
+  55   1              key_scan ();
+C51 COMPILER V8.02   謃籣                                                                  08/04/2013 08:06:21 PAGE 2   
+
+  56   1              switch(flag)
+  57   1                      {
+  58   2                              case 1: 
+  59   2                                      send('D');
+  60   2                                      led1 = 1; led2 = 1;flag=0; 
+  61   2                                      break;
+  62   2                              case 2:
+  63   2                                      send('A');
+  64   2                                      led1 = 0; led2 = 1;flag=0;
+  65   2                                      break;
+  66   2                              case 3:
+  67   2                                      send('B');
+  68   2                                      led1 = 1; led2 = 0;flag=0;
+  69   2                                      break;
+  70   2                              case 4:
+  71   2                                      send('C');
+  72   2                                      led1 = 0; led2 = 1;flag=0; 
+  73   2                                      break;;
+  74   2      //                      default:
+  75   2      //                              send('E');
+  76   2                      }
+  77   1                              
+  78   1      }
+  79          
+  80          void key_scan ()
+  81          {
+  82   1                      if (key1==0)
+  83   1                      {
+  84   2                              delay (10);
+  85   2                              if (key1==0)
+  86   2                                      flag=1;
+  87   2                      }
+  88   1                      if (key2==0)
+  89   1                      {
+  90   2                              delay (10);
+  91   2                              if (key2==0)
+  92   2                                      flag=2;
+  93   2                      }
+  94   1                      if (key3==0)
+  95   1                      {
+  96   2                              delay (10);
+  97   2                              if (key3==0)
+  98   2                                      flag=3;
+  99   2                      }
+ 100   1                      if (key4==0)
+ 101   1                      {
+ 102   2                              delay (10);
+ 103   2                              if (key4==0)
+ 104   2                                      flag=4;
+ 105   2                      }
+ 106   1      }
+ 107          
+ 108          
+ 109          /**************************************************/
+ 110          //主函数
+ 111          /**************************************************/
+ 112          void main()
+ 113          {
+ 114   1              EA = 1;
+ 115   1              EX0 = 1;
+ 116   1              IT0 = 1;
+ 117   1              SCON = 0x60;
+C51 COMPILER V8.02   謃籣                                                                  08/04/2013 08:06:21 PAGE 3   
+
+ 118   1              PCON = 0X80;
+ 119   1              TMOD = 0x20;
+ 120   1              TH0 = 0xFA;
+ 121   1              TL0 = 0xFA;
+ 122   1              TR1 = 1;
+ 123   1              while(1)
+ 124   1              {
+ 125   2                      dispose();
+ 126   2              }
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    184    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

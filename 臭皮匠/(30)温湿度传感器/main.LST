@@ -1,0 +1,73 @@
+C51 COMPILER V9.52.0.0   MAIN                                                              03/27/2014 19:34:20 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\(7)KEIL\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          /******************************************************************************      
+   2          * 【语    言】：C语言
+   3          * 【编译环境】: Keil4  
+   4          * 【程序功能】：温湿度传感器1602显示
+   5          * 【技术支持】：
+   6          * 【晶    振】：11.0592MHz        
+   7          * 【芯    片】：stc89c52rc  
+   8          * 【日    期】：2013/8/16
+   9          * 【作    者】：王云飞
+  10          ******************************************************************************/
+  11          #include "reg52.h" 
+  12          #include "head.h" 
+  13          
+  14          /****************************************************************************/
+  15          /*                主函数                    */
+  16          /****************************************************************************/
+  17          void main()
+  18          {
+  19   1            unsigned char i,n=0x40,m;
+  20   1            lcd_init(); 
+  21   1            delay_us(); 
+  22   1            while(1)
+  23   1            {
+  24   2                 read_TRH();    //读取数据
+  25   2                 for(i=0;i<=7;i++)      //字符显示
+  26   2                 {
+  27   3                     lcd_dis_pos(i);    //第一行显示
+  28   3                     lcd_wdata(dis1[i]);
+  29   3                     lcd_dis_pos(n+i);    //第二行显示
+  30   3                     lcd_wdata(dis2[i]);
+  31   3                  }
+  32   2                  m=0x08;
+  33   2                  for(i=0;i<=7;i++)       //湿度显示  
+  34   2                  {
+  35   3                       lcd_dis_pos(m); 
+  36   3                       lcd_wdata(str1[i]);
+  37   3                       m++;
+  38   3                  }
+  39   2                  m=0x48;
+  40   2                  for(i=0;i<=7;i++)         //温度显示
+  41   2                  {
+  42   3                       lcd_dis_pos(m); 
+  43   3                       lcd_wdata(str2[i]);
+  44   3                       m++;
+  45   3                  }
+  46   2                  delay_ms(1000) ;
+  47   2            }      
+  48   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    128    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.52.0.0   MAIN                                                              03/27/2014 19:34:20 PAGE 2   
+
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

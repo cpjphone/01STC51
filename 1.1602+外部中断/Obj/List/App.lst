@@ -1,0 +1,125 @@
+C51 COMPILER V9.01   APP                                                                   01/18/2015 16:37:17 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE APP
+OBJECT MODULE PLACED IN ..\Obj\App.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\Source\APP\App.c BROWSE INCDIR(..\Source\BSP;..\Source\BSP\Interrupt;..\
+                    -Source\BSP\LCD1602;..\Source\BSP\LED) DEBUG OBJECTEXTEND PRINT(..\Obj\List\App.lst) TABS(2) OBJECT(..\Obj\App.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    APP.c
+   4            * @author  phone
+   5            * @version V1.0
+   6            * @date    2014-11-06
+   7            * @brief   
+   8            ******************************************************************************
+   9            * @attention
+  10            *
+  11            * @{实验平台:
+  12            * @{雅典娜程序整理  
+  13            * @{ USE_STM3210B_EVAL
+  14            --cpu Cortex-M3 -g --apcs=interwork 
+  15            -I C:\Keil\ARM\RV31\INC 
+  16            ******************************************************************************
+  17            */ 
+  18            
+  19          /* Includes ------------------------------------------------------------------*/ 
+  20          
+  21          //void Delay(__IO u32 nCount); 
+  22          
+  23                                                                     
+  24          #include "BSP.h"
+  25          unsigned char code dis_VOL[] = {"FLUX VOLUME :"};
+  26          
+  27          /**---------------------------------------------------------------------------------
+  28          * @brief     ms延时
+  29          ---------------------------------------------------------------------------------*/                       
+             -                                                   
+  30          static void delay(int ms)                                                         
+  31          {                                                                          
+  32   1         int i;                                                                  
+  33   1         while(ms--)                                                             
+  34   1         {                                                                       
+  35   2           for(i = 0; i< 250; i++)                                               
+  36   2           {                                                                     
+  37   3            _nop_();                                                             
+  38   3            _nop_();                                                             
+  39   3            _nop_();                                                             
+  40   3            _nop_();                                                             
+  41   3           }                                                                     
+  42   2         }                                                                       
+  43   1      } 
+  44          
+  45          /**---------------------------------------------------------------------------------
+  46            * @brief       数据处理函数
+  47            * @param        无
+  48            * @arg         NULL
+  49            * @retval     null
+  50            ---------------------------------------------------------------------------------*/
+  51          unsigned char* DATA_DEAL(water_date t)
+  52          {
+  53   1        unsigned char  DIS_DATA[] = {"000mL;000L;000M3"}; 
+C51 COMPILER V9.01   APP                                                                   01/18/2015 16:37:17 PAGE 2   
+
+  54   1        if(t.mL_data || t.L_data || t.M3_data)
+  55   1        {
+  56   2          DIS_DATA[0] = (t.mL_data * 1000/450)%1000/100 + 0x30;
+  57   2          DIS_DATA[1] = (t.mL_data * 1000/450)%100/10 + 0x30;
+  58   2          DIS_DATA[2] = (t.mL_data * 1000/450)%10 + 0x30;
+  59   2          
+  60   2          DIS_DATA[6] = t.L_data%1000/100 + 0x30;
+  61   2          DIS_DATA[7] = t.L_data%100/10 + 0x30;
+  62   2          DIS_DATA[8] = t.L_data%10 + 0x30;
+  63   2          
+  64   2          DIS_DATA[11] = t.M3_data%1000/100 + 0x30;
+  65   2          DIS_DATA[12] = t.M3_data%100/10 + 0x30;
+  66   2          DIS_DATA[13] = t.M3_data%10 + 0x30;
+  67   2      
+  68   2          return DIS_DATA;
+  69   2        }
+  70   1        else return 0;
+  71   1      
+  72   1      }
+  73          
+  74          
+  75          
+  76          /**---------------------------------------------------------------------------------
+  77            * @brief       主函数.
+  78            * @param        无
+  79            * @arg         NULL
+  80            * @retval     null
+  81            ---------------------------------------------------------------------------------*/
+  82          #if 1
+  83          void main()
+  84          {
+  85   1        ALL_Config();
+  86   1        //LCD1602_WRITE(1,0,dis_FL);
+  87   1        LCD1602_WRITE(1,0,dis_VOL);
+  88   1        while(1)
+  89   1        {
+  90   2          //DATA_DEAL(water_data1);
+  91   2          LCD1602_WRITE(2,0,DATA_DEAL(water_data1));
+  92   2          delay(15);  
+  93   2        }
+  94   1      }
+  95          
+  96          #endif
+  97          
+  98          /*********************************************END OF FILE**********************/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    531    ----
+   CONSTANT SIZE    =     31    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      29
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
